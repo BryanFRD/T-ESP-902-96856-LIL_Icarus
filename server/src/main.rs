@@ -17,7 +17,7 @@ async fn main() {
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         );
 
-    let listener = match tokio::net::TcpListener::bind("0.0.0.0:3000").await {
+    let listener = match tokio::net::TcpListener::bind("0.0.0.0:80").await {
         Ok(listener) => {
             tracing::info!("Listening on {}", listener.local_addr().unwrap());
             listener
