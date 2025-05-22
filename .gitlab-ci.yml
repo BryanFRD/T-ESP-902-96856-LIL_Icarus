@@ -33,9 +33,10 @@ stages:
     - echo "Running tests..."
     - cargo test
 
-needs:
-  - job: 🧪_test
-    optional: true
+✈_deploy_dev:
+  needs:
+    - job: 🧪_test
+      optional: true
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
