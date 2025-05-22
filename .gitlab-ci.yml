@@ -8,7 +8,7 @@ stages:
 🛠_build:
   stage: build
   rules:
-    - if: '$CI_COMMIT_BRANCH == "feat/deployment"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
   script:
     - echo "Building Docker image..."
@@ -25,7 +25,7 @@ stages:
     - 🧪_test
   stage: deploy
   rules:
-    - if: '$CI_COMMIT_BRANCH == "feat/deployment"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
   script:
     - echo "Deploying to dev..."
@@ -35,9 +35,6 @@ stages:
 
 🧹_cleanup:
   stage: cleanup
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "feat/deployment"'
-      when: always
   script:
     - echo "Cleaning up..."
     - rm -rf target
