@@ -10,34 +10,63 @@ stages:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
   script:
     - echo "Building Docker image..."
-    - docker build -t app:latest .
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        TAG="app:latest"
+      else
+        TAG="app-dev:latest"
+      fi
+    - docker build -t $TAG .
 
 🧪_test:
   stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
   script:
     - echo "Running tests..."
     - cargo test
 
-✈_deploy:
+needs:
+  - job: 🧪_test
+    optional: true
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: never
+    - when: manual
+  script:
+    - echo "Deploying to dev..."
+    - echo $DOCKER_REGISTRY_PASSWORD_DEV | docker login --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
+    - docker tag app:latest $DOCKER_REGISTRY/app-dev:latest
+    - docker push $DOCKER_REGISTRY/app-dev:latest
+    - docker restart watchtower
+
+✈_deploy_prod:
   needs:
     - 🧪_test
   stage: deploy
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: always
   script:
-    - echo "Deploying to dev..."
-    - echo $DOCKER_REGISTRY_PASSWORD_DEV | docker login --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
+    - echo "Deploying to production..."
+    - echo $DOCKER_REGISTRY_PASSWORD_PROD | docker login --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
     - docker tag app:latest $DOCKER_REGISTRY/app:latest
     - docker push $DOCKER_REGISTRY/app:latest
+    - docker restart watchtower
 
 🧹_cleanup:
   stage: cleanup
+  when: always
   script:
     - echo "Cleaning up..."
     - rm -rf target
     - docker logout $DOCKER_REGISTRY
-  when: always
   allow_failure: true
