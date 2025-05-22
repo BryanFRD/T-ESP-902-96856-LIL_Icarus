@@ -19,10 +19,6 @@ stages:
   script:
     - echo "Running tests..."
     - cargo test
-  artifacts:
-    paths:
-      - target/*
-    expire_in: 1 day
 
 ✈_deploy:
   needs:
@@ -44,6 +40,7 @@ stages:
       when: always
   script:
     - echo "Cleaning up..."
+    - rm -rf target
     - docker logout $DOCKER_REGISTRY
   when: always
   allow_failure: true
