@@ -10,7 +10,7 @@ async fn main() {
     tracing::info!("Starting server...");
 
     let app = Router::new()
-        .route("/", get(|| async { "Hello, World!1" }))
+        .route("/", get(|| async { "Hello, World!" }))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))

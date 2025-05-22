@@ -47,7 +47,7 @@ stages:
     - echo $DOCKER_REGISTRY_PASSWORD_DEV | docker login --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
     - docker tag app:latest $DOCKER_REGISTRY/app-dev:latest
     - docker push $DOCKER_REGISTRY/app-dev:latest
-    - docker restart watchtower
+    - ~/dockers/update.sh
 
 ✈_deploy_prod:
   needs:
@@ -61,7 +61,7 @@ stages:
     - echo $DOCKER_REGISTRY_PASSWORD_PROD | docker login --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
     - docker tag app:latest $DOCKER_REGISTRY/app:latest
     - docker push $DOCKER_REGISTRY/app:latest
-    - docker restart watchtower
+    - ~/dockers/update.sh
 
 🧹_cleanup:
   stage: cleanup
