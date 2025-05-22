@@ -25,6 +25,8 @@ stages:
     expire_in: 1 day
 
 ✈_deploy:
+  needs:
+    - 🧪_test
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "feat/deployment"'
