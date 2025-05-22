@@ -1,0 +1,47 @@
+stages:
+  - build
+  - test
+  # - release
+  - deploy
+  - cleanup
+
+🛠_build:
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "feat/deployment"'
+      when: always
+  script:
+    - echo "Building Docker image..."
+    - docker build -t app:latest
+
+🧪_test:
+  stage: test
+  script:
+    - echo "Running tests..."
+    - cargo test
+  artifacts:
+    paths:
+      - target/*
+    expire_in: 1 day
+
+✈_deploy:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "feat/deployment"'
+      when: always
+  script:
+    - echo "Deploying to dev..."
+    - echo $DOCKER_REGISTRY_PASSWORD_DEV | docker login --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
+    - docker tag app:latest $DOCKER_REGISTRY/app:latest
+    - docker push $DOCKER_REGISTRY/app:latest
+
+🧹_cleanup:
+  stage: cleanup
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "feat/deployment"'
+      when: always
+  script:
+    - echo "Cleaning up..."
+    - docker logout $DOCKER_REGISTRY
+  when: always
+  allow_failure: true
