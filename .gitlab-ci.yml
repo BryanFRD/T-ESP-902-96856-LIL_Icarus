@@ -12,7 +12,7 @@ stages:
       when: always
   script:
     - echo "Building Docker image..."
-    - docker build -t app:latest
+    - docker build -t app:latest .
 
 🧪_test:
   stage: test
