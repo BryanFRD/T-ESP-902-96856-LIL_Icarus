@@ -1,7 +1,6 @@
-use axum::{Router, routing::get};
-use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
-use tracing::Level;
-
+mod auth;
+mod schema;
+mod state;
 mod utils;
 
 #[tokio::main]
@@ -9,13 +8,7 @@ async fn main() {
     utils::start_logger();
     tracing::info!("Starting server...");
 
-    let app = Router::new()
-        .route("/", get(|| async { "Hello, World!" }))
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
-                .on_response(DefaultOnResponse::new().level(Level::INFO)),
-        );
+    let app = utils::get_router();
 
     let listener = match tokio::net::TcpListener::bind("0.0.0.0:80").await {
         Ok(listener) => {
