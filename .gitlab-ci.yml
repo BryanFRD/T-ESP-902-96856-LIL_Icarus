@@ -61,7 +61,7 @@ stages:
     - echo $DOCKER_REGISTRY_PASSWORD_PROD | docker login --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
     - docker tag app:latest $DOCKER_REGISTRY/app:latest
     - docker push $DOCKER_REGISTRY/app:latest
-    - export VAULT_ADDR=https://localhost:8200
+    - export VAULT_ADDR=http://localhost:8200
     - |
       VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
       export VAULT_TOKEN
