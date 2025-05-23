@@ -36,7 +36,7 @@ pub async fn login(
     }
 
     let jwt = JwtClaims::from(user);
-    let jwt = match jwt.to_string() {
+    let jwt = match jwt.to_string(state.get_secrets().jwt_secret.as_str()) {
         Ok(jwt) => jwt,
         Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
     };
@@ -44,8 +44,8 @@ pub async fn login(
     let mut cookie = Cookie::new("auth", jwt);
 
     #[cfg(not(debug_assertions))]
-    cookie.set_http_only(true);
     cookie.set_secure(true);
+    cookie.set_http_only(true);
     cookie.set_path("/");
     cookies.add(cookie);
 

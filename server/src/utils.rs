@@ -6,6 +6,7 @@ use tracing::Level;
 
 use crate::auth;
 use crate::state::GlobalState;
+use crate::vault::get_secrets;
 
 pub fn start_logger() {
     tracing_subscriber::fmt()
@@ -15,13 +16,19 @@ pub fn start_logger() {
         .init();
 }
 
-pub fn get_state() -> GlobalState {
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    GlobalState::new(&database_url)
+pub async fn get_state() -> GlobalState {
+    let secrets = match get_secrets().await {
+        Ok(secrets) => secrets,
+        Err(e) => {
+            tracing::error!("Failed to get secrets: {}", e);
+            panic!("Failed to get secrets");
+        }
+    };
+    GlobalState::new(secrets)
 }
 
-pub fn get_router() -> Router {
-    let state = get_state();
+pub async fn get_router() -> Router {
+    let state = get_state().await;
 
     let router_v1 = Router::new()
         .nest("/auth", auth::get_routes(state.clone()))
