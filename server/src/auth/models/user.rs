@@ -80,7 +80,7 @@ impl From<RegisterPayload> for User {
 #[diesel(sql_type = Text)]
 pub enum UserRole {
     Admin,
-    User,
+    Pentester,
     Client,
 }
 
@@ -91,7 +91,7 @@ where
     fn from_sql(bytes: <DB as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {
         match String::from_sql(bytes)?.as_str() {
             "admin" => Ok(UserRole::Admin),
-            "user" => Ok(UserRole::User),
+            "pentester" => Ok(UserRole::Pentester),
             "client" => Ok(UserRole::Client),
             _ => Err("Unrecognized role".into()),
         }
@@ -105,7 +105,7 @@ where
     fn to_sql(&self, out: &mut Output<DB>) -> diesel::serialize::Result {
         match self {
             UserRole::Admin => "admin".to_sql(out),
-            UserRole::User => "user".to_sql(out),
+            UserRole::Pentester => "pentester".to_sql(out),
             UserRole::Client => "client".to_sql(out),
         }
     }
@@ -115,7 +115,7 @@ impl Display for UserRole {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             UserRole::Admin => write!(f, "admin"),
-            UserRole::User => write!(f, "user"),
+            UserRole::Pentester => write!(f, "pentester"),
             UserRole::Client => write!(f, "client"),
         }
     }
@@ -125,7 +125,7 @@ impl From<String> for UserRole {
     fn from(s: String) -> Self {
         match s.as_str() {
             "admin" => UserRole::Admin,
-            "user" => UserRole::User,
+            "pentester" => UserRole::Pentester,
             "client" => UserRole::Client,
             _ => UserRole::Client,
         }
