@@ -1,6 +1,10 @@
+use std::vec;
+
 use axum::Router;
 use axum::middleware::from_fn;
+use http::{HeaderName, Method};
 use tower_cookies::CookieManagerLayer;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
 use tracing::Level;
 
@@ -28,6 +32,20 @@ pub async fn get_state() -> GlobalState {
 }
 
 pub async fn get_router() -> Router {
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods(vec![
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::OPTIONS,
+        ])
+        .allow_headers(vec![
+            HeaderName::from_static("content-type"),
+            HeaderName::from_static("authorization"),
+        ]);
+
     let state = get_state().await;
 
     let router_v1 = Router::new()
@@ -44,4 +62,5 @@ pub async fn get_router() -> Router {
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         )
+        .layer(cors)
 }
