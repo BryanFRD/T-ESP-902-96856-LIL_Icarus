@@ -4,9 +4,9 @@ use tower_cookies::CookieManagerLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
 use tracing::Level;
 
-use crate::auth;
 use crate::state::GlobalState;
 use crate::vault::get_secrets;
+use crate::{auth, status};
 
 pub fn start_logger() {
     tracing_subscriber::fmt()
@@ -33,6 +33,7 @@ pub async fn get_router() -> Router {
     let router_v1 = Router::new()
         .nest("/auth", auth::get_routes(state.clone()))
         .layer(from_fn(auth::middleware))
+        .nest("/status", status::get_routes(state.clone()))
         .nest("/auth", auth::get_no_auth_routes(state.clone()));
 
     Router::new()
