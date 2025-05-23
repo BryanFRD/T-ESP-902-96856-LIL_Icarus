@@ -20,13 +20,23 @@ impl<S: Send + Sync> FromRequestParts<S> for JwtClaims {
         parts: &mut http::request::Parts,
         _state: &S,
     ) -> Result<Self, Self::Rejection> {
-        let cookies = parts.extract::<Cookies>().await.unwrap();
+        let cookies = match parts.extract::<Cookies>().await {
+            Ok(cookies) => cookies,
+            Err(_) => return Err((StatusCode::UNAUTHORIZED, Json("Unauthorized"))),
+        };
 
         let auth_cookie = cookies
             .get("auth")
             .ok_or_else(|| (StatusCode::UNAUTHORIZED, Json("Unauthorized")))?;
 
-        let jwt = JwtClaims::from(auth_cookie.value().to_string());
+        let jwt_secret = std::env::var("JWT_SECRET").map_err(|_| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("Internal Server Error"),
+            )
+        })?;
+
+        let jwt = JwtClaims::from_jwt(auth_cookie.value(), &jwt_secret);
 
         if !jwt.is_valid() {
             return Err((StatusCode::UNAUTHORIZED, Json("Unauthorized")));

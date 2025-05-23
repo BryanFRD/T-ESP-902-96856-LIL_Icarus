@@ -2,13 +2,14 @@ mod auth;
 mod schema;
 mod state;
 mod utils;
+mod vault;
 
 #[tokio::main]
 async fn main() {
     utils::start_logger();
     tracing::info!("Starting server...");
 
-    let app = utils::get_router();
+    let app = utils::get_router().await;
 
     let listener = match tokio::net::TcpListener::bind("0.0.0.0:80").await {
         Ok(listener) => {

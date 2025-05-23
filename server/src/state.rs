@@ -1,24 +1,37 @@
+use crate::vault::Secrets;
 use diesel::{
     PgConnection,
     r2d2::{ConnectionManager, Pool, PoolError, PooledConnection},
 };
 use std::sync::Arc;
+use tracing::info;
 
 #[derive(Clone)]
 pub struct GlobalState {
     pub db_pool: Arc<Pool<ConnectionManager<PgConnection>>>,
+    secrets: Arc<Secrets>,
 }
 
 impl GlobalState {
-    pub fn new(database_url: &str) -> Self {
-        let manager = ConnectionManager::<PgConnection>::new(database_url);
+    pub fn new(secrets: Secrets) -> Self {
+        // Ugly way to set the JWT_SECRET but need it for the JWT middleware
+        // to work. The JWT middleware cannot access the GlobalState
+        // directly, so we need to set it as an environment variable.
+        unsafe {
+            std::env::set_var("JWT_SECRET", &secrets.jwt_secret);
+        }
+
+        let manager = ConnectionManager::<PgConnection>::new(secrets.database_url.clone());
         let pool = Pool::builder()
             .max_size(10)
             .build(manager)
             .expect("Failed to create pool.");
 
+        info!("Successfully connected to database");
+
         Self {
             db_pool: Arc::new(pool),
+            secrets: Arc::new(secrets),
         }
     }
 
@@ -26,5 +39,9 @@ impl GlobalState {
         &self,
     ) -> Result<PooledConnection<ConnectionManager<PgConnection>>, PoolError> {
         self.db_pool.get()
+    }
+
+    pub fn get_secrets(&self) -> &Secrets {
+        &self.secrets
     }
 }
