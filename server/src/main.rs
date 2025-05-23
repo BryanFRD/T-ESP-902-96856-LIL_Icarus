@@ -1,6 +1,7 @@
 mod auth;
 mod schema;
 mod state;
+mod status;
 mod utils;
 mod vault;
 
