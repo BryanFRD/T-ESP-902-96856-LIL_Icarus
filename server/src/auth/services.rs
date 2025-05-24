@@ -1,5 +1,5 @@
 use super::{
-    endpoints::{login, me, register},
+    endpoints::{login, logout, me, register},
     models::RegisterPayload,
 };
 use axum::{
@@ -21,7 +21,10 @@ pub fn get_no_auth_routes(state: GlobalState) -> Router {
 }
 
 pub fn get_routes(state: GlobalState) -> Router {
-    Router::new().route("/me", get(me)).with_state(state)
+    Router::new()
+        .route("/me", get(me))
+        .route("/logout", post(logout))
+        .with_state(state)
 }
 
 pub fn get_user_by_email(
