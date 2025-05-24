@@ -15,11 +15,11 @@ stages:
     - echo "Building Docker image..."
     - |
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
-        TAG="app:latest"
+        TAG="-t app:latest -t app-dev:latest"
       else
-        TAG="app-dev:latest"
+        TAG="-t app-dev:latest"
       fi
-    - docker build -t $TAG .
+    - docker build $TAG .
 
 🧪_test:
   stage: test
@@ -39,7 +39,7 @@ stages:
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-      when: never
+      when: always
     - when: manual
   script:
     - echo "Deploying to dev..."
