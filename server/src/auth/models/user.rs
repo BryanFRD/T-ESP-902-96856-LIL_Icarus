@@ -70,7 +70,7 @@ impl From<RegisterPayload> for User {
             payload.first_name,
             payload.last_name,
             payload.email,
-            "user".to_string(),
+            "client".to_string(),
             payload.password,
         )
     }
