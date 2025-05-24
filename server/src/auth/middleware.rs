@@ -6,6 +6,7 @@ use axum::{
     response::IntoResponse,
 };
 use tower_cookies::Cookies;
+use tracing::error;
 
 use super::models::JwtClaims;
 
@@ -22,7 +23,10 @@ impl<S: Send + Sync> FromRequestParts<S> for JwtClaims {
     ) -> Result<Self, Self::Rejection> {
         let cookies = match parts.extract::<Cookies>().await {
             Ok(cookies) => cookies,
-            Err(_) => return Err((StatusCode::UNAUTHORIZED, Json("Unauthorized"))),
+            Err(e) => {
+                error!("Failed to extract cookies: {:?}", e);
+                return Err((StatusCode::UNAUTHORIZED, Json("Unauthorized")));
+            }
         };
 
         let auth_cookie = cookies
