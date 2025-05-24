@@ -1,6 +1,6 @@
 use axum::{Json, extract::State, response::IntoResponse};
 use http::StatusCode;
-use tower_cookies::{Cookie, Cookies};
+use tower_cookies::{Cookie, Cookies, cookie::time};
 use tracing::error;
 use validator::Validate;
 
@@ -91,4 +91,14 @@ pub async fn me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoRe
     };
 
     Json(user).into_response()
+}
+
+pub async fn logout(cookies: Cookies) -> impl IntoResponse {
+    let mut cookie = Cookie::new("auth", "");
+    cookie.set_expires(time::OffsetDateTime::UNIX_EPOCH);
+    cookie.set_path("/");
+    cookie.set_http_only(true);
+    cookies.add(cookie);
+
+    (StatusCode::OK).into_response()
 }
