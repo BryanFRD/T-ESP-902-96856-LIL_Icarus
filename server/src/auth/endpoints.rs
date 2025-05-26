@@ -1,6 +1,7 @@
 use axum::{Json, extract::State, response::IntoResponse};
 use http::StatusCode;
 use tower_cookies::{Cookie, Cookies, cookie::time};
+use tower_cookies::cookie::SameSite;
 use tracing::error;
 use validator::Validate;
 
@@ -47,6 +48,7 @@ pub async fn login(
     cookie.set_secure(true);
     cookie.set_http_only(true);
     cookie.set_path("/");
+    cookie.set_same_site(SameSite::None);
     cookies.add(cookie);
 
     (StatusCode::OK).into_response()
