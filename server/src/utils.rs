@@ -6,7 +6,7 @@ use http::{HeaderName, HeaderValue, Method};
 use tower_cookies::CookieManagerLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
-use tracing::Level;
+use tracing::{Level, info};
 
 use crate::state::GlobalState;
 use crate::vault::get_secrets;
@@ -35,15 +35,23 @@ pub async fn get_router() -> Router {
     let state = get_state().await;
     let secrets = state.get_secrets();
 
-    let origin = match HeaderValue::from_str(&secrets.origin_cors) {
-        Ok(value) => value,
-        Err(e) => {
+    let allowed_origins: Vec<HeaderValue> = secrets
+        .origin_cors
+        .split(',')
+        .map(str::trim)
+        .map(HeaderValue::from_str)
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap_or_else(|e| {
             tracing::error!("Invalid CORS origin: {}", e);
             panic!("Invalid CORS origin");
-        }
-    };
+        });
+
+    info!(
+        "Starting server with allowed origins: {:?}",
+        allowed_origins
+    );
     let cors = CorsLayer::new()
-        .allow_origin(origin)
+        .allow_origin(allowed_origins)
         .allow_methods(vec![
             Method::GET,
             Method::POST,
