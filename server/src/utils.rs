@@ -2,9 +2,9 @@ use std::vec;
 
 use axum::Router;
 use axum::middleware::from_fn;
-use http::{HeaderName, Method};
+use http::{HeaderName, HeaderValue, Method};
 use tower_cookies::CookieManagerLayer;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
 use tracing::Level;
 
@@ -32,8 +32,18 @@ pub async fn get_state() -> GlobalState {
 }
 
 pub async fn get_router() -> Router {
+    let state = get_state().await;
+    let secrets = state.get_secrets();
+
+    let origin = match HeaderValue::from_str(&secrets.origin_cors) {
+        Ok(value) => value,
+        Err(e) => {
+            tracing::error!("Invalid CORS origin: {}", e);
+            panic!("Invalid CORS origin");
+        }
+    };
     let cors = CorsLayer::new()
-        .allow_origin(Any)
+        .allow_origin(origin)
         .allow_methods(vec![
             Method::GET,
             Method::POST,
@@ -44,9 +54,8 @@ pub async fn get_router() -> Router {
         .allow_headers(vec![
             HeaderName::from_static("content-type"),
             HeaderName::from_static("authorization"),
-        ]);
-
-    let state = get_state().await;
+        ])
+        .allow_credentials(true);
 
     let router_v1 = Router::new()
         .nest("/auth", auth::get_routes(state.clone()))
