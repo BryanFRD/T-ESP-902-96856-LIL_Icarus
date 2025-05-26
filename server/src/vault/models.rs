@@ -12,4 +12,6 @@ pub struct Secrets {
     pub status: StatusEnum,
     #[serde(rename = "STATUS_MESSAGE")]
     pub status_message: String,
+    #[serde(rename = "ORIGIN_CORS")]
+    pub origin_cors: String,
 }
