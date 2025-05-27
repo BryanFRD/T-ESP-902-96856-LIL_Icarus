@@ -15,9 +15,10 @@ use crate::auth::services::hash_password;
 
 use super::RegisterPayload;
 
-#[derive(Serialize, Deserialize, Queryable, Insertable, Selectable)]
+#[derive(Deserialize, Queryable, Insertable, Selectable)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
+#[serde(rename_all = "camelCase")]
 pub struct User {
     pub id: String,
     pub username: String,

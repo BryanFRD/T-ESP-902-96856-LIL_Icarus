@@ -1,7 +1,8 @@
 use axum::{Json, extract::State, response::IntoResponse};
 use http::StatusCode;
-use tower_cookies::{Cookie, Cookies, cookie::time};
+#[cfg(not(debug_assertions))]
 use tower_cookies::cookie::SameSite;
+use tower_cookies::{Cookie, Cookies, cookie::time};
 use tracing::error;
 use validator::Validate;
 
@@ -46,9 +47,10 @@ pub async fn login(
 
     #[cfg(not(debug_assertions))]
     cookie.set_secure(true);
+    #[cfg(not(debug_assertions))]
+    cookie.set_same_site(SameSite::None);
     cookie.set_http_only(true);
     cookie.set_path("/");
-    cookie.set_same_site(SameSite::None);
     cookies.add(cookie);
 
     (StatusCode::OK).into_response()
