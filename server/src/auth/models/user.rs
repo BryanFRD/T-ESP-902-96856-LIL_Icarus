@@ -8,14 +8,14 @@ use diesel::{
     serialize::{Output, ToSql},
     sql_types::Text,
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use ulid::Ulid;
 
 use crate::auth::services::hash_password;
 
 use super::RegisterPayload;
 
-#[derive(Deserialize, Queryable, Insertable, Selectable)]
+#[derive(Serialize, Queryable, Insertable, Selectable)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[serde(rename_all = "camelCase")]
@@ -77,7 +77,7 @@ impl From<RegisterPayload> for User {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, AsExpression, FromSqlRow, PartialEq)]
+#[derive(Serialize, Clone, Debug, AsExpression, FromSqlRow, PartialEq)]
 #[diesel(sql_type = Text)]
 pub enum UserRole {
     Admin,
