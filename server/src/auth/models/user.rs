@@ -10,20 +10,26 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
+use utoipa::ToSchema;
 
 use crate::auth::services::hash_password;
 
 use super::RegisterPayload;
 
-#[derive(Serialize, Deserialize, Queryable, Insertable, Selectable)]
+#[derive(Serialize, Deserialize, Queryable, Insertable, Selectable, ToSchema)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[serde(rename_all = "camelCase")]
 pub struct User {
+    #[schema(example = "01F8MECHZX3TBDSZ7XK4F5G9ZQ")]
     pub id: String,
+    #[schema(example = "johndoe")]
     pub username: String,
+    #[schema(example = "John")]
     pub first_name: String,
+    #[schema(example = "Doe")]
     pub last_name: String,
+    #[schema(example = "johndoe@example.com")]
     pub email: String,
     pub role: UserRole,
     #[serde(skip_serializing)]
@@ -77,8 +83,9 @@ impl From<RegisterPayload> for User {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, AsExpression, FromSqlRow, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, AsExpression, FromSqlRow, PartialEq, ToSchema)]
 #[diesel(sql_type = Text)]
+#[schema(example = "Pentester")]
 pub enum UserRole {
     Admin,
     Pentester,

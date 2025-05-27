@@ -9,10 +9,22 @@ use validator::Validate;
 use crate::state::GlobalState;
 
 use super::{
-    models::{JwtClaims, LoginPayload, RegisterPayload},
+    models::{JwtClaims, LoginPayload, RegisterPayload, User},
     services::{create_user, get_user_by_email, user_exists},
 };
 
+#[utoipa::path(
+    post,
+    path = "/v1/auth/login",
+    description = "Login a user",
+    request_body = LoginPayload,
+    responses(
+        (status = 200, description = "Logged in successfully"),
+        (status = BAD_REQUEST, description = "Invalid request payload"),
+        (status = UNAUTHORIZED, description = "Invalid credentials"),
+    ),
+    tag = "Auth"
+)]
 pub async fn login(
     State(state): State<GlobalState>,
     cookies: Cookies,
@@ -56,6 +68,18 @@ pub async fn login(
     (StatusCode::OK).into_response()
 }
 
+#[utoipa::path(
+    post,
+    path = "/v1/auth/register",
+    description = "Register a new user",
+    request_body = RegisterPayload,
+    responses(
+        (status = 201, description = "Registered successfully"),
+        (status = BAD_REQUEST, description = "Invalid request payload"),
+        (status = CONFLICT, description = "User already exists"),
+    ),
+    tag = "Auth"
+)]
 pub async fn register(
     State(state): State<GlobalState>,
     Json(payload): Json<RegisterPayload>,
@@ -82,6 +106,18 @@ pub async fn register(
     }
 }
 
+#[utoipa::path(
+    get,
+    path = "/v1/auth/me",
+    responses(
+        (status = 200, description = "User information retrieved successfully", body = User),
+        (status = UNAUTHORIZED, description = "Invalid credentials"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+    tag = "User",
+)]
 pub async fn me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoResponse {
     let user = match get_user_by_email(&state, &jwt.email) {
         Ok(user) => match user {
@@ -97,6 +133,18 @@ pub async fn me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoRe
     Json(user).into_response()
 }
 
+#[utoipa::path(
+    post,
+    path = "/v1/auth/logout",
+    responses(
+        (status = 200, description = "Logged out successfully"),
+        (status = UNAUTHORIZED, description = "Invalid credentials"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+    tag = "Auth",
+)]
 pub async fn logout(cookies: Cookies) -> impl IntoResponse {
     let mut cookie = Cookie::new("auth", "");
     cookie.set_expires(time::OffsetDateTime::UNIX_EPOCH);
