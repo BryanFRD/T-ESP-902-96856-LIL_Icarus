@@ -80,7 +80,7 @@ pub async fn get_router() -> Router {
         )
         .layer(cors);
 
-    let is_prod = std::env::var("VAULT_ENV").unwrap_or_default() == "local";
+    let is_prod = std::env::var("VAULT_ENV").unwrap_or("local".to_string()) == "prod";
 
     if !is_prod {
         main_router
