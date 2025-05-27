@@ -1,4 +1,4 @@
-mod endpoints;
+pub mod endpoints;
 mod middleware;
 mod models;
 mod services;

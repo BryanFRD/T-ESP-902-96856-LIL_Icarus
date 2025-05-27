@@ -1,12 +1,15 @@
 use std::vec;
 
+use crate::swagger::ApiDoc;
 use axum::Router;
 use axum::middleware::from_fn;
 use http::{HeaderName, HeaderValue, Method};
 use tower_cookies::CookieManagerLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
-use tracing::{Level, info};
+use tracing::Level;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 use crate::state::GlobalState;
 use crate::vault::get_secrets;
@@ -46,10 +49,6 @@ pub async fn get_router() -> Router {
             panic!("Invalid CORS origin");
         });
 
-    info!(
-        "Starting server with allowed origins: {:?}",
-        allowed_origins
-    );
     let cors = CorsLayer::new()
         .allow_origin(allowed_origins)
         .allow_methods(vec![
@@ -71,7 +70,7 @@ pub async fn get_router() -> Router {
         .nest("/status", status::get_routes(state.clone()))
         .nest("/auth", auth::get_no_auth_routes(state.clone()));
 
-    Router::new()
+    let main_router = Router::new()
         .nest("/v1", router_v1)
         .layer(CookieManagerLayer::new())
         .layer(
@@ -79,5 +78,14 @@ pub async fn get_router() -> Router {
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         )
-        .layer(cors)
+        .layer(cors);
+
+    let is_prod = std::env::var("VAULT_ENV").unwrap_or_default() == "local";
+
+    if !is_prod {
+        main_router
+            .merge(SwaggerUi::new("/v1/swagger").url("/v1/swagger/openapi.json", ApiDoc::openapi()))
+    } else {
+        main_router
+    }
 }
