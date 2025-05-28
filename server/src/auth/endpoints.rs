@@ -64,6 +64,7 @@ pub async fn login(
     cookie.set_secure(true);
     #[cfg(not(debug_assertions))]
     cookie.set_same_site(SameSite::None);
+    cookie.set_expires(time::OffsetDateTime::now_utc() + time::Duration::days(7));
     cookie.set_http_only(true);
     cookie.set_path("/");
     cookies.add(cookie);
@@ -123,6 +124,11 @@ pub async fn register(
 )]
 pub async fn logout(cookies: Cookies) -> impl IntoResponse {
     let mut cookie = Cookie::new("auth", "");
+
+    #[cfg(not(debug_assertions))]
+    cookie.set_secure(true);
+    #[cfg(not(debug_assertions))]
+    cookie.set_same_site(SameSite::None);
     cookie.set_expires(time::OffsetDateTime::UNIX_EPOCH);
     cookie.set_path("/");
     cookie.set_http_only(true);
