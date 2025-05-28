@@ -62,11 +62,9 @@ deploy_prod:
 
 apply_migrations:
   stage: deploy
-  image: docker:latest
   needs:
     - job: deploy_dev
     - job: deploy_prod
-  tags: [ci]
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
   needs:
@@ -86,19 +84,12 @@ apply_migrations:
       else
         export ENVIRONMENT="dev"
       fi
-
+    - export DATABASE_URL=$(vault kv get -field=DATABASE_URL_CI secret/env/$ENVIRONMENT/app)
     - echo "Applying migrations..."
-    - docker run --rm \
-      -v "$CI_PROJECT_DIR":/app \
-      -w /app \
-      -e DATABASE_URL=$(vault kv get -field=DATABASE_URL_CI secret/env/$ENVIRONMENT/app) \
-      app-dev:latest \
-      diesel migration run
+    - diesel migration run
 
 restart_docker:
   stage: deploy
-  image: docker:latest
-  tags: [ci]
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
   needs:
@@ -106,9 +97,4 @@ restart_docker:
     - job: deploy_dev
   script:
     - echo "Restarting Docker server..."
-    - docker run --rm \
-      -v /var/run/docker.sock:/var/run/docker.sock \
-      containrrr/watchtower \
-      --run-once \
-      --label-enable \
-      --cleanup
+    - ~/dockers/update.sh
