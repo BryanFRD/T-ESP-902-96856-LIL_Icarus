@@ -33,8 +33,8 @@ build:
 
 test:
   stage: test
-  image: docker:24.0
-  tags: [ci]
+  image: rust:1.87-alpine
+  tags: [ci, rust]
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'
