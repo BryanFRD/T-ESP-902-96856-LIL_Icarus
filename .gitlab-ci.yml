@@ -33,7 +33,7 @@ build:
 
 test:
   stage: test
-  image: rust:1.87-alpine
+  image: rust:1.87-slim
   tags: [ci, rust]
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
