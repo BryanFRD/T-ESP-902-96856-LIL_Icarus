@@ -40,7 +40,7 @@ test:
     - if: '$CI_COMMIT_BRANCH == "main"'
   script:
     - echo "Running tests..."
-    - cargo run test
+    - cargo test
   needs:
     - job: build
 
