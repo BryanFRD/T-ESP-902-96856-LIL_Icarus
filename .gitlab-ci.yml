@@ -1,11 +1,14 @@
 stages:
-  - build
   - test
+  - build
   - deploy
   - cleanup
 
 🛠_build:
   stage: build
+  needs:
+    - job: 🧪_test
+      optional: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
@@ -36,6 +39,7 @@ stages:
   needs:
     - job: 🧪_test
       optional: true
+    - job: 🛠_build
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
@@ -52,12 +56,13 @@ stages:
     - cd server
     - export DATABASE_URL=$(vault kv get -field=DATABASE_URL_CI secret/env/dev/app)
     - diesel migration run --database-url $DATABASE_URL
-    - ~/dockers/update.sh
+    - /home/antoine/dockers/update.sh
   allow_failure: true
 
 ✈_deploy_prod:
   needs:
     - 🧪_test
+    - 🛠_build
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
@@ -73,7 +78,7 @@ stages:
     - cd server
     - export DATABASE_URL=$(vault kv get -field=DATABASE_URL_CI secret/env/prod/app)
     - diesel migration run --database-url $DATABASE_URL
-    - ~/dockers/update.sh
+    - /home/antoine/dockers/update.sh
 
 🧹_cleanup:
   stage: cleanup
