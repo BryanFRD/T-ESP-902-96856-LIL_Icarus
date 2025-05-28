@@ -24,8 +24,6 @@ test:
   script:
     - echo "Running tests..."
     - cargo test
-  needs:
-    - job: build
 
 deploy_dev:
   stage: deploy
