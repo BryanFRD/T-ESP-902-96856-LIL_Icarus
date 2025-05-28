@@ -9,6 +9,7 @@ use utoipa::OpenApi;
         auth::endpoints::login,
         auth::endpoints::register,
         auth::endpoints::me,
+        auth::endpoints::update_me,
         auth::endpoints::logout,
         status::endpoints::get_status,
     ),

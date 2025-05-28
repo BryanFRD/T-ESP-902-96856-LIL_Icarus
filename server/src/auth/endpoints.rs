@@ -9,8 +9,11 @@ use validator::Validate;
 use crate::state::GlobalState;
 
 use super::{
-    models::{JwtClaims, LoginPayload, RegisterPayload, User},
-    services::{create_user, get_user_by_email, user_exists},
+    models::{JwtClaims, LoginPayload, RegisterPayload, UpdatePayload, User},
+    services::{
+        check_update_conflicts, create_user, delete_user, get_user_by_email, get_user_by_id,
+        hash_password, update_user_fields, user_exists, validate_update_payload,
+    },
 };
 
 #[utoipa::path(
@@ -107,6 +110,28 @@ pub async fn register(
 }
 
 #[utoipa::path(
+    post,
+    path = "/v1/auth/logout",
+    responses(
+        (status = 200, description = "Logged out successfully"),
+        (status = UNAUTHORIZED, description = "Invalid credentials"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+    tag = "Auth",
+)]
+pub async fn logout(cookies: Cookies) -> impl IntoResponse {
+    let mut cookie = Cookie::new("auth", "");
+    cookie.set_expires(time::OffsetDateTime::UNIX_EPOCH);
+    cookie.set_path("/");
+    cookie.set_http_only(true);
+    cookies.add(cookie);
+
+    (StatusCode::OK).into_response()
+}
+
+#[utoipa::path(
     get,
     path = "/v1/auth/me",
     responses(
@@ -134,23 +159,80 @@ pub async fn me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoRe
 }
 
 #[utoipa::path(
-    post,
-    path = "/v1/auth/logout",
+    patch,
+    path = "/v1/auth/me",
+    description = "Update user information",
+    request_body = UpdatePayload,
     responses(
-        (status = 200, description = "Logged out successfully"),
+        (status = 200, description = "User information updated successfully"),
+        (status = BAD_REQUEST, description = "Invalid request payload"),
+        (status = CONFLICT, description = "Update conflicts with existing data"),
         (status = UNAUTHORIZED, description = "Invalid credentials"),
     ),
     security(
         ("cookieAuth" = [])
     ),
-    tag = "Auth",
+    tag = "User",
 )]
-pub async fn logout(cookies: Cookies) -> impl IntoResponse {
-    let mut cookie = Cookie::new("auth", "");
-    cookie.set_expires(time::OffsetDateTime::UNIX_EPOCH);
-    cookie.set_path("/");
-    cookie.set_http_only(true);
-    cookies.add(cookie);
+pub async fn update_me(
+    State(state): State<GlobalState>,
+    jwt: JwtClaims,
+    Json(payload): Json<UpdatePayload>,
+) -> impl IntoResponse {
+    if let Err(_) = validate_update_payload(&payload) {
+        return (StatusCode::BAD_REQUEST).into_response();
+    }
+
+    let user = match get_user_by_id(&state, &jwt.sub.to_string()) {
+        Ok(Some(user)) => user,
+        Ok(None) => return (StatusCode::UNAUTHORIZED).into_response(),
+        Err(e) => {
+            error!("Failed to get user by email: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+        }
+    };
+
+    if payload.new_password.is_some() {
+        if let Some(ref current_pw) = payload.password {
+            let hashed = hash_password(current_pw);
+            if hashed != user.password_hash {
+                return (StatusCode::UNAUTHORIZED, "Current password is incorrect").into_response();
+            }
+        }
+    }
+
+    match check_update_conflicts(&state, &payload, &user) {
+        Ok(Some(conflict)) => return (StatusCode::CONFLICT, conflict).into_response(),
+        Ok(None) => (),
+        Err(e) => {
+            error!("Failed to check update conflicts: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+        }
+    };
+
+    match update_user_fields(&state, &user.id, &payload) {
+        Ok(_) => (),
+        Err(e) => {
+            error!("Failed to update user: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+        }
+    };
+
+    if let Err(_) = update_user_fields(&state, &user.id, &payload) {
+        return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+    }
 
     (StatusCode::OK).into_response()
+}
+
+pub async fn delete_me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoResponse {
+    let user_id = jwt.sub.to_string();
+
+    match delete_user(&state, &user_id) {
+        Ok(_) => (StatusCode::NO_CONTENT).into_response(),
+        Err(e) => {
+            error!("Failed to delete user: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+        }
+    }
 }
