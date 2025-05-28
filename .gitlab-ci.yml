@@ -4,43 +4,53 @@ stages:
   - deploy
   - cleanup
 
-🛠_build:
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_TLS_CERTDIR: ""
+  CARGO_HOME: /cache/cargo
+  CARGO_TARGET_DIR: /cache/target
+
+services:
+  - name: docker:dind
+    alias: docker
+
+".build":
   stage: build
+  image: docker:latest
+  tags: [build]
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: always
   script:
     - echo "Building Docker image..."
     - |
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
-        TAG="-t app:latest -t app-dev:latest"
+        TAGS="-t app:latest -t app-dev:latest"
       else
-        TAG="-t app-dev:latest"
+        TAGS="-t app-dev:latest"
       fi
-    - docker build $TAG .
+    - docker build $TAGS .
 
-🧪_test:
+".test":
   stage: test
+  image: docker:24.0
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
   script:
     - echo "Running tests..."
-    - cargo test
-
-✈_deploy_dev:
+    - docker run --rm app:latest cargo test
   needs:
-    - job: 🧪_test
-      optional: true
+    - job: ".build"
+
+".deploy_dev":
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-      when: always
     - when: manual
+  needs:
+    - job: ".test"
+      optional: true
   script:
     - echo "Deploying to dev..."
     - echo $DOCKER_REGISTRY_PASSWORD_DEV | docker login --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
@@ -55,13 +65,12 @@ stages:
     - ~/dockers/update.sh
   allow_failure: true
 
-✈_deploy_prod:
-  needs:
-    - 🧪_test
+".deploy_prod":
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-      when: always
+  needs:
+    - job: ".test"
   script:
     - echo "Deploying to production..."
     - echo $DOCKER_REGISTRY_PASSWORD_PROD | docker login --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
@@ -75,7 +84,7 @@ stages:
     - diesel migration run --database-url $DATABASE_URL
     - ~/dockers/update.sh
 
-🧹_cleanup:
+".cleanup":
   stage: cleanup
   when: always
   script:
