@@ -40,7 +40,7 @@ test:
     - if: '$CI_COMMIT_BRANCH == "main"'
   script:
     - echo "Running tests..."
-    - docker run --rm app:latest cargo test
+    - cargo run test
   needs:
     - job: build
 
