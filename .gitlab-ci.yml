@@ -4,103 +4,82 @@ stages:
   - deploy
   - cleanup
 
-# variables:
-#   DOCKER_HOST: tcp://docker:2375/
-#   DOCKER_TLS_CERTDIR: ""
-#   CARGO_HOME: /cache/cargo
-#   CARGO_TARGET_DIR: /cache/target
+🛠_build:
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+  script:
+    - echo "Building Docker image..."
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        TAG="-t app:latest -t app-dev:latest"
+      else
+        TAG="-t app-dev:latest"
+      fi
+    - docker build $TAG .
 
-
-test:
+🧪_test:
   stage: test
-  # image: rust:1.87
-  tags: [ci, rust]
-  # services:
-  # - name: docker:dind
-  #   alias: docker
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
   script:
     - echo "Running tests..."
     - cargo test
 
-deploy_dev:
+✈_deploy_dev:
+  needs:
+    - job: 🧪_test
+      optional: true
   stage: deploy
-  image: docker:latest
-  # tags: [ci, build]
-  # services:
-  # - name: docker:dind
-  #   alias: docker
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: always
     - when: manual
-  needs:
-    - job: test
-      optional: true
   script:
-    - echo "Building Docker image..."
-    - docker build -t app-dev:latest .
     - echo "Deploying to dev..."
     - echo $DOCKER_REGISTRY_PASSWORD_DEV | docker login --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
     - docker tag app-dev:latest $DOCKER_REGISTRY/app-dev:latest
     - docker push $DOCKER_REGISTRY/app-dev:latest
+    - export VAULT_ADDR=http://localhost:8200
+    - export VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+    - vault login $VAULT_TOKEN > /dev/null 2>&1
+    - cd server
+    - export DATABASE_URL=$(vault kv get -field=DATABASE_URL_CI secret/env/dev/app)
+    - diesel migration run --database-url $DATABASE_URL
+    - ~/dockers/update.sh
   allow_failure: true
 
-deploy_prod:
+✈_deploy_prod:
+  needs:
+    - 🧪_test
   stage: deploy
-  image: docker:latest
-  # tags: [ci, build]
-  # services:
-  # - name: docker:dind
-  #   alias: docker
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-  needs:
-    - job: test
+      when: always
   script:
-    - echo "Building Docker image..."
-    - docker build -t app:latest -t app-dev:latest .
     - echo "Deploying to production..."
     - echo $DOCKER_REGISTRY_PASSWORD_PROD | docker login --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
     - docker tag app:latest $DOCKER_REGISTRY/app:latest
     - docker push $DOCKER_REGISTRY/app:latest
-
-apply_migrations:
-  stage: deploy
-  needs:
-    - job: deploy_dev
-    - job: deploy_prod
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-  needs:
-    - job: deploy_prod
-  script:
-    - echo "Installing Vault CLI..."
-    - apt-get update && apt-get install -y curl unzip
-    - curl -fsSL https://releases.hashicorp.com/vault/1.15.4/vault_1.15.4_linux_amd64.zip -o vault.zip
-    - unzip vault.zip && mv vault /usr/local/bin/ && rm vault.zip
-    - echo "Logging into Vault..."
-    - export VAULT_ADDR=https://vault.icarus-cyber.fr
+    - export VAULT_ADDR=http://localhost:8200
     - export VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
     - vault login $VAULT_TOKEN > /dev/null 2>&1
-    - |
-      if [ "$CI_COMMIT_BRANCH" = "main" ] && [ "$CI_PIPELINE_SOURCE" = "push" ]; then
-        export ENVIRONMENT="prod"
-      else
-        export ENVIRONMENT="dev"
-      fi
-    - export DATABASE_URL=$(vault kv get -field=DATABASE_URL_CI secret/env/$ENVIRONMENT/app)
-    - echo "Applying migrations..."
-    - diesel migration run
-
-restart_docker:
-  stage: deploy
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-  needs:
-    - job: deploy_prod
-    - job: deploy_dev
-  script:
-    - echo "Restarting Docker server..."
+    - cd server
+    - export DATABASE_URL=$(vault kv get -field=DATABASE_URL_CI secret/env/prod/app)
+    - diesel migration run --database-url $DATABASE_URL
     - ~/dockers/update.sh
+
+🧹_cleanup:
+  stage: cleanup
+  when: always
+  script:
+    - echo "Cleaning up..."
+    - rm -rf target
+    - docker logout $DOCKER_REGISTRY
+  allow_failure: true
