@@ -10,14 +10,14 @@ variables:
   CARGO_HOME: /cache/cargo
   CARGO_TARGET_DIR: /cache/target
 
-services:
-  - name: docker:dind
-    alias: docker
 
 test:
   stage: test
   image: rust:1.87
   tags: [ci, rust]
+  services:
+  - name: docker:dind
+    alias: docker
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -29,6 +29,9 @@ deploy_dev:
   stage: deploy
   image: docker:latest
   tags: [ci, build]
+  services:
+  - name: docker:dind
+    alias: docker
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
     - when: manual
@@ -48,6 +51,9 @@ deploy_prod:
   stage: deploy
   image: docker:latest
   tags: [ci, build]
+  services:
+  - name: docker:dind
+    alias: docker
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
   needs:
