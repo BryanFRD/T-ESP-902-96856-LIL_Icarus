@@ -231,6 +231,19 @@ pub async fn update_me(
     (StatusCode::OK).into_response()
 }
 
+#[utoipa::path(
+    delete,
+    path = "/v1/auth/me",
+    responses(
+        (status = 204, description = "User deleted successfully"),
+        (status = UNAUTHORIZED, description = "Invalid credentials"),
+        (status = INTERNAL_SERVER_ERROR, description = "Failed to delete user"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+    tag = "User",
+)]
 pub async fn delete_me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoResponse {
     let user_id = jwt.sub.to_string();
 
