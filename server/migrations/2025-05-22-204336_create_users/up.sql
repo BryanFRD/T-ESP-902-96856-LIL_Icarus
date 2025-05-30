@@ -13,3 +13,24 @@ CREATE TABLE "users"(
 	"last_connected_at" TIMESTAMP NOT NULL
 );
 
+-- PostgreSQL trigger function to update updated_at
+CREATE OR REPLACE FUNCTION update_users_updated_at_func()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to call the function after update
+CREATE TRIGGER update_users_updated_at
+BEFORE UPDATE OF
+    username,
+    first_name,
+    last_name,
+    email,
+    role,
+    password_hash
+ON users
+FOR EACH ROW
+EXECUTE FUNCTION update_users_updated_at_func();

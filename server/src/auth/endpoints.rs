@@ -183,6 +183,7 @@ pub async fn me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoRe
 pub async fn update_me(
     State(state): State<GlobalState>,
     jwt: JwtClaims,
+    cookies: Cookies,
     Json(payload): Json<UpdatePayload>,
 ) -> impl IntoResponse {
     if let Err(_) = validate_update_payload(&payload) {
@@ -227,6 +228,36 @@ pub async fn update_me(
     if let Err(_) = update_user_fields(&state, &user.id, &payload) {
         return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
     }
+
+    if payload.email.is_none() {
+        return (StatusCode::OK).into_response();
+    }
+
+    // If email was updated, we need to re-issue the JWT with the new email
+    let updated_user = match get_user_by_id(&state, &user.id) {
+        Ok(Some(user)) => user,
+        Ok(None) => return (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+        Err(e) => {
+            error!("Failed to get updated user: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+        }
+    };
+
+    let jwt = JwtClaims::from(updated_user);
+    let jwt = match jwt.to_string(state.get_secrets().jwt_secret.as_str()) {
+        Ok(jwt) => jwt,
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+    };
+    let mut cookie = Cookie::new("auth", jwt);
+
+    #[cfg(not(debug_assertions))]
+    cookie.set_secure(true);
+    #[cfg(not(debug_assertions))]
+    cookie.set_same_site(SameSite::None);
+    cookie.set_expires(time::OffsetDateTime::now_utc() + time::Duration::days(7));
+    cookie.set_http_only(true);
+    cookie.set_path("/");
+    cookies.add(cookie);
 
     (StatusCode::OK).into_response()
 }
