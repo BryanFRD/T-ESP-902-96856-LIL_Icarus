@@ -3,9 +3,8 @@ mod middleware;
 mod models;
 mod services;
 
-pub use middleware::middleware;
+pub use middleware::{admin_middleware, middleware};
+pub use services::hash_password;
 pub use services::{get_no_auth_routes, get_routes};
 
-pub use models::User;
-
-pub use models::{LoginPayload, RegisterPayload};
+pub use models::{JwtClaims, LoginPayload, RegisterPayload};

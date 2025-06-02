@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
-use super::{UserRole, user::User};
+use crate::users::{User, UserRole};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JwtClaims {
@@ -38,6 +38,10 @@ impl JwtClaims {
                 exp: 0,
             },
         }
+    }
+
+    pub fn is_admin(&self) -> bool {
+        self.role == UserRole::Admin
     }
 
     pub fn is_valid(&self) -> bool {

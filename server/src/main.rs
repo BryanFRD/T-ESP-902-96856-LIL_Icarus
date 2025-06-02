@@ -3,6 +3,7 @@ mod schema;
 mod state;
 mod status;
 mod swagger;
+mod users;
 mod utils;
 mod vault;
 
