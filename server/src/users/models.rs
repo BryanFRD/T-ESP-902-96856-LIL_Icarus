@@ -11,10 +11,11 @@ use diesel::{
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 use utoipa::ToSchema;
+use validator::Validate;
 
-use crate::auth::services::hash_password;
+use crate::auth::hash_password;
 
-use super::RegisterPayload;
+use crate::auth::RegisterPayload;
 
 #[derive(Serialize, Deserialize, Queryable, Insertable, Selectable, ToSchema)]
 #[diesel(table_name = crate::schema::users)]
@@ -138,4 +139,26 @@ impl From<String> for UserRole {
             _ => UserRole::Client,
         }
     }
+}
+
+#[derive(Deserialize, Clone, Debug, Validate, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdatePayload {
+    #[schema(example = "johndoe")]
+    pub username: Option<String>,
+    #[schema(example = "John")]
+    pub first_name: Option<String>,
+    #[schema(example = "Doe")]
+    pub last_name: Option<String>,
+
+    #[validate(email(message = "Invalid email format"))]
+    #[schema(example = "johndoe@example.com")]
+    pub email: Option<String>,
+
+    #[schema(example = "current_password123")]
+    pub password: Option<String>,
+    #[schema(example = "new_password123")]
+    pub new_password: Option<String>,
+    #[schema(example = "new_password123")]
+    pub confirm_password: Option<String>,
 }
