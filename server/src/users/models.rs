@@ -17,7 +17,9 @@ use crate::auth::hash_password;
 
 use crate::auth::RegisterPayload;
 
-#[derive(Serialize, Deserialize, Queryable, Insertable, Selectable, ToSchema)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable, ToSchema, Identifiable,
+)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[serde(rename_all = "camelCase")]

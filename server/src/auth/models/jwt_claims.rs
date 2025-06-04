@@ -44,6 +44,10 @@ impl JwtClaims {
         self.role == UserRole::Admin
     }
 
+    pub fn is_pentester(&self) -> bool {
+        self.role == UserRole::Pentester || self.role == UserRole::Admin
+    }
+
     pub fn is_valid(&self) -> bool {
         let now = chrono::Local::now().timestamp() as usize;
         self.iat <= now && self.exp >= now
