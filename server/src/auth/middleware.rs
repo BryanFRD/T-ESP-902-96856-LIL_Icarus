@@ -21,6 +21,13 @@ pub async fn admin_middleware(jwt: JwtClaims, req: Request, next: Next) -> impl 
     next.run(req).await
 }
 
+pub async fn pentester_middleware(jwt: JwtClaims, req: Request, next: Next) -> impl IntoResponse {
+    if !jwt.is_pentester() {
+        return (StatusCode::FORBIDDEN, Json("Forbidden")).into_response();
+    }
+    next.run(req).await
+}
+
 impl<S: Send + Sync> FromRequestParts<S> for JwtClaims {
     type Rejection = (StatusCode, Json<&'static str>);
 

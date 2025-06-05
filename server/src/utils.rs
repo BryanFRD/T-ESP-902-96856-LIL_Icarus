@@ -13,7 +13,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::state::GlobalState;
 use crate::vault::get_secrets;
-use crate::{auth, status, users};
+use crate::{auth, status, teams, users};
 
 pub fn start_logger() {
     tracing_subscriber::fmt()
@@ -66,6 +66,7 @@ pub async fn get_router() -> Router {
         .allow_credentials(true);
 
     let router_v1 = Router::new()
+        .nest("/teams", teams::get_routes(state.clone()))
         .nest("/users", users::get_routes(state.clone()))
         .nest("/auth", auth::get_routes(state.clone()))
         .layer(from_fn(auth::middleware))

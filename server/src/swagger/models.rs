@@ -1,6 +1,8 @@
 use crate::auth;
 use crate::auth::{LoginPayload, RegisterPayload};
 use crate::status;
+use crate::teams;
+use crate::teams::CreateTeam;
 use crate::users;
 use utoipa::OpenApi;
 
@@ -17,16 +19,21 @@ use utoipa::OpenApi;
         users::endpoints::get_user_admin,
         users::endpoints::update_user_admin,
         users::endpoints::delete_user_admin,
+        teams::endpoints::create_team,
+        teams::endpoints::get_my_teams,
+        teams::endpoints::update_team,
+        teams::endpoints::delete_team,
         status::endpoints::get_status,
     ),
     components(
-        schemas(LoginPayload, RegisterPayload),
+        schemas(LoginPayload, RegisterPayload, CreateTeam),
     ),
     tags(
         (name = "Auth", description = "Authentication endpoints"),
         (name = "User", description = "User management endpoints"),
         (name = "Admin", description = "Admin management endpoints"),
         (name = "Status", description = "Application status endpoints"),
+        (name = "Teams", description = "Team management endpoints"),
     ),
     security(
         ("cookieAuth" = [])
