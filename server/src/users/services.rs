@@ -1,10 +1,14 @@
 use crate::auth::{RegisterPayload, admin_middleware};
 use crate::schema::users::dsl::*;
 use crate::state::GlobalState;
-use axum::routing::{delete, get, patch};
+use axum::extract::multipart::Multipart;
+use axum::routing::{delete, get, patch, post};
 use axum::{Router, middleware};
 use diesel::dsl::update;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use image::{DynamicImage, GenericImageView};
+use std::fs;
+use std::path::Path;
 use tracing::error;
 use validator::Validate;
 
@@ -14,9 +18,12 @@ use super::models::UpdatePayload;
 
 pub fn get_routes(state: GlobalState) -> Router {
     Router::new()
+        .route("/avatars/{filename}", get(serve_avatar))
         .route("/me", get(me))
         .route("/me", patch(update_me))
         .route("/me", delete(delete_me))
+        .route("/me/avatar", post(upload_avatar))
+        .route("/me/avatar", delete(delete_avatar))
         .with_state(state.clone())
         .merge(get_admin_routes(state.clone()))
 }
@@ -284,4 +291,141 @@ pub fn delete_user(state: &GlobalState, user_id: &str) -> Result<(), diesel::res
     diesel::delete(users.filter(id.eq(user_id)))
         .execute(&mut conn)
         .map(|_| ())
+}
+
+pub async fn save_avatar(
+    state: &GlobalState,
+    user_id: &str,
+    mut multipart: Multipart,
+) -> Result<String, String> {
+    let avatar_dir = "dist/avatars";
+    if let Err(e) = fs::create_dir_all(avatar_dir) {
+        tracing::error!("Failed to create avatar directory: {}", e);
+        return Err("Failed to create avatar directory".to_string());
+    }
+
+    while let Some(field) = multipart.next_field().await.map_err(|e| {
+        tracing::error!("Failed to read multipart field: {}", e);
+        "Invalid multipart data".to_string()
+    })? {
+        let name = field.name().unwrap_or("");
+
+        if name != "avatar" {
+            continue;
+        }
+
+        let content_type = field.content_type().unwrap_or("");
+        match content_type {
+            "image/jpeg" | "image/jpg" | "image/png" | "image/webp" | "image/gif" | "image/bmp" => {
+            }
+            _ => return Err("Invalid file type. Only image files are allowed".to_string()),
+        };
+
+        let data = field.bytes().await.map_err(|e| {
+            tracing::error!("Failed to read file data: {}", e);
+            "Failed to read file data".to_string()
+        })?;
+
+        if data.len() > 10 * 1024 * 1024 {
+            return Err("File too large. Maximum size is 10MB".to_string());
+        }
+
+        let img = image::load_from_memory(&data).map_err(|e| {
+            tracing::error!("Failed to load image: {}", e);
+            "Invalid image file".to_string()
+        })?;
+
+        let resized_img = resize_image_if_needed(img, 512, 512);
+
+        let webp_data = convert_to_webp(&resized_img, 80.0).map_err(|e| {
+            tracing::error!("Failed to convert to WebP: {}", e);
+            "Failed to process image".to_string()
+        })?;
+
+        if webp_data.len() > 2 * 1024 * 1024 {
+            return Err("Processed file is still too large. Try a smaller image".to_string());
+        }
+
+        let ulid = ulid::Ulid::new();
+        let filename = format!("{}.webp", ulid);
+        let file_path = format!("{}/{}", avatar_dir, filename);
+
+        tokio::fs::write(&file_path, &webp_data)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to write file: {}", e);
+                "Failed to save file".to_string()
+            })?;
+
+        // Mettre à jour l'utilisateur en base de données
+        update_user_avatar(state, user_id, &filename).map_err(|e| {
+            tracing::error!("Failed to update user avatar: {:?}", e);
+            "Failed to update user avatar in database".to_string()
+        })?;
+
+        return Ok(filename);
+    }
+
+    Err("No avatar file found in request".to_string())
+}
+
+fn resize_image_if_needed(img: DynamicImage, max_width: u32, max_height: u32) -> DynamicImage {
+    let (width, height) = img.dimensions();
+
+    if width <= max_width && height <= max_height {
+        return img;
+    }
+
+    let ratio = (max_width as f32 / width as f32).min(max_height as f32 / height as f32);
+    let new_width = (width as f32 * ratio) as u32;
+    let new_height = (height as f32 * ratio) as u32;
+
+    img.resize(new_width, new_height, image::imageops::FilterType::Lanczos3)
+}
+
+fn convert_to_webp(
+    img: &DynamicImage,
+    quality: f32,
+) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let rgb_img = img.to_rgb8();
+    let (width, height) = rgb_img.dimensions();
+
+    let encoder = webp::Encoder::from_rgb(&rgb_img, width, height);
+    let encoded = encoder.encode(quality);
+
+    Ok(encoded.to_vec())
+}
+
+pub fn update_user_avatar(
+    state: &GlobalState,
+    user_id: &str,
+    avatar_filename: &str,
+) -> Result<(), diesel::result::Error> {
+    use crate::schema::users::dsl::*;
+    use diesel::prelude::*;
+
+    let mut conn = state
+        .get_db_conn()
+        .map_err(|_| diesel::result::Error::NotFound)?;
+
+    let avatar_value = if avatar_filename.is_empty() {
+        None
+    } else {
+        Some(avatar_filename.to_string())
+    };
+
+    diesel::update(users.filter(id.eq(user_id)))
+        .set(avatar_url.eq(avatar_value))
+        .execute(&mut conn)?;
+
+    Ok(())
+}
+
+pub fn delete_avatar_file(filename: &str) {
+    let file_path = format!("dist/avatars/{}", filename);
+    if Path::new(&file_path).exists() {
+        if let Err(e) = fs::remove_file(&file_path) {
+            tracing::error!("Failed to delete avatar file {}: {}", filename, e);
+        }
+    }
 }
