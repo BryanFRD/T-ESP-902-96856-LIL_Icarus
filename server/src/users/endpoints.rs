@@ -1,18 +1,21 @@
+use std::path::PathBuf;
+
 use axum::{
     Json,
     extract::{Path, State},
     response::IntoResponse,
 };
 use http::StatusCode;
+use tokio::fs;
 #[cfg(not(debug_assertions))]
 use tower_cookies::cookie::SameSite;
 use tower_cookies::{Cookie, Cookies, cookie::time};
-use tracing::error;
+use tracing::{error, info};
 
 use crate::{
     auth::{JwtClaims, hash_password},
     state::GlobalState,
-    users::get_all_users,
+    users::{get_all_users, models::AvatarForm},
 };
 
 use super::{
@@ -308,6 +311,136 @@ pub async fn delete_user_admin(
         Ok(_) => (StatusCode::NO_CONTENT).into_response(),
         Err(e) => {
             error!("Failed to delete user: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+        }
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/v1/users/me/avatar",
+    description = "Upload user avatar (automatically converted to WebP format with 80% quality)",
+    request_body(content = AvatarForm, content_type = "multipart/form-data"),
+    responses(
+        (status = 200, description = "Avatar uploaded and converted successfully"),
+        (status = BAD_REQUEST, description = "Invalid file, file too large, or processing failed"),
+        (status = UNAUTHORIZED, description = "Invalid credentials"),
+        (status = INTERNAL_SERVER_ERROR, description = "Failed to save avatar"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+    tag = "User",
+)]
+pub async fn upload_avatar(
+    State(state): State<GlobalState>,
+    jwt: JwtClaims,
+    multipart: axum::extract::Multipart,
+) -> impl IntoResponse {
+    let user_id = jwt.sub.to_string();
+
+    let current_user = match get_user_by_id(&state, &user_id) {
+        Ok(Some(user)) => user,
+        Ok(None) => return (StatusCode::UNAUTHORIZED).into_response(),
+        Err(e) => {
+            error!("Failed to get user: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+        }
+    };
+
+    if let Some(ref old_avatar) = current_user.avatar_url {
+        super::delete_avatar_file(old_avatar);
+        info!("Deleted old avatar: {}", old_avatar);
+    }
+
+    match super::save_avatar(&state, &user_id, multipart).await {
+        Ok(filename) => Json(serde_json::json!({
+            "avatar_url": filename
+        }))
+        .into_response(),
+        Err(e) => {
+            error!("Failed to save avatar: {}", e);
+            (StatusCode::BAD_REQUEST, e).into_response()
+        }
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/v1/users/me/avatar/{filename}",
+    description = "Serve user avatar by filename",
+    responses(
+        (status = 200, description = "Avatar served successfully"),
+        (status = NOT_FOUND, description = "Avatar file not found"),
+        (status = BAD_REQUEST, description = "Invalid filename"),
+        (status = INTERNAL_SERVER_ERROR, description = "Failed to read avatar file"),
+    ),
+    tag = "User",
+)]
+pub async fn serve_avatar(Path(filename): Path<String>) -> impl IntoResponse {
+    let file_path = PathBuf::from("dist").join("avatars").join(&filename);
+
+    info!("Serving avatar: {:?}", file_path);
+
+    if !file_path.exists() {
+        return (StatusCode::NOT_FOUND).into_response();
+    }
+
+    let avatars_dir = PathBuf::from("dist").join("avatars");
+    if !file_path.starts_with(&avatars_dir) {
+        return (StatusCode::BAD_REQUEST).into_response();
+    }
+
+    match fs::read(file_path).await {
+        Ok(contents) => (StatusCode::OK, contents).into_response(),
+
+        Err(e) => {
+            error!("Failed to read avatar file: {}", e);
+            (StatusCode::NOT_FOUND).into_response()
+        }
+    }
+}
+
+#[utoipa::path(
+    delete,
+    path = "/v1/users/me/avatar",
+    description = "Delete user avatar",
+    responses(
+        (status = 204, description = "Avatar deleted successfully"),
+        (status = UNAUTHORIZED, description = "Invalid credentials"),
+        (status = NOT_FOUND, description = "No avatar to delete"),
+        (status = INTERNAL_SERVER_ERROR, description = "Failed to delete avatar"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+    tag = "User",
+)]
+pub async fn delete_avatar(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoResponse {
+    let user_id = jwt.sub.to_string();
+
+    let current_user = match get_user_by_id(&state, &user_id) {
+        Ok(Some(user)) => user,
+        Ok(None) => return (StatusCode::UNAUTHORIZED).into_response(),
+        Err(e) => {
+            error!("Failed to get user: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+        }
+    };
+
+    let avatar_filename = match current_user.avatar_url {
+        Some(filename) => filename,
+        None => return (StatusCode::NOT_FOUND, "No avatar to delete").into_response(),
+    };
+
+    // Supprimer le fichier
+    super::delete_avatar_file(&avatar_filename);
+
+    // Mettre à jour la base de données
+    match super::update_user_avatar(&state, &user_id, "") {
+        Ok(_) => (StatusCode::NO_CONTENT).into_response(),
+        Err(e) => {
+            error!("Failed to update user avatar in database: {}", e);
             (StatusCode::INTERNAL_SERVER_ERROR).into_response()
         }
     }

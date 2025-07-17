@@ -39,6 +39,7 @@ pub struct User {
     pub password_hash: String,
     #[serde(skip_serializing)]
     pub is_connected: bool,
+    pub avatar_url: Option<String>,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
     pub last_connected_at: chrono::NaiveDateTime,
@@ -62,6 +63,7 @@ impl User {
             role: role.into(),
             password_hash: hash_password(password.as_str()),
             is_connected: false,
+            avatar_url: None,
             created_at: chrono::Local::now().naive_utc(),
             updated_at: chrono::Local::now().naive_utc(),
             last_connected_at: chrono::Local::now().naive_utc(),
@@ -163,4 +165,10 @@ pub struct UpdatePayload {
     pub new_password: Option<String>,
     #[schema(example = "new_password123")]
     pub confirm_password: Option<String>,
+}
+#[allow(dead_code)]
+#[derive(Deserialize, ToSchema)]
+pub struct AvatarForm {
+    #[schema(format = Binary, content_media_type = "image/*")]
+    avatar: String,
 }

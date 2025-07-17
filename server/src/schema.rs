@@ -33,6 +33,7 @@ diesel::table! {
         created_at -> Timestamp,
         updated_at -> Timestamp,
         last_connected_at -> Timestamp,
+        avatar_url -> Nullable<Varchar>,
     }
 }
 

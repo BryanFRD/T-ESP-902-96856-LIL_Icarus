@@ -25,7 +25,6 @@ diesel = { version = "2.2.10", features = [
     "postgres",
     "uuid",
     "chrono",
-    "uuid",
     "r2d2",
 ] }
 chrono = { version = "0.4.41", features = ["serde"] }
@@ -40,3 +39,5 @@ vaultrs = "0.7.4"
 dotenvy = "0.15.7"
 utoipa = { version = "5.3.1", features = ["axum_extras", "ulid", "chrono"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
+image = "0.25.6"
+webp = "0.3.0"
