@@ -367,7 +367,7 @@ pub async fn upload_avatar(
 
 #[utoipa::path(
     get,
-    path = "/v1/users/me/avatar/{filename}",
+    path = "/v1/users/avatars/{filename}",
     description = "Serve user avatar by filename",
     responses(
         (status = 200, description = "Avatar served successfully"),
