@@ -166,6 +166,7 @@ pub struct UpdatePayload {
     #[schema(example = "new_password123")]
     pub confirm_password: Option<String>,
 }
+
 #[allow(dead_code)]
 #[derive(Deserialize, ToSchema)]
 pub struct AvatarForm {

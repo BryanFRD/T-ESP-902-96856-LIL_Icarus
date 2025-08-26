@@ -24,7 +24,7 @@ pub fn hash_password(password: &str) -> String {
     let first_hash_hex = format!("{:x}", first_hash);
 
     let mut hasher2 = Sha256::new();
-    hasher2.update(format!("{}{}", password, first_hash_hex));
+    hasher2.update(format!("{password}{first_hash_hex}"));
     let result = hasher2.finalize();
     format!("{:x}", result)
 }

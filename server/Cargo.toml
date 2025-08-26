@@ -29,7 +29,6 @@ diesel = { version = "2.2.10", features = [
 ] }
 chrono = { version = "0.4.41", features = ["serde"] }
 sha2 = "0.10.9"
-anyhow = "1.0.98"
 validator = { version = "0.20.0", features = ["derive"] }
 tower-cookies = "0.11.0"
 jsonwebtoken = "9.3.1"
@@ -41,3 +40,4 @@ utoipa = { version = "5.3.1", features = ["axum_extras", "ulid", "chrono"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
 image = "0.25.6"
 webp = "0.3.0"
+thiserror = "2.0.16"

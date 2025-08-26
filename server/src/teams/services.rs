@@ -6,12 +6,12 @@ use axum::{
 use diesel::{
     BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper, dsl::update,
 };
-
+use std::collections::HashMap;
 use super::endpoints;
 use crate::{
     state::GlobalState,
-    teams::{Team, TeamMember, TeamReturn, TeamRole, UpdateTeam},
-    users::{User, get_user_by_id},
+    teams::{Team, TeamError, TeamMember, TeamReturn, TeamRole, UpdateTeam},
+    users::{get_user_by_id, User, UserError},
 };
 
 pub fn get_routes(state: GlobalState) -> axum::Router {
@@ -29,12 +29,9 @@ pub fn create_team(
     user_id: &str,
     name: String,
     description: String,
-) -> Result<Team, diesel::result::Error> {
+) -> Result<Team, TeamError> {
     use crate::schema::teams;
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
-    };
+    let mut conn = state.get_db_conn()?;
 
     let new_team = Team::new(name, description);
 
@@ -52,7 +49,7 @@ pub fn add_team_member(
     team_id: &str,
     user_id: &str,
     role: TeamRole,
-) -> Result<(), diesel::result::Error> {
+) -> Result<(), TeamError> {
     use crate::schema::teams_members;
 
     let new_member = super::models::TeamMember {
@@ -73,18 +70,16 @@ pub fn add_team_member(
 pub fn get_user_teams(
     state: &GlobalState,
     user_id: &str,
-) -> Result<Vec<TeamReturn>, diesel::result::Error> {
+) -> Result<Vec<TeamReturn>, TeamError> {
     use crate::schema::{teams, teams_members, users};
 
-    let user = match get_user_by_id(&state, user_id)? {
-        Some(user) => user,
-        None => return Err(diesel::result::Error::NotFound),
+    let user = match get_user_by_id(state, user_id) {
+        Ok(Some(user)) => user,
+        Ok(None) => return Err(TeamError::UserError(UserError::UserNotFound)),
+        Err(e) => return Err(TeamError::UserError(e))
     };
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
-    };
+    let mut conn = state.get_db_conn()?;
 
     let teams_vec = TeamMember::belonging_to(&user)
         .inner_join(teams::table)
@@ -99,7 +94,6 @@ pub fn get_user_teams(
         .select((TeamMember::as_select(), User::as_select()))
         .load::<(TeamMember, User)>(&mut conn)?;
 
-    use std::collections::HashMap;
     let mut members_map: HashMap<String, Vec<User>> = HashMap::new();
     for (tm, user) in team_members {
         members_map.entry(tm.team_id).or_default().push(user);
@@ -116,13 +110,10 @@ pub fn get_user_teams(
     Ok(result)
 }
 
-pub fn does_team_exist(state: &GlobalState, team_id: &str) -> Result<bool, diesel::result::Error> {
+pub fn does_team_exist(state: &GlobalState, team_id: &str) -> Result<bool, TeamError> {
     use crate::schema::teams::dsl::*;
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
-    };
+    let mut conn = state.get_db_conn()?;
 
     let count = teams
         .filter(id.eq(team_id))
@@ -136,13 +127,10 @@ pub fn is_team_owner(
     state: &GlobalState,
     team: &str,
     user: &str,
-) -> Result<bool, diesel::result::Error> {
+) -> Result<bool, TeamError> {
     use crate::schema::teams_members::dsl::*;
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
-    };
+    let mut conn = state.get_db_conn()?;
 
     let count = teams_members
         .filter(team_id.eq(team))
@@ -158,13 +146,10 @@ pub fn update_team(
     state: &GlobalState,
     team_id: &str,
     payload: UpdateTeam,
-) -> Result<usize, diesel::result::Error> {
+) -> Result<usize, TeamError> {
     use crate::schema::teams::dsl::*;
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
-    };
+    let mut conn = state.get_db_conn()?;
 
     let changes = update(teams.filter(id.eq(team_id)));
 
@@ -173,19 +158,26 @@ pub fn update_team(
         payload.description.as_ref().map(|d| description.eq(d)),
     );
 
-    changes
+    let updated_rows = changes
         .set(update_fields)
         .filter(id.eq(team_id))
-        .execute(&mut conn)
+        .execute(&mut conn);
+
+    match updated_rows {
+        Ok(nb_changes) => Ok(nb_changes),
+        Err(e) => Err(TeamError::DatabaseError(e))
+    }
 }
 
-pub fn delete_team(state: &GlobalState, team_id: &str) -> Result<usize, diesel::result::Error> {
+pub fn delete_team(state: &GlobalState, team_id: &str) -> Result<usize, TeamError> {
     use crate::schema::teams::dsl::*;
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
-    };
+    let mut conn = state.get_db_conn()?;
 
-    diesel::delete(teams.filter(id.eq(team_id))).execute(&mut conn)
+    let deleted_rows = diesel::delete(teams.filter(id.eq(team_id))).execute(&mut conn);
+
+    match deleted_rows {
+        Ok(nb_changes) => Ok(nb_changes),
+        Err(e) => Err(TeamError::DatabaseError(e))
+    }
 }
