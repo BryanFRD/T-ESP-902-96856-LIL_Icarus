@@ -1,6 +1,7 @@
 use crate::auth::{RegisterPayload, admin_middleware};
 use crate::schema::users::dsl::*;
 use crate::state::GlobalState;
+use crate::users::UserError;
 use axum::extract::multipart::Multipart;
 use axum::routing::{delete, get, patch, post};
 use axum::{Router, middleware};
@@ -9,7 +10,6 @@ use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use image::{DynamicImage, GenericImageView};
 use std::fs;
 use std::path::Path;
-use tracing::error;
 use validator::Validate;
 
 use super::User;
@@ -40,13 +40,13 @@ pub fn get_admin_routes(state: GlobalState) -> Router {
 pub fn get_user_by_email(
     state: &GlobalState,
     query_email: &str,
-) -> Result<Option<User>, diesel::result::Error> {
+) -> Result<Option<User>, UserError> {
     use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
     let mut conn = match state.get_db_conn() {
         Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
+        Err(e) => return Err(UserError::DatabaseConnectionError(e)),
     };
 
     users
@@ -54,52 +54,45 @@ pub fn get_user_by_email(
         .select(User::as_select())
         .first::<User>(&mut conn)
         .optional()
-        .map_err(|_| diesel::result::Error::NotFound)
+        .map_err(|_| UserError::UserNotFound)
 }
 
 pub fn get_user_by_id(
     state: &GlobalState,
     user_id: &str,
-) -> Result<Option<User>, diesel::result::Error> {
+) -> Result<Option<User>, UserError> {
     use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
-    };
+    let mut conn = state.get_db_conn()?;
 
     users
         .filter(id.eq(user_id))
         .select(User::as_select())
         .first::<User>(&mut conn)
         .optional()
-        .map_err(|_| diesel::result::Error::NotFound)
+        .map_err(|_| UserError::UserNotFound)
 }
 
-pub fn get_all_users(state: &GlobalState) -> Result<Vec<User>, diesel::result::Error> {
+pub fn get_all_users(state: &GlobalState) -> Result<Vec<User>, UserError> {
     use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
-    };
+    let mut conn = state.get_db_conn()?;
 
-    users
+    match users
         .select(User::as_select())
-        .load::<User>(&mut conn)
-        .map_err(|_| diesel::result::Error::NotFound)
+        .load::<User>(&mut conn) {
+            Ok(user_list) => Ok(user_list),
+            Err(e) => Err(UserError::DatabaseError(e))
+    }
 }
 
-pub fn create_user(state: &GlobalState, user: User) -> Result<(), diesel::result::Error> {
+pub fn create_user(state: &GlobalState, user: User) -> Result<(), UserError> {
     use crate::schema::users;
     use diesel::prelude::*;
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(_) => return Err(diesel::result::Error::NotFound),
-    };
+    let mut conn = state.get_db_conn()?;
 
     diesel::insert_into(users::table)
         .values(&user)
@@ -111,18 +104,12 @@ pub fn create_user(state: &GlobalState, user: User) -> Result<(), diesel::result
 pub fn user_exists(
     state: &GlobalState,
     payload: &RegisterPayload,
-) -> Result<Option<String>, diesel::result::Error> {
+) -> Result<Option<String>, UserError> {
     use crate::schema::users::dsl::*;
     use diesel::dsl::exists;
     use diesel::select;
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(e) => {
-            error!("Failed to get DB connection: {}", e);
-            return Err(diesel::result::Error::NotFound);
-        }
-    };
+    let mut conn = state.get_db_conn()?;
 
     if select(exists(users.filter(email.eq(&payload.email)))).get_result(&mut conn)? {
         return Ok(Some("Email already exists".to_string()));
@@ -145,10 +132,8 @@ pub fn user_exists(
     Ok(None)
 }
 
-pub fn validate_update_payload(payload: &UpdatePayload) -> Result<(), String> {
-    payload
-        .validate()
-        .map_err(|_| "Invalid update payload".to_string())?;
+pub fn validate_update_payload(payload: &UpdatePayload) -> Result<(), UserError> {
+    payload.validate()?;
 
     if payload.username.is_none()
         && payload.first_name.is_none()
@@ -158,17 +143,17 @@ pub fn validate_update_payload(payload: &UpdatePayload) -> Result<(), String> {
         && payload.new_password.is_none()
         && payload.confirm_password.is_none()
     {
-        return Err("No fields to update".to_string());
+        return Err(UserError::UpdatePayloadError("Provide at least one field to update".to_string()));
     }
 
     if let Some(ref new_password) = payload.new_password {
         if payload.password.is_none() {
-            return Err("Current password is required to set a new password".to_string());
+            return Err(UserError::UpdatePayloadError("Provide old password to change password".to_string()));
         }
         match &payload.confirm_password {
             Some(confirm_pw) if confirm_pw == new_password => {}
-            Some(_) => return Err("New password and confirmation do not match".to_string()),
-            None => return Err("Confirmation password is required".to_string()),
+            Some(_) => return Err(UserError::UpdatePayloadError("New password and confirmation do not match".to_string())),
+            None => return Err(UserError::UpdatePayloadError("Confirmation password is required".to_string())),
         }
     }
 
@@ -179,7 +164,7 @@ pub fn check_update_conflicts(
     state: &GlobalState,
     payload: &UpdatePayload,
     current_user: &User,
-) -> Result<Option<String>, diesel::result::Error> {
+) -> Result<Option<String>, UserError> {
     use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
@@ -238,12 +223,10 @@ pub fn update_user_fields(
     state: &GlobalState,
     user_id: &str,
     payload: &UpdatePayload,
-) -> Result<(), diesel::result::Error> {
+) -> Result<(), UserError> {
     use diesel::prelude::*;
 
-    let mut conn = state
-        .get_db_conn()
-        .map_err(|_| diesel::result::Error::NotFound)?;
+    let mut conn = state.get_db_conn()?;
 
     let changes = update(users.filter(id.eq(user_id)));
 
@@ -280,34 +263,27 @@ pub fn update_user_fields(
     Ok(())
 }
 
-pub fn delete_user(state: &GlobalState, user_id: &str) -> Result<(), diesel::result::Error> {
+pub fn delete_user(state: &GlobalState, user_id: &str) -> Result<usize, UserError> {
     use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
-    let mut conn = state
-        .get_db_conn()
-        .map_err(|_| diesel::result::Error::NotFound)?;
+    let mut conn = state.get_db_conn()?;
 
-    diesel::delete(users.filter(id.eq(user_id)))
-        .execute(&mut conn)
-        .map(|_| ())
+    match diesel::delete(users.filter(id.eq(user_id))).execute(&mut conn) {
+        Ok(usize) => Ok(usize),
+        Err(e) => Err(UserError::DatabaseError(e))
+    }
 }
 
 pub async fn save_avatar(
     state: &GlobalState,
     user_id: &str,
     mut multipart: Multipart,
-) -> Result<String, String> {
+) -> Result<String, UserError> {
     let avatar_dir = "dist/avatars";
-    if let Err(e) = fs::create_dir_all(avatar_dir) {
-        tracing::error!("Failed to create avatar directory: {}", e);
-        return Err("Failed to create avatar directory".to_string());
-    }
+    fs::create_dir_all(avatar_dir)?;
 
-    while let Some(field) = multipart.next_field().await.map_err(|e| {
-        tracing::error!("Failed to read multipart field: {}", e);
-        "Invalid multipart data".to_string()
-    })? {
+    while let Some(field) = multipart.next_field().await? {
         let name = field.name().unwrap_or("");
 
         if name != "avatar" {
@@ -318,55 +294,41 @@ pub async fn save_avatar(
         match content_type {
             "image/jpeg" | "image/jpg" | "image/png" | "image/webp" | "image/gif" | "image/bmp" => {
             }
-            _ => return Err("Invalid file type. Only image files are allowed".to_string()),
+            _ => return Err(UserError::MultipartError("Invalid file type. Only image files are allowed".to_string())),
         };
 
-        let data = field.bytes().await.map_err(|e| {
-            tracing::error!("Failed to read file data: {}", e);
-            "Failed to read file data".to_string()
-        })?;
+        let data = field.bytes().await?;
 
         if data.len() > 10 * 1024 * 1024 {
-            return Err("File too large. Maximum size is 10MB".to_string());
+            return Err(UserError::MultipartError("File too large. Maximum size is 10MB".to_string()));
         }
 
-        let img = image::load_from_memory(&data).map_err(|e| {
-            tracing::error!("Failed to load image: {}", e);
-            "Invalid image file".to_string()
-        })?;
+        let img = image::load_from_memory(&data)?;
 
         let resized_img = resize_image_if_needed(img, 512, 512);
 
-        let webp_data = convert_to_webp(&resized_img, 80.0).map_err(|e| {
-            tracing::error!("Failed to convert to WebP: {}", e);
-            "Failed to process image".to_string()
-        })?;
+        let webp_data = match convert_to_webp(&resized_img, 80.0) {
+            Ok(webp) => webp,
+            Err(_) => return Err(UserError::ImageConvertinError)
+        };
 
         if webp_data.len() > 2 * 1024 * 1024 {
-            return Err("Processed file is still too large. Try a smaller image".to_string());
+            return Err(UserError::MultipartError("Processed file is still too large. Try a smaller image".to_string()));
         }
 
         let ulid = ulid::Ulid::new();
-        let filename = format!("{}.webp", ulid);
-        let file_path = format!("{}/{}", avatar_dir, filename);
+        let filename = format!("{ulid}.webp");
+        let file_path = format!("{avatar_dir}/{filename}");
 
-        tokio::fs::write(&file_path, &webp_data)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to write file: {}", e);
-                "Failed to save file".to_string()
-            })?;
+        tokio::fs::write(&file_path, &webp_data).await?;
 
         // Mettre à jour l'utilisateur en base de données
-        update_user_avatar(state, user_id, &filename).map_err(|e| {
-            tracing::error!("Failed to update user avatar: {:?}", e);
-            "Failed to update user avatar in database".to_string()
-        })?;
+        update_user_avatar(state, user_id, &filename)?;
 
         return Ok(filename);
     }
 
-    Err("No avatar file found in request".to_string())
+    Err(UserError::AvatarNotFound)
 }
 
 fn resize_image_if_needed(img: DynamicImage, max_width: u32, max_height: u32) -> DynamicImage {
@@ -422,7 +384,7 @@ pub fn update_user_avatar(
 }
 
 pub fn delete_avatar_file(filename: &str) {
-    let file_path = format!("dist/avatars/{}", filename);
+    let file_path = format!("dist/avatars/{filename}");
     if Path::new(&file_path).exists() {
         if let Err(e) = fs::remove_file(&file_path) {
             tracing::error!("Failed to delete avatar file {}: {}", filename, e);

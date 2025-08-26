@@ -1,9 +1,7 @@
 use std::path::PathBuf;
 
 use axum::{
-    Json,
-    extract::{Path, State},
-    response::IntoResponse,
+    extract::{Path, State}, response::IntoResponse, Json
 };
 use http::StatusCode;
 use tokio::fs;
@@ -72,7 +70,7 @@ pub async fn update_me(
     cookies: Cookies,
     Json(payload): Json<UpdatePayload>,
 ) -> impl IntoResponse {
-    if let Err(_) = validate_update_payload(&payload) {
+    if validate_update_payload(&payload).is_err() {
         return (StatusCode::BAD_REQUEST).into_response();
     }
 
@@ -111,7 +109,7 @@ pub async fn update_me(
         }
     };
 
-    if let Err(_) = update_user_fields(&state, &user.id, &payload) {
+    if update_user_fields(&state, &user.id, &payload).is_err() {
         return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
     }
 
@@ -247,10 +245,10 @@ pub async fn update_user_admin(
     Path(id): Path<String>,
     Json(payload): Json<UpdatePayload>,
 ) -> impl IntoResponse {
-    if let Err(_) = validate_update_payload(&payload) {
+    if validate_update_payload(&payload).is_err() {
         return (StatusCode::BAD_REQUEST).into_response();
     }
-
+ 
     let user = match get_user_by_id(&state, &id) {
         Ok(Some(user)) => user,
         Ok(None) => return (StatusCode::NOT_FOUND).into_response(),
@@ -332,6 +330,7 @@ pub async fn delete_user_admin(
     ),
     tag = "User",
 )]
+#[axum::debug_handler]
 pub async fn upload_avatar(
     State(state): State<GlobalState>,
     jwt: JwtClaims,
@@ -358,9 +357,9 @@ pub async fn upload_avatar(
             "avatar_url": filename
         }))
         .into_response(),
-        Err(e) => {
-            error!("Failed to save avatar: {}", e);
-            (StatusCode::BAD_REQUEST, e).into_response()
+        Err(_) => {
+            // error!("Failed to save avatar: {}", e);
+            (StatusCode::BAD_REQUEST).into_response()
         }
     }
 }
@@ -433,10 +432,8 @@ pub async fn delete_avatar(State(state): State<GlobalState>, jwt: JwtClaims) -> 
         None => return (StatusCode::NOT_FOUND, "No avatar to delete").into_response(),
     };
 
-    // Supprimer le fichier
     super::delete_avatar_file(&avatar_filename);
 
-    // Mettre à jour la base de données
     match super::update_user_avatar(&state, &user_id, "") {
         Ok(_) => (StatusCode::NO_CONTENT).into_response(),
         Err(e) => {

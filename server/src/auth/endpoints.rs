@@ -30,7 +30,7 @@ pub async fn login(
     cookies: Cookies,
     Json(payload): Json<LoginPayload>,
 ) -> impl IntoResponse {
-    if let Err(_) = payload.validate() {
+    if payload.validate().is_err() {
         return (StatusCode::BAD_REQUEST).into_response();
     }
 
@@ -85,7 +85,7 @@ pub async fn register(
     State(state): State<GlobalState>,
     Json(payload): Json<RegisterPayload>,
 ) -> impl IntoResponse {
-    if let Err(_) = payload.validate() {
+    if payload.validate().is_err() {
         return (StatusCode::BAD_REQUEST).into_response();
     }
 
@@ -100,9 +100,8 @@ pub async fn register(
 
     match create_user(&state, payload.into()) {
         Ok(_) => (StatusCode::CREATED).into_response(),
-        Err(e) => {
-            error!("Failed to create user: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+        Err(_) => {
+            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
         }
     }
 }
