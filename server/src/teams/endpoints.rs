@@ -41,7 +41,7 @@ pub async fn create_team(
         Ok(team) => (StatusCode::CREATED, Json(team)).into_response(),
         Err(e) => {
             error!("Failed to create team: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }
@@ -63,7 +63,7 @@ pub async fn get_my_teams(
         Ok(teams) => (StatusCode::OK, Json(teams)).into_response(),
         Err(e) => {
             error!("Failed to get teams: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }
@@ -86,15 +86,15 @@ pub async fn update_team(
     Json(payload): Json<UpdateTeam>,
 ) -> impl IntoResponse {
     if payload.name.is_none() && payload.description.is_none() {
-        return (StatusCode::BAD_REQUEST, Json("No fields to update")).into_response();
+        return (StatusCode::BAD_REQUEST, Json("error.team.update.validate.noFieldProvided")).into_response();
     }
 
     match super::does_team_exist(&state, &team_id.to_string()) {
         Ok(true) => (),
-        Ok(false) => return (StatusCode::NOT_FOUND, Json("Team not found")).into_response(),
+        Ok(false) => return (StatusCode::NOT_FOUND, Json("error.team.notFound")).into_response(),
         Err(e) => {
             error!("Failed to check team existence: {:?}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
@@ -102,12 +102,12 @@ pub async fn update_team(
         Ok(true) => (),
         Ok(false) => {
             if !jwt_user.is_admin() {
-                return (StatusCode::FORBIDDEN,).into_response();
+                return (StatusCode::FORBIDDEN, Json("error.user.auth.forbidden")).into_response();
             }
         }
         Err(e) => {
             error!("Failed to check team ownership: {:?}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
@@ -115,7 +115,7 @@ pub async fn update_team(
         Ok(_) => (StatusCode::OK).into_response(),
         Err(e) => {
             error!("Failed to update team: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }
@@ -137,10 +137,10 @@ pub async fn delete_team(
 ) -> impl IntoResponse {
     match super::does_team_exist(&state, &team_id.to_string()) {
         Ok(true) => (),
-        Ok(false) => return (StatusCode::NOT_FOUND).into_response(),
+        Ok(false) => return (StatusCode::NOT_FOUND, Json("error.team.notFound")).into_response(),
         Err(e) => {
             error!("Failed to check team existence: {:?}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
@@ -148,12 +148,12 @@ pub async fn delete_team(
         Ok(true) => (),
         Ok(false) => {
             if !jwt_user.is_admin() {
-                return (StatusCode::FORBIDDEN,).into_response();
+                return (StatusCode::FORBIDDEN, Json("error.user.auth.forbidden")).into_response();
             }
         }
         Err(e) => {
             error!("Failed to check team ownership: {:?}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
@@ -161,7 +161,7 @@ pub async fn delete_team(
         Ok(_) => (StatusCode::NO_CONTENT).into_response(),
         Err(e) => {
             error!("Failed to delete team: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }

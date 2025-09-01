@@ -16,14 +16,14 @@ pub async fn middleware(_jwt: JwtClaims, req: Request, next: Next) -> impl IntoR
 
 pub async fn admin_middleware(jwt: JwtClaims, req: Request, next: Next) -> impl IntoResponse {
     if !jwt.is_admin() {
-        return (StatusCode::FORBIDDEN, Json("Forbidden")).into_response();
+        return (StatusCode::FORBIDDEN, Json("error.user.auth.forbidden")).into_response();
     }
     next.run(req).await
 }
 
 pub async fn pentester_middleware(jwt: JwtClaims, req: Request, next: Next) -> impl IntoResponse {
     if !jwt.is_pentester() {
-        return (StatusCode::FORBIDDEN, Json("Forbidden")).into_response();
+        return (StatusCode::FORBIDDEN, Json("error.user.auth.forbidden")).into_response();
     }
     next.run(req).await
 }
@@ -39,25 +39,25 @@ impl<S: Send + Sync> FromRequestParts<S> for JwtClaims {
             Ok(cookies) => cookies,
             Err(e) => {
                 error!("Failed to extract cookies: {:?}", e);
-                return Err((StatusCode::UNAUTHORIZED, Json("Unauthorized")));
+                return Err((StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")));
             }
         };
 
         let auth_cookie = cookies
             .get("auth")
-            .ok_or_else(|| (StatusCode::UNAUTHORIZED, Json("Unauthorized")))?;
+            .ok_or_else(|| (StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")))?;
 
         let jwt_secret = std::env::var("JWT_SECRET").map_err(|_| {
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json("Internal Server Error"),
+                Json("error.server.internalError"),
             )
         })?;
 
         let jwt = JwtClaims::from_jwt(auth_cookie.value(), &jwt_secret);
 
         if !jwt.is_valid() {
-            return Err((StatusCode::UNAUTHORIZED, Json("Unauthorized")));
+            return Err((StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")));
         }
 
         Ok(jwt)

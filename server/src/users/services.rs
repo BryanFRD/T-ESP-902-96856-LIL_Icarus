@@ -112,7 +112,7 @@ pub fn user_exists(
     let mut conn = state.get_db_conn()?;
 
     if select(exists(users.filter(email.eq(&payload.email)))).get_result(&mut conn)? {
-        return Ok(Some("Email already exists".to_string()));
+        return Ok(Some("email".to_string()));
     }
 
     if select(exists(
@@ -122,18 +122,20 @@ pub fn user_exists(
     ))
     .get_result(&mut conn)?
     {
-        return Ok(Some("Name already exists".to_string()));
+        return Ok(Some("name".to_string()));
     }
 
     if select(exists(users.filter(username.eq(&payload.username)))).get_result(&mut conn)? {
-        return Ok(Some("Username already exists".to_string()));
+        return Ok(Some("username".to_string()));
     }
 
     Ok(None)
 }
 
 pub fn validate_update_payload(payload: &UpdatePayload) -> Result<(), UserError> {
-    payload.validate()?;
+    if payload.validate().is_err() {
+        return Err(UserError::UpdatePayloadError("invalidEmail".to_string()));
+    }
 
     if payload.username.is_none()
         && payload.first_name.is_none()
@@ -143,17 +145,17 @@ pub fn validate_update_payload(payload: &UpdatePayload) -> Result<(), UserError>
         && payload.new_password.is_none()
         && payload.confirm_password.is_none()
     {
-        return Err(UserError::UpdatePayloadError("Provide at least one field to update".to_string()));
+        return Err(UserError::UpdatePayloadError("noFieldProvided".to_string()));
     }
 
     if let Some(ref new_password) = payload.new_password {
         if payload.password.is_none() {
-            return Err(UserError::UpdatePayloadError("Provide old password to change password".to_string()));
+            return Err(UserError::UpdatePayloadError("needOldPassword".to_string()));
         }
         match &payload.confirm_password {
             Some(confirm_pw) if confirm_pw == new_password => {}
-            Some(_) => return Err(UserError::UpdatePayloadError("New password and confirmation do not match".to_string())),
-            None => return Err(UserError::UpdatePayloadError("Confirmation password is required".to_string())),
+            Some(_) => return Err(UserError::UpdatePayloadError("passwordsDoNotMatch".to_string())),
+            None => return Err(UserError::UpdatePayloadError("confirmationPasswordRequired".to_string())),
         }
     }
 
@@ -201,17 +203,17 @@ pub fn check_update_conflicts(
     if let Some((db_email, db_username, db_first, db_last)) = existing {
         if let Some(ref new_email) = payload.email {
             if &db_email == new_email {
-                return Ok(Some("Email already exists".to_string()));
+                return Ok(Some("email".to_string()));
             }
         }
         if let Some(ref new_username) = payload.username {
             if &db_username == new_username {
-                return Ok(Some("Username already exists".to_string()));
+                return Ok(Some("username".to_string()));
             }
         }
         if let (Some(new_first), Some(new_last)) = (&payload.first_name, &payload.last_name) {
             if &db_first == new_first && &db_last == new_last {
-                return Ok(Some("Name already exists".to_string()));
+                return Ok(Some("name".to_string()));
             }
         }
     }
@@ -294,13 +296,13 @@ pub async fn save_avatar(
         match content_type {
             "image/jpeg" | "image/jpg" | "image/png" | "image/webp" | "image/gif" | "image/bmp" => {
             }
-            _ => return Err(UserError::MultipartError("Invalid file type. Only image files are allowed".to_string())),
+            _ => return Err(UserError::MultipartError("invalidFileType".to_string())),
         };
 
         let data = field.bytes().await?;
 
         if data.len() > 10 * 1024 * 1024 {
-            return Err(UserError::MultipartError("File too large. Maximum size is 10MB".to_string()));
+            return Err(UserError::MultipartError("fileTooLarge".to_string()));
         }
 
         let img = image::load_from_memory(&data)?;
@@ -313,7 +315,7 @@ pub async fn save_avatar(
         };
 
         if webp_data.len() > 2 * 1024 * 1024 {
-            return Err(UserError::MultipartError("Processed file is still too large. Try a smaller image".to_string()));
+            return Err(UserError::MultipartError("fileTooLarge".to_string()));
         }
 
         let ulid = ulid::Ulid::new();
