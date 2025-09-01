@@ -7,7 +7,6 @@ pub struct LoginPayload {
     #[validate(email)]
     #[schema(example = "johndoe@example.com")]
     pub email: String,
-    #[validate(length(min = 6, message = "Password must be at least 4 characters long"))]
     #[schema(example = "password123")]
     pub password: String,
 }

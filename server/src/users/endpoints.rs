@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-
 use axum::{
     extract::{Path, State}, response::IntoResponse, Json
 };
@@ -11,9 +10,9 @@ use tower_cookies::{Cookie, Cookies, cookie::time};
 use tracing::{error, info};
 
 use crate::{
-    auth::{JwtClaims, hash_password},
+    auth::{hash_password, JwtClaims},
     state::GlobalState,
-    users::{get_all_users, models::AvatarForm},
+    users::{get_all_users, models::AvatarForm, UserError},
 };
 
 use super::{
@@ -37,11 +36,11 @@ pub async fn me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoRe
     let user = match get_user_by_email(&state, &jwt.email) {
         Ok(user) => match user {
             Some(user) => user,
-            None => return (StatusCode::UNAUTHORIZED).into_response(),
+            None => return (StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")).into_response(),
         },
         Err(e) => {
             error!("Failed to get user by email: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
@@ -70,16 +69,17 @@ pub async fn update_me(
     cookies: Cookies,
     Json(payload): Json<UpdatePayload>,
 ) -> impl IntoResponse {
-    if validate_update_payload(&payload).is_err() {
-        return (StatusCode::BAD_REQUEST).into_response();
-    }
-
+    match validate_update_payload(&payload) {
+        Ok(_) => (),
+        Err(UserError::PayloadValidationError(e)) => return (StatusCode::BAD_REQUEST, Json(format!("error.user.update.validate.{e}"))).into_response(),
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+     }
     let user = match get_user_by_id(&state, &jwt.sub.to_string()) {
         Ok(Some(user)) => user,
-        Ok(None) => return (StatusCode::UNAUTHORIZED).into_response(),
+        Ok(None) => return (StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")).into_response(),
         Err(e) => {
             error!("Failed to get user by email: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
@@ -87,17 +87,17 @@ pub async fn update_me(
         if let Some(ref current_pw) = payload.password {
             let hashed = hash_password(current_pw);
             if hashed != user.password_hash {
-                return (StatusCode::UNAUTHORIZED, "Current password is incorrect").into_response();
+                return (StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")).into_response();
             }
         }
     }
 
     match check_update_conflicts(&state, &payload, &user) {
-        Ok(Some(conflict)) => return (StatusCode::CONFLICT, conflict).into_response(),
+        Ok(Some(conflict)) => return (StatusCode::CONFLICT, Json(format!("error.user.update.conflict.{conflict}")   )).into_response(),
         Ok(None) => (),
         Err(e) => {
             error!("Failed to check update conflicts: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
@@ -105,12 +105,12 @@ pub async fn update_me(
         Ok(_) => (),
         Err(e) => {
             error!("Failed to update user: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
     if update_user_fields(&state, &user.id, &payload).is_err() {
-        return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+        return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
     }
 
     if payload.email.is_none() {
@@ -120,17 +120,17 @@ pub async fn update_me(
     // If email was updated, we need to re-issue the JWT with the new email
     let updated_user = match get_user_by_id(&state, &user.id) {
         Ok(Some(user)) => user,
-        Ok(None) => return (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+        Ok(None) => return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response(),
         Err(e) => {
             error!("Failed to get updated user: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
     let jwt = JwtClaims::from(updated_user);
     let jwt = match jwt.to_string(state.get_secrets().jwt_secret.as_str()) {
         Ok(jwt) => jwt,
-        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR).into_response(),
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response(),
     };
     let mut cookie = Cookie::new("auth", jwt);
 
@@ -166,7 +166,7 @@ pub async fn delete_me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl
         Ok(_) => (StatusCode::NO_CONTENT).into_response(),
         Err(e) => {
             error!("Failed to delete user: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }
@@ -189,7 +189,7 @@ pub async fn list_users_admin(State(state): State<GlobalState>) -> impl IntoResp
         Ok(users) => Json(users).into_response(),
         Err(e) => {
             error!("Failed to get users: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }
@@ -214,10 +214,10 @@ pub async fn get_user_admin(
 ) -> impl IntoResponse {
     match get_user_by_id(&state, &id) {
         Ok(Some(user)) => Json(user).into_response(),
-        Ok(None) => (StatusCode::NOT_FOUND).into_response(),
+        Ok(None) => (StatusCode::NOT_FOUND, Json("error.user.admin.notFound")).into_response(),
         Err(e) => {
             error!("Failed to get user by ID: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }
@@ -245,33 +245,27 @@ pub async fn update_user_admin(
     Path(id): Path<String>,
     Json(payload): Json<UpdatePayload>,
 ) -> impl IntoResponse {
-    if validate_update_payload(&payload).is_err() {
-        return (StatusCode::BAD_REQUEST).into_response();
+    match validate_update_payload(&payload) {
+        Ok(_) => (),
+        Err(UserError::PayloadValidationError(e)) => return (StatusCode::BAD_REQUEST, Json(format!("error.user.update.validate.{e}"))).into_response(),
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
     }
  
     let user = match get_user_by_id(&state, &id) {
         Ok(Some(user)) => user,
-        Ok(None) => return (StatusCode::NOT_FOUND).into_response(),
+        Ok(None) => return (StatusCode::NOT_FOUND, Json("error.user.admin.notFound")).into_response(),
         Err(e) => {
             error!("Failed to get user by ID: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
-    if payload.new_password.is_some() && payload.password.is_none() {
-        return (
-            StatusCode::BAD_REQUEST,
-            "Current password is required to set a new password",
-        )
-            .into_response();
-    }
-
     match check_update_conflicts(&state, &payload, &user) {
-        Ok(Some(conflict)) => return (StatusCode::CONFLICT, conflict).into_response(),
+        Ok(Some(conflict)) => return (StatusCode::CONFLICT, Json(format!("error.user.update.conflict.{conflict}")   )).into_response(),
         Ok(None) => (),
         Err(e) => {
             error!("Failed to check update conflicts: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
@@ -279,7 +273,7 @@ pub async fn update_user_admin(
         Ok(_) => (),
         Err(e) => {
             error!("Failed to update user: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
@@ -309,7 +303,7 @@ pub async fn delete_user_admin(
         Ok(_) => (StatusCode::NO_CONTENT).into_response(),
         Err(e) => {
             error!("Failed to delete user: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }
@@ -340,16 +334,15 @@ pub async fn upload_avatar(
 
     let current_user = match get_user_by_id(&state, &user_id) {
         Ok(Some(user)) => user,
-        Ok(None) => return (StatusCode::UNAUTHORIZED).into_response(),
+        Ok(None) => return (StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")).into_response(),
         Err(e) => {
             error!("Failed to get user: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
     if let Some(ref old_avatar) = current_user.avatar_url {
         super::delete_avatar_file(old_avatar);
-        info!("Deleted old avatar: {}", old_avatar);
     }
 
     match super::save_avatar(&state, &user_id, multipart).await {
@@ -357,9 +350,12 @@ pub async fn upload_avatar(
             "avatar_url": filename
         }))
         .into_response(),
-        Err(_) => {
+        Err(UserError::MultipartError(e)) => {
             // error!("Failed to save avatar: {}", e);
-            (StatusCode::BAD_REQUEST).into_response()
+            (StatusCode::BAD_REQUEST, Json(format!("error.user.update.avatar.{e}"))).into_response()
+        }
+        Err(_) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }
@@ -382,12 +378,12 @@ pub async fn serve_avatar(Path(filename): Path<String>) -> impl IntoResponse {
     info!("Serving avatar: {:?}", file_path);
 
     if !file_path.exists() {
-        return (StatusCode::NOT_FOUND).into_response();
+        return (StatusCode::NOT_FOUND, Json("error.user.avatar.notFound")).into_response();
     }
 
     let avatars_dir = PathBuf::from("dist").join("avatars");
     if !file_path.starts_with(&avatars_dir) {
-        return (StatusCode::BAD_REQUEST).into_response();
+        return (StatusCode::BAD_REQUEST, Json("error.server.invalidPath")).into_response();
     }
 
     match fs::read(file_path).await {
@@ -395,7 +391,7 @@ pub async fn serve_avatar(Path(filename): Path<String>) -> impl IntoResponse {
 
         Err(e) => {
             error!("Failed to read avatar file: {}", e);
-            (StatusCode::NOT_FOUND).into_response()
+            (StatusCode::NOT_FOUND, Json("error.user.avatar.notFound")).into_response()
         }
     }
 }
@@ -420,16 +416,16 @@ pub async fn delete_avatar(State(state): State<GlobalState>, jwt: JwtClaims) -> 
 
     let current_user = match get_user_by_id(&state, &user_id) {
         Ok(Some(user)) => user,
-        Ok(None) => return (StatusCode::UNAUTHORIZED).into_response(),
+        Ok(None) => return (StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")).into_response(),
         Err(e) => {
             error!("Failed to get user: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR).into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
         }
     };
 
     let avatar_filename = match current_user.avatar_url {
         Some(filename) => filename,
-        None => return (StatusCode::NOT_FOUND, "No avatar to delete").into_response(),
+        None => return (StatusCode::NOT_FOUND, Json("error.user.avatar.noAvatarToDelete")).into_response(),
     };
 
     super::delete_avatar_file(&avatar_filename);
@@ -438,7 +434,7 @@ pub async fn delete_avatar(State(state): State<GlobalState>, jwt: JwtClaims) -> 
         Ok(_) => (StatusCode::NO_CONTENT).into_response(),
         Err(e) => {
             error!("Failed to update user avatar in database: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR).into_response()
+            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
         }
     }
 }
