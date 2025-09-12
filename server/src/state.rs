@@ -3,12 +3,14 @@ use diesel::{
     PgConnection,
     r2d2::{ConnectionManager, Pool, PoolError, PooledConnection},
 };
+use resend_rs::Resend;
 use std::sync::Arc;
 use tracing::info;
 
 #[derive(Clone)]
 pub struct GlobalState {
     pub db_pool: Arc<Pool<ConnectionManager<PgConnection>>>,
+    pub resend: Arc<Resend>,
     secrets: Arc<Secrets>,
 }
 
@@ -29,8 +31,11 @@ impl GlobalState {
 
         info!("Successfully connected to database");
 
+        let resend = Resend::new(&secrets.resend_api_key);
+
         Self {
             db_pool: Arc::new(pool),
+            resend: Arc::new(resend),
             secrets: Arc::new(secrets),
         }
     }
@@ -43,5 +48,9 @@ impl GlobalState {
 
     pub fn get_secrets(&self) -> &Secrets {
         &self.secrets
+    }
+
+    pub fn get_resend(&self) -> &Resend {
+        &self.resend
     }
 }

@@ -1,4 +1,5 @@
 mod auth;
+mod resend;
 mod schema;
 mod state;
 mod status;
@@ -34,7 +35,7 @@ async fn main() {
     {
         Ok(_) => {}
         Err(e) => {
-            eprintln!("Server error: {}", e);
+            eprintln!("Server error: {e}");
         }
     }
 }

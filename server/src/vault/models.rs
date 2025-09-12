@@ -14,4 +14,6 @@ pub struct Secrets {
     pub status_message: String,
     #[serde(rename = "ORIGIN_CORS")]
     pub origin_cors: String,
+    #[serde(rename = "RESEND_API_KEY")]
+    pub resend_api_key: String,
 }
