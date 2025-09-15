@@ -1,5 +1,5 @@
 mod auth;
-mod resend;
+mod mails;
 mod schema;
 mod state;
 mod status;

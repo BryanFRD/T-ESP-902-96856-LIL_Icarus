@@ -1,5 +1,6 @@
 use axum::{Json, extract::State, response::IntoResponse};
 use http::StatusCode;
+use rand::Rng;
 #[cfg(not(debug_assertions))]
 use tower_cookies::cookie::SameSite;
 use tower_cookies::{Cookie, Cookies, cookie::time};
@@ -7,11 +8,10 @@ use tracing::error;
 use validator::Validate;
 
 use crate::{
-    state::GlobalState,
-    users::{create_user, get_user_by_email, user_exists},
+    auth::{models::ResetPasswordRequestPayload, services::{consume_token, get_token, save_reset_password_token}}, mails::send_reset_password_mail, state::GlobalState, users::{create_user, get_user_by_email, get_user_by_id, update_user_password, user_exists}
 };
 
-use super::models::{JwtClaims, LoginPayload, RegisterPayload};
+use super::models::{JwtClaims, LoginPayload, RegisterPayload, ResetPasswordPayload};
 
 #[utoipa::path(
     post,
@@ -131,4 +131,79 @@ pub async fn logout(cookies: Cookies) -> impl IntoResponse {
     cookies.add(cookie);
 
     (StatusCode::OK).into_response()
+}
+
+#[utoipa::path(
+    post,
+    path = "/v1/auth/request-password-reset",
+    responses(
+        (status = 200, description = "Reset password demand sent"),
+        (status = 500, description = "Failed to send password reset demand")
+    ),
+    tag = "Auth",
+)]
+pub async fn request_password_reset(State(state): State<GlobalState>, Json(payload): Json<ResetPasswordRequestPayload>) -> impl IntoResponse {
+    let user = match get_user_by_email(&state, &payload.reset_email) {
+        Ok(Some(u)) => u,
+        Ok(None) => return (StatusCode::OK).into_response(),
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+    };
+
+    let token_bytes: [u8; 64];
+    {
+        let mut rng = state.get_rand().lock().await;
+        token_bytes = rng.random();
+    }
+    let token: String = token_bytes
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect::<Vec<String>>()
+        .join("");
+
+    if save_reset_password_token(&state, &user.id, &token).await.is_err() {
+        return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
+    };
+    
+    let resend = state.get_resend().lock().await;
+    match send_reset_password_mail(token, user.first_name, payload.reset_email, &resend).await {
+        Ok(_) => (StatusCode::OK).into_response(),
+        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+    }
+}
+
+
+#[utoipa::path(
+    post,
+    path = "/v1/auth/reset-password",
+    responses(
+        (status = 200, description = "Reset password demand sent"),
+        (status = 500, description = "Failed to send password reset demand")
+    ),
+    tag = "Auth",
+)]
+pub async fn reset_password(State(state): State<GlobalState>, Json(payload): Json<ResetPasswordPayload>) -> impl IntoResponse {
+    let token = match get_token(&state, &payload.token).await {
+        Ok(Some(token)) => token,
+        Ok(None) => return (StatusCode::BAD_REQUEST, Json("error.auth.resetPassword.invalidToken")).into_response(),
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+    };
+
+    if token.is_expired() {
+        return (StatusCode::BAD_REQUEST, Json("error.auth.resetPassword.expiredToken")).into_response();
+    }
+
+    let user = match get_user_by_id(&state, &token.user_id) {
+        Ok(Some(user)) => user,
+        Ok(None) => return (StatusCode::BAD_REQUEST, Json("error.auth.resetPassword.invalidToken")).into_response(),
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+    };
+
+    if consume_token(&state, &token.user_id).await.is_err() {
+        return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
+    }
+
+    match update_user_password(&state, &user.id, &payload.new_password).await {
+        Ok(_) => (StatusCode::OK).into_response(),
+        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+    }
 }

@@ -12,6 +12,8 @@ use utoipa::OpenApi;
         auth::endpoints::login,
         auth::endpoints::register,
         auth::endpoints::logout,
+        auth::endpoints::request_password_reset,
+        auth::endpoints::reset_password,
         users::endpoints::me,
         users::endpoints::update_me,
         users::endpoints::delete_me,

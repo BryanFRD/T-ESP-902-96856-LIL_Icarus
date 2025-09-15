@@ -3,14 +3,17 @@ use diesel::{
     PgConnection,
     r2d2::{ConnectionManager, Pool, PoolError, PooledConnection},
 };
+use rand::{rngs::StdRng, SeedableRng};
 use resend_rs::Resend;
+use tokio::sync::Mutex;
 use std::sync::Arc;
 use tracing::info;
 
 #[derive(Clone)]
 pub struct GlobalState {
     pub db_pool: Arc<Pool<ConnectionManager<PgConnection>>>,
-    pub resend: Arc<Resend>,
+    pub resend: Arc<Mutex<Resend>>,
+    pub rng: Arc<Mutex<StdRng>>,
     secrets: Arc<Secrets>,
 }
 
@@ -32,10 +35,12 @@ impl GlobalState {
         info!("Successfully connected to database");
 
         let resend = Resend::new(&secrets.resend_api_key);
+        let rng = StdRng::from_os_rng();
 
         Self {
             db_pool: Arc::new(pool),
-            resend: Arc::new(resend),
+            resend: Arc::new(Mutex::new(resend)),
+            rng: Arc::new(Mutex::new(rng)),
             secrets: Arc::new(secrets),
         }
     }
@@ -50,7 +55,11 @@ impl GlobalState {
         &self.secrets
     }
 
-    pub fn get_resend(&self) -> &Resend {
+    pub fn get_resend(&self) -> &Mutex<Resend> {
         &self.resend
+    }
+
+    pub fn get_rand(&self) -> &Mutex<StdRng> {
+        &self.rng
     }
 }

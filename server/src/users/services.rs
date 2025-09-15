@@ -1,8 +1,9 @@
-use crate::auth::{RegisterPayload, admin_middleware};
+use crate::auth::{self, admin_middleware, hash_password, RegisterPayload};
 use crate::schema::users::dsl::*;
 use crate::state::GlobalState;
 use crate::users::UserError;
 use axum::extract::multipart::Multipart;
+use axum::middleware::from_fn;
 use axum::routing::{delete, get, patch, post};
 use axum::{Router, middleware};
 use diesel::dsl::update;
@@ -24,6 +25,7 @@ pub fn get_routes(state: GlobalState) -> Router {
         .route("/me", delete(delete_me))
         .route("/me/avatar", post(upload_avatar))
         .route("/me/avatar", delete(delete_avatar))
+        .layer(from_fn(auth::middleware))
         .with_state(state.clone())
         .merge(get_admin_routes(state.clone()))
 }
@@ -49,12 +51,14 @@ pub fn get_user_by_email(
         Err(e) => return Err(UserError::DatabaseConnectionError(e)),
     };
 
-    users
+    match users
         .filter(email.eq(query_email))
         .select(User::as_select())
         .first::<User>(&mut conn)
-        .optional()
-        .map_err(|_| UserError::UserNotFound)
+        .optional() {
+            Ok(res) => Ok(res),
+            Err(e) => Err(UserError::DatabaseError(e))
+    }
 }
 
 pub fn get_user_by_id(
@@ -261,6 +265,22 @@ pub fn update_user_fields(
             ))
             .execute(&mut conn)?;
     }
+
+    Ok(())
+}
+
+pub async fn update_user_password(
+    state: &GlobalState,
+    user_id: &str,
+    password: &str
+) -> Result<(), UserError> {
+    use crate::schema::users::dsl::*;
+    use diesel::prelude::*;
+    let mut conn = state.get_db_conn()?;
+    
+    diesel::update(users.filter(id.eq(user_id)))
+        .set(password_hash.eq(hash_password(password)))
+        .execute(&mut conn)?;
 
     Ok(())
 }
