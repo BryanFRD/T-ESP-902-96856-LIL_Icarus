@@ -2,7 +2,6 @@ use std::vec;
 
 use crate::swagger::ApiDoc;
 use axum::Router;
-use axum::middleware::from_fn;
 use http::{HeaderName, HeaderValue, Method};
 use tower_cookies::CookieManagerLayer;
 use tower_http::cors::CorsLayer;
@@ -69,9 +68,7 @@ pub async fn get_router() -> Router {
         .nest("/teams", teams::get_routes(state.clone()))
         .nest("/users", users::get_routes(state.clone()))
         .nest("/auth", auth::get_routes(state.clone()))
-        .layer(from_fn(auth::middleware))
-        .nest("/status", status::get_routes(state.clone()))
-        .nest("/auth", auth::get_no_auth_routes(state.clone()));
+        .nest("/status", status::get_routes(state.clone()));
 
     let main_router = Router::new()
         .nest("/v1", router_v1)

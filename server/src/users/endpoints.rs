@@ -10,9 +10,7 @@ use tower_cookies::{Cookie, Cookies, cookie::time};
 use tracing::{error, info};
 
 use crate::{
-    auth::{hash_password, JwtClaims},
-    state::GlobalState,
-    users::{get_all_users, models::AvatarForm, UserError},
+    auth::{hash_password, JwtClaims}, state::GlobalState, users::{get_all_users, models::AvatarForm, UserError}
 };
 
 use super::{

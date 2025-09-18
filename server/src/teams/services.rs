@@ -9,9 +9,7 @@ use diesel::{
 use std::collections::HashMap;
 use super::endpoints;
 use crate::{
-    state::GlobalState,
-    teams::{Team, TeamError, TeamMember, TeamReturn, TeamRole, UpdateTeam},
-    users::{get_user_by_id, User, UserError},
+    auth, state::GlobalState, teams::{Team, TeamError, TeamMember, TeamReturn, TeamRole, UpdateTeam}, users::{get_user_by_id, User, UserError}
 };
 
 pub fn get_routes(state: GlobalState) -> axum::Router {
@@ -21,6 +19,7 @@ pub fn get_routes(state: GlobalState) -> axum::Router {
         .route("/me", post(endpoints::create_team))
         .layer(from_fn(crate::auth::pentester_middleware))
         .route("/me", get(endpoints::get_my_teams))
+        .layer(from_fn(auth::middleware))
         .with_state(state.clone())
 }
 

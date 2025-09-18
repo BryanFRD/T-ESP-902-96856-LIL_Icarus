@@ -1,3 +1,11 @@
 [workspace]
 members = ["server", "agent", "shared"]
 resolver = "2"
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+
+[profile.release.package."*"]
+opt-level = 3
+
