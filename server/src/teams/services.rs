@@ -1,3 +1,11 @@
+use super::endpoints;
+use crate::teams::invitations::endpoints as invitation_endpoints;
+use crate::{
+    auth,
+    state::GlobalState,
+    teams::{Team, TeamError, TeamMember, TeamReturn, TeamRole, UpdateTeam},
+    users::{User, UserError, get_user_by_id},
+};
 use axum::{
     Router,
     middleware::from_fn,
@@ -7,10 +15,6 @@ use diesel::{
     BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper, dsl::update,
 };
 use std::collections::HashMap;
-use super::endpoints;
-use crate::{
-    auth, state::GlobalState, teams::{Team, TeamError, TeamMember, TeamReturn, TeamRole, UpdateTeam}, users::{get_user_by_id, User, UserError}
-};
 
 pub fn get_routes(state: GlobalState) -> axum::Router {
     Router::new()
@@ -20,6 +24,22 @@ pub fn get_routes(state: GlobalState) -> axum::Router {
         .layer(from_fn(crate::auth::pentester_middleware))
         .route("/me", get(endpoints::get_my_teams))
         .layer(from_fn(auth::middleware))
+        .route(
+            "/{team_id}/invitations",
+            post(invitation_endpoints::create_invitation),
+        )
+        .route(
+            "/{team_id}/invitations",
+            get(invitation_endpoints::list_invitations),
+        )
+        .route(
+            "/{team_id}/invitations/{invitation_id}",
+            delete(invitation_endpoints::delete_invitation),
+        )
+        .route(
+            "/invitations/join/{token}",
+            post(invitation_endpoints::consume_invitation),
+        )
         .with_state(state.clone())
 }
 
@@ -66,16 +86,13 @@ pub fn add_team_member(
     Ok(())
 }
 
-pub fn get_user_teams(
-    state: &GlobalState,
-    user_id: &str,
-) -> Result<Vec<TeamReturn>, TeamError> {
+pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamReturn>, TeamError> {
     use crate::schema::{teams, teams_members, users};
 
     let user = match get_user_by_id(state, user_id) {
         Ok(Some(user)) => user,
         Ok(None) => return Err(TeamError::UserError(UserError::UserNotFound)),
-        Err(e) => return Err(TeamError::UserError(e))
+        Err(e) => return Err(TeamError::UserError(e)),
     };
 
     let mut conn = state.get_db_conn()?;
@@ -122,7 +139,22 @@ pub fn does_team_exist(state: &GlobalState, team_id: &str) -> Result<bool, TeamE
     Ok(count > 0)
 }
 
-pub fn is_team_owner(
+pub fn is_team_owner(state: &GlobalState, team: &str, user: &str) -> Result<bool, TeamError> {
+    use crate::schema::teams_members::dsl::*;
+
+    let mut conn = state.get_db_conn()?;
+
+    let count = teams_members
+        .filter(team_id.eq(team))
+        .filter(user_id.eq(user))
+        .filter(role.eq("owner"))
+        .count()
+        .get_result::<i64>(&mut conn)?;
+
+    Ok(count > 0)
+}
+
+pub fn is_team_owner_or_moderator(
     state: &GlobalState,
     team: &str,
     user: &str,
@@ -134,7 +166,7 @@ pub fn is_team_owner(
     let count = teams_members
         .filter(team_id.eq(team))
         .filter(user_id.eq(user))
-        .filter(role.eq("owner"))
+        .filter(role.eq_any(vec!["owner", "moderator"]))
         .count()
         .get_result::<i64>(&mut conn)?;
 
@@ -164,7 +196,7 @@ pub fn update_team(
 
     match updated_rows {
         Ok(nb_changes) => Ok(nb_changes),
-        Err(e) => Err(TeamError::DatabaseError(e))
+        Err(e) => Err(TeamError::DatabaseError(e)),
     }
 }
 
@@ -177,6 +209,6 @@ pub fn delete_team(state: &GlobalState, team_id: &str) -> Result<usize, TeamErro
 
     match deleted_rows {
         Ok(nb_changes) => Ok(nb_changes),
-        Err(e) => Err(TeamError::DatabaseError(e))
+        Err(e) => Err(TeamError::DatabaseError(e)),
     }
 }

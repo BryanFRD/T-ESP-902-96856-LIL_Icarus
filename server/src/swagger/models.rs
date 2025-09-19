@@ -2,7 +2,7 @@ use crate::auth;
 use crate::auth::{LoginPayload, RegisterPayload};
 use crate::status;
 use crate::teams;
-use crate::teams::CreateTeam;
+use crate::teams::{CreateInvitationPayload, CreateTeam, InvitationReturn};
 use crate::users;
 use utoipa::OpenApi;
 
@@ -28,10 +28,14 @@ use utoipa::OpenApi;
         teams::endpoints::get_my_teams,
         teams::endpoints::update_team,
         teams::endpoints::delete_team,
+        teams::invitations::endpoints::create_invitation,
+        teams::invitations::endpoints::list_invitations,
+        teams::invitations::endpoints::delete_invitation,
+        teams::invitations::endpoints::consume_invitation,
         status::endpoints::get_status,
     ),
     components(
-        schemas(LoginPayload, RegisterPayload, CreateTeam),
+        schemas(LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn),
     ),
     tags(
         (name = "Auth", description = "Authentication endpoints"),
