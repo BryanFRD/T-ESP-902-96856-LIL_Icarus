@@ -9,7 +9,7 @@ pub async fn send_reset_password_mail(token: String, first_name: String, email: 
     
     let url = match env.as_str() {
         "prod" => format!("https://app.icarus-cyber.fr/reset-password?token={token}"),
-        "env" => format!("https:/app-dev.icarus-cyber.fr/reset-password?token={token}"),
+        "dev" => format!("https:/app-dev.icarus-cyber.fr/reset-password?token={token}"),
         _ => format!("http://localhost:8080/reset-password?token={token}"),
     };
 

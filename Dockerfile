@@ -46,6 +46,7 @@ RUN apt-get update && \
     apt-get install -y \
     libpq5 \
     openssl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
