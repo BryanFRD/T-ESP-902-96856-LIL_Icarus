@@ -12,8 +12,6 @@ stages:
 
 🧪_test:
   stage: test
-  needs: 
-    - job: 📏_clippy
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: always
@@ -27,8 +25,6 @@ stages:
 
 🛠_build:
   stage: build
-  needs:
-    - job: 🧪_test
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
@@ -45,9 +41,6 @@ stages:
     - docker build $TAG .
 
 ✈_deploy_dev:
-  needs:
-    - job: 🧪_test
-    - job: 🛠_build
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
@@ -68,9 +61,6 @@ stages:
   allow_failure: true
 
 ✈_deploy_prod:
-  needs:
-    - 🧪_test
-    - 🛠_build
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
