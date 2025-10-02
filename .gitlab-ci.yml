@@ -6,8 +6,6 @@ stages:
 
 📏_clippy:
   stage: test
-  needs: 
-    - job: 🔎_check
   script:
     - echo "Running cargo clippy ..."
     - cargo clippy -- -W clippy::pedantic -Dwarnings
