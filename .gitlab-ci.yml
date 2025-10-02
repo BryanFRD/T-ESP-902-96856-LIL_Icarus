@@ -31,10 +31,6 @@ stages:
 
 🛠_build:
   stage: build
-  needs:
-    - 🔎_check
-    - 📏_clippy
-    - 🧪_test
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
