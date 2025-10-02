@@ -27,9 +27,9 @@ stages:
   stage: build
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
+      when: on_success 
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: always
+      when: on_success
   script:
     - echo "Building Docker image..."
     - |
@@ -44,7 +44,7 @@ stages:
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-      when: always
+      when: on_success
     - when: manual
   script:
     - echo "Deploying to dev..."
@@ -64,7 +64,7 @@ stages:
   stage: deploy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
-      when: always
+      when: on_success
   script:
     - echo "Deploying to production..."
     - echo $DOCKER_REGISTRY_PASSWORD_PROD | docker login --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
