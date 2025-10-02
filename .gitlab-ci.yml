@@ -8,8 +8,11 @@ stages:
   stage: build
   needs:
     - job: 🔎_check 
+      optional: false,
     - job: 📏_clippy
+      optional: false,
     - job: 🧪_test
+      optional: false,
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
