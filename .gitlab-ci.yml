@@ -4,30 +4,6 @@ stages:
   - deploy
   - cleanup
 
-🛠_build:
-  stage: build
-  needs:
-    - job: 🔎_check 
-      optional: false
-    - job: 📏_clippy
-      optional: false
-    - job: 🧪_test
-      optional: false
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: always
-  script:
-    - echo "Building Docker image..."
-    - |
-      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
-        TAG="-t app:latest -t app-dev:latest"
-      else
-        TAG="-t app-dev:latest"
-      fi
-    - docker build $TAG .
-
 🔎_check:
   stage: test
   script:
@@ -52,6 +28,27 @@ stages:
   script:
     - echo "Running tests..."
     - cargo test
+
+🛠_build:
+  stage: build
+  needs:
+    - 🔎_check
+    - 📏_clippy
+    - 🧪_test
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+  script:
+    - echo "Building Docker image..."
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        TAG="-t app:latest -t app-dev:latest"
+      else
+        TAG="-t app-dev:latest"
+      fi
+    - docker build $TAG .
 
 ✈_deploy_dev:
   needs:
