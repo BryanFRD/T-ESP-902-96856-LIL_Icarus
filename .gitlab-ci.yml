@@ -6,14 +6,16 @@ stages:
 
 📏_clippy:
   stage: test
-  needs: 🔎_check
+  needs: 
+    - job: 🔎_check
   script:
     - echo "Running cargo clippy ..."
     - cargo clippy -- -W clippy::pedantic -Dwarnings
 
 🧪_test:
   stage: test
-  needs: 📏_clippy
+  needs: 
+    - job: 📏_clippy
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: always
@@ -28,7 +30,7 @@ stages:
 🛠_build:
   stage: build
   needs:
-    - 🧪_test
+    - job: 🧪_test
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
