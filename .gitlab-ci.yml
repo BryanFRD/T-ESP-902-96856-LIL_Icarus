@@ -7,8 +7,8 @@ stages:
 🛠_build:
   stage: build
   needs:
-    - job: 🧪_test
-      optional: true
+    - stage: test
+      optional: false 
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
@@ -34,7 +34,7 @@ stages:
   stage: test
   script:
     - echo "Running cargo clippy ..."
-    - cargo clippy
+    - cargo clippy -- -W clippy::pedantic -Dwarnings
 
 🧪_test:
   stage: test
