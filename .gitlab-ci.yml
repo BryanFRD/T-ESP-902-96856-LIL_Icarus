@@ -24,6 +24,18 @@ stages:
       fi
     - docker build $TAG .
 
+🧪_check:
+  stage: test
+  script:
+    - echo "Running cargo check..."
+    - cargo check
+
+🧪_clippy:
+  stage: test
+  script:
+    - echo "Running cargo clippy ..."
+    - cargo clippy
+
 🧪_test:
   stage: test
   rules:
