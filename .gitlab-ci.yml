@@ -8,11 +8,8 @@ stages:
   stage: build
   needs:
     - job: 🔎_check 
-      optional: false 
     - job: 📏_clippy
-      optional: false 
     - job: 🧪_test
-      optional: false 
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
@@ -45,6 +42,8 @@ stages:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: always
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: always
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
   script:
@@ -54,7 +53,6 @@ stages:
 ✈_deploy_dev:
   needs:
     - job: 🧪_test
-      optional: true
     - job: 🛠_build
   stage: deploy
   rules:
