@@ -1,9 +1,20 @@
 use super::endpoints::{login, logout, register, request_password_reset};
-use axum::{middleware::from_fn, routing::post, Router};
-use diesel::{dsl::{now, IntervalDsl}, upsert::excluded};
+use axum::{Router, middleware::from_fn, routing::post};
+use diesel::{
+    dsl::{IntervalDsl, now},
+    upsert::excluded,
+};
 use sha2::{Digest, Sha256};
 
-use crate::{auth::{self, endpoints::reset_password, models::{AddPasswordResetToken, PasswordResetToken}}, state::GlobalState, users::UserError};
+use crate::{
+    auth::{
+        self,
+        endpoints::reset_password,
+        models::{AddPasswordResetToken, PasswordResetToken},
+    },
+    state::GlobalState,
+    users::UserError,
+};
 
 pub fn get_routes(state: GlobalState) -> Router {
     Router::new()
@@ -28,7 +39,11 @@ pub fn hash_password(password: &str) -> String {
     format!("{result:x}")
 }
 
-pub async fn save_reset_password_token(state: &GlobalState, user_id: &str, token: &str) -> Result<(), UserError> {
+pub async fn save_reset_password_token(
+    state: &GlobalState,
+    user_id: &str,
+    token: &str,
+) -> Result<(), UserError> {
     use crate::schema::password_reset_tokens;
     use diesel::prelude::*;
 
@@ -50,8 +65,11 @@ pub async fn save_reset_password_token(state: &GlobalState, user_id: &str, token
     Ok(())
 }
 
-pub async fn get_token(state: &GlobalState, token: &str) -> Result<Option<PasswordResetToken>, UserError> {
-    use crate::schema::password_reset_tokens::dsl::*;
+pub async fn get_token(
+    state: &GlobalState,
+    token: &str,
+) -> Result<Option<PasswordResetToken>, UserError> {
+    use crate::schema::password_reset_tokens::dsl::{password_reset_tokens, token_hash};
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;
@@ -60,14 +78,15 @@ pub async fn get_token(state: &GlobalState, token: &str) -> Result<Option<Passwo
         .filter(token_hash.eq(&hash_password(token)))
         .select(PasswordResetToken::as_select())
         .first::<PasswordResetToken>(&mut conn)
-        .optional() {
-            Ok(res) => Ok(res),
-            Err(e) => Err(UserError::DatabaseError(e))
+        .optional()
+    {
+        Ok(res) => Ok(res),
+        Err(e) => Err(UserError::DatabaseError(e)),
     }
 }
 
 pub async fn consume_token(state: &GlobalState, id: &str) -> Result<(), UserError> {
-    use crate::schema::password_reset_tokens::dsl::*;
+    use crate::schema::password_reset_tokens::dsl::{created_at, password_reset_tokens, user_id};
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;

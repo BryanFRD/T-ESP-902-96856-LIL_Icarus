@@ -1,8 +1,8 @@
 pub mod endpoints;
+mod error;
 mod models;
 mod services;
-mod error;
 
+pub use error::UserError;
 pub use models::{User, UserRole};
 pub use services::*;
-pub use error::UserError;

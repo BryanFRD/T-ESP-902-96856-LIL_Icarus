@@ -39,13 +39,17 @@ impl<S: Send + Sync> FromRequestParts<S> for JwtClaims {
             Ok(cookies) => cookies,
             Err(e) => {
                 error!("Failed to extract cookies: {:?}", e);
-                return Err((StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")));
+                return Err((
+                    StatusCode::UNAUTHORIZED,
+                    Json("error.user.auth.unauthorized"),
+                ));
             }
         };
 
-        let auth_cookie = cookies
-            .get("auth")
-            .ok_or_else(|| (StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")))?;
+        let auth_cookie = cookies.get("auth").ok_or((
+            StatusCode::UNAUTHORIZED,
+            Json("error.user.auth.unauthorized"),
+        ))?;
 
         let jwt_secret = std::env::var("JWT_SECRET").map_err(|_| {
             (
@@ -57,7 +61,10 @@ impl<S: Send + Sync> FromRequestParts<S> for JwtClaims {
         let jwt = JwtClaims::from_jwt(auth_cookie.value(), &jwt_secret);
 
         if !jwt.is_valid() {
-            return Err((StatusCode::UNAUTHORIZED, Json("error.user.auth.unauthorized")));
+            return Err((
+                StatusCode::UNAUTHORIZED,
+                Json("error.user.auth.unauthorized"),
+            ));
         }
 
         Ok(jwt)

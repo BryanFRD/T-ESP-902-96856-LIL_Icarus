@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.87.0"
 
+[lints.clippy]
+pedantic = "warn"
+
 [dependencies]
 
 axum = { version = "0.8.4", features = ["macros", "multipart"] }
@@ -41,5 +44,7 @@ utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
 image = "0.25.6"
 webp = "0.3.0"
 thiserror = "2.0.16"
-resend-rs = { version = "0.17.1", default-features = false, features = ["native-tls"]}
+resend-rs = { version = "0.17.1", default-features = false, features = [
+    "native-tls",
+] }
 rand = "0.9.2"

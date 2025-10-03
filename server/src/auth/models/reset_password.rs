@@ -1,5 +1,8 @@
 use chrono::{Duration, Utc};
-use diesel::{prelude::{Identifiable, Insertable, Queryable}, Selectable};
+use diesel::{
+    Selectable,
+    prelude::{Identifiable, Insertable, Queryable},
+};
 
 #[derive(Debug, Clone, Queryable, Selectable, Identifiable)]
 #[diesel(table_name = crate::schema::password_reset_tokens)]
@@ -16,7 +19,7 @@ impl PasswordResetToken {
         let expiry_time = self.created_at + Duration::minutes(15);
         now > expiry_time
     }
-    
+
     pub fn is_valid(&self) -> bool {
         !self.is_expired()
     }
@@ -26,5 +29,5 @@ impl PasswordResetToken {
 #[diesel(table_name = crate::schema::password_reset_tokens)]
 pub struct AddPasswordResetToken {
     pub user_id: String,
-    pub token_hash: String
+    pub token_hash: String,
 }

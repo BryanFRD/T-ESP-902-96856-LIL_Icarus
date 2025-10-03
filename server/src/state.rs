@@ -3,10 +3,10 @@ use diesel::{
     PgConnection,
     r2d2::{ConnectionManager, Pool, PoolError, PooledConnection},
 };
-use rand::{rngs::StdRng, SeedableRng};
+use rand::{SeedableRng, rngs::StdRng};
 use resend_rs::Resend;
-use tokio::sync::Mutex;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 use tracing::info;
 
 #[derive(Clone)]

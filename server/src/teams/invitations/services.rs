@@ -1,5 +1,3 @@
- 
-
 use crate::{
     schema::teams_invitations,
     state::GlobalState,
@@ -28,7 +26,12 @@ pub fn create_invitation(
 
     let mut conn = state.get_db_conn()?;
 
-    let invitation = TeamInvitation::new(team_id.to_string(), creator_user_id.to_string(), max_uses, expires_at);
+    let invitation = TeamInvitation::new(
+        team_id.to_string(),
+        creator_user_id.to_string(),
+        max_uses,
+        expires_at,
+    );
 
     diesel::insert_into(teams_invitations::table)
         .values(&invitation)
@@ -71,7 +74,7 @@ pub fn cancel_invitation(
     requester_user_id: &str,
     is_admin: bool,
 ) -> Result<(), InvitationError> {
-    use crate::schema::teams_invitations::dsl::*;
+    use crate::schema::teams_invitations::dsl::{teams_invitations, id, team_id, is_canceled};
     use diesel::prelude::*;
 
     if !does_team_exist(state, team_id_str)? {
@@ -84,9 +87,13 @@ pub fn cancel_invitation(
 
     let mut conn = state.get_db_conn()?;
 
-    let affected = diesel::update(teams_invitations.filter(id.eq(invitation_id)).filter(team_id.eq(team_id_str)))
-        .set(is_canceled.eq(true))
-        .execute(&mut conn)?;
+    let affected = diesel::update(
+        teams_invitations
+            .filter(id.eq(invitation_id))
+            .filter(team_id.eq(team_id_str)),
+    )
+    .set(is_canceled.eq(true))
+    .execute(&mut conn)?;
 
     if affected == 0 {
         return Err(InvitationError::NotFound);
@@ -111,10 +118,7 @@ pub fn consume_invitation_by_token(
         .first::<super::TeamInvitation>(&mut conn)
         .optional()?;
 
-    let invitation = match invitation {
-        Some(i) => i,
-        None => return Err(InvitationError::NotFound),
-    };
+    let Some(invitation) = invitation else { return Err(InvitationError::NotFound) };
 
     if invitation.is_canceled {
         return Err(InvitationError::Canceled);
@@ -156,4 +160,3 @@ pub fn consume_invitation_by_token(
 
     Ok(invitation.team_id)
 }
-

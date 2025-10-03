@@ -1,12 +1,17 @@
-use resend_rs::{types::CreateEmailResponse, Resend};
+use resend_rs::{Resend, types::CreateEmailResponse};
 
 use crate::mails::services::send_mail;
 
 const PASSWORD_RESET_TEMPLATE: &str = include_str!("../../templates/mails/password-reset.html");
 
-pub async fn send_reset_password_mail(token: String, first_name: String, email: String, resend: &Resend) -> Result<CreateEmailResponse, resend_rs::Error> {
+pub async fn send_reset_password_mail(
+    token: String,
+    first_name: String,
+    email: String,
+    resend: &Resend,
+) -> Result<CreateEmailResponse, resend_rs::Error> {
     let env = std::env::var("VAULT_ENV").unwrap_or("local".to_string());
-    
+
     let url = match env.as_str() {
         "prod" => format!("https://app.icarus-cyber.fr/reset-password?token={token}"),
         "dev" => format!("https://app-dev.icarus-cyber.fr/reset-password?token={token}"),
@@ -18,5 +23,11 @@ pub async fn send_reset_password_mail(token: String, first_name: String, email: 
         .replace("{{reset_url}}", &url)
         .replace("{{email}}", &email);
 
-    send_mail(&[email], "Password reset request - Icarus".to_string(), mail, resend).await
+    send_mail(
+        &[email],
+        "Password reset request - Icarus".to_string(),
+        mail,
+        resend,
+    )
+    .await
 }

@@ -1,3 +1,5 @@
+#![allow(clippy::needless_for_each)]
+
 mod auth;
 mod mails;
 mod schema;
@@ -33,7 +35,7 @@ async fn main() {
     )
     .await
     {
-        Ok(_) => {}
+        Ok(()) => {}
         Err(e) => {
             eprintln!("Server error: {e}");
         }

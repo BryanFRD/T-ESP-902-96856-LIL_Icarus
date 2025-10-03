@@ -41,7 +41,11 @@ pub async fn create_team(
         Ok(team) => (StatusCode::CREATED, Json(team)).into_response(),
         Err(e) => {
             error!("Failed to create team: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response()
         }
     }
 }
@@ -63,7 +67,11 @@ pub async fn get_my_teams(
         Ok(teams) => (StatusCode::OK, Json(teams)).into_response(),
         Err(e) => {
             error!("Failed to get teams: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response()
         }
     }
 }
@@ -86,7 +94,11 @@ pub async fn update_team(
     Json(payload): Json<UpdateTeam>,
 ) -> impl IntoResponse {
     if payload.name.is_none() && payload.description.is_none() {
-        return (StatusCode::BAD_REQUEST, Json("error.team.update.validate.noFieldProvided")).into_response();
+        return (
+            StatusCode::BAD_REQUEST,
+            Json("error.team.update.validate.noFieldProvided"),
+        )
+            .into_response();
     }
 
     match super::does_team_exist(&state, &team_id.to_string()) {
@@ -94,9 +106,13 @@ pub async fn update_team(
         Ok(false) => return (StatusCode::NOT_FOUND, Json("error.team.notFound")).into_response(),
         Err(e) => {
             error!("Failed to check team existence: {:?}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
         }
-    };
+    }
 
     match super::is_team_owner(&state, &team_id.to_string(), &jwt_user.sub.to_string()) {
         Ok(true) => (),
@@ -107,15 +123,23 @@ pub async fn update_team(
         }
         Err(e) => {
             error!("Failed to check team ownership: {:?}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
         }
-    };
+    }
 
-    match super::update_team(&state, &team_id.to_string(), payload) {
+    match super::update_team(&state, &team_id.to_string(), &payload) {
         Ok(_) => (StatusCode::OK).into_response(),
         Err(e) => {
             error!("Failed to update team: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response()
         }
     }
 }
@@ -140,9 +164,13 @@ pub async fn delete_team(
         Ok(false) => return (StatusCode::NOT_FOUND, Json("error.team.notFound")).into_response(),
         Err(e) => {
             error!("Failed to check team existence: {:?}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
         }
-    };
+    }
 
     match super::is_team_owner(&state, &team_id.to_string(), &jwt_user.sub.to_string()) {
         Ok(true) => (),
@@ -153,15 +181,23 @@ pub async fn delete_team(
         }
         Err(e) => {
             error!("Failed to check team ownership: {:?}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
         }
-    };
+    }
 
     match super::delete_team(&state, &team_id.to_string()) {
         Ok(_) => (StatusCode::NO_CONTENT).into_response(),
         Err(e) => {
             error!("Failed to delete team: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response()
         }
     }
 }

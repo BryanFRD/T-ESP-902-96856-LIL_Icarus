@@ -65,8 +65,8 @@ pub async fn get_router() -> Router {
         .allow_credentials(true);
 
     let router_v1 = Router::new()
-        .nest("/teams", teams::get_routes(state.clone()))
-        .nest("/users", users::get_routes(state.clone()))
+        .nest("/teams", teams::get_routes(&state))
+        .nest("/users", users::get_routes(&state))
         .nest("/auth", auth::get_routes(state.clone()))
         .nest("/status", status::get_routes(state.clone()));
 
@@ -82,10 +82,10 @@ pub async fn get_router() -> Router {
 
     let is_prod = std::env::var("VAULT_ENV").unwrap_or("local".to_string()) == "prod";
 
-    if !is_prod {
+    if is_prod {
         main_router
-            .merge(SwaggerUi::new("/v1/swagger").url("/v1/swagger/openapi.json", ApiDoc::openapi()))
     } else {
         main_router
+            .merge(SwaggerUi::new("/v1/swagger").url("/v1/swagger/openapi.json", ApiDoc::openapi()))
     }
 }

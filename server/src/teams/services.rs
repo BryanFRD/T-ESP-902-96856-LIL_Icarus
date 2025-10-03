@@ -16,7 +16,7 @@ use diesel::{
 };
 use std::collections::HashMap;
 
-pub fn get_routes(state: GlobalState) -> axum::Router {
+pub fn get_routes(state: &GlobalState) -> axum::Router {
     Router::new()
         .route("/{id}", delete(endpoints::delete_team))
         .route("/{id}", patch(endpoints::update_team))
@@ -91,8 +91,8 @@ pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamRetu
 
     let user = match get_user_by_id(state, user_id) {
         Ok(Some(user)) => user,
-        Ok(None) => return Err(TeamError::UserError(UserError::UserNotFound)),
-        Err(e) => return Err(TeamError::UserError(e)),
+        Ok(None) => return Err(TeamError::User(UserError::UserNotFound)),
+        Err(e) => return Err(TeamError::User(e)),
     };
 
     let mut conn = state.get_db_conn()?;
@@ -127,7 +127,7 @@ pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamRetu
 }
 
 pub fn does_team_exist(state: &GlobalState, team_id: &str) -> Result<bool, TeamError> {
-    use crate::schema::teams::dsl::*;
+    use crate::schema::teams::dsl::{id, teams};
 
     let mut conn = state.get_db_conn()?;
 
@@ -140,7 +140,7 @@ pub fn does_team_exist(state: &GlobalState, team_id: &str) -> Result<bool, TeamE
 }
 
 pub fn is_team_owner(state: &GlobalState, team: &str, user: &str) -> Result<bool, TeamError> {
-    use crate::schema::teams_members::dsl::*;
+    use crate::schema::teams_members::dsl::{role, team_id, teams_members, user_id};
 
     let mut conn = state.get_db_conn()?;
 
@@ -159,7 +159,7 @@ pub fn is_team_owner_or_moderator(
     team: &str,
     user: &str,
 ) -> Result<bool, TeamError> {
-    use crate::schema::teams_members::dsl::*;
+    use crate::schema::teams_members::dsl::{role, team_id, teams_members, user_id};
 
     let mut conn = state.get_db_conn()?;
 
@@ -176,9 +176,9 @@ pub fn is_team_owner_or_moderator(
 pub fn update_team(
     state: &GlobalState,
     team_id: &str,
-    payload: UpdateTeam,
+    payload: &UpdateTeam,
 ) -> Result<usize, TeamError> {
-    use crate::schema::teams::dsl::*;
+    use crate::schema::teams::dsl::{description, id, name, teams};
 
     let mut conn = state.get_db_conn()?;
 
@@ -196,12 +196,12 @@ pub fn update_team(
 
     match updated_rows {
         Ok(nb_changes) => Ok(nb_changes),
-        Err(e) => Err(TeamError::DatabaseError(e)),
+        Err(e) => Err(TeamError::Database(e)),
     }
 }
 
 pub fn delete_team(state: &GlobalState, team_id: &str) -> Result<usize, TeamError> {
-    use crate::schema::teams::dsl::*;
+    use crate::schema::teams::dsl::{id, teams};
 
     let mut conn = state.get_db_conn()?;
 
@@ -209,6 +209,6 @@ pub fn delete_team(state: &GlobalState, team_id: &str) -> Result<usize, TeamErro
 
     match deleted_rows {
         Ok(nb_changes) => Ok(nb_changes),
-        Err(e) => Err(TeamError::DatabaseError(e)),
+        Err(e) => Err(TeamError::Database(e)),
     }
 }

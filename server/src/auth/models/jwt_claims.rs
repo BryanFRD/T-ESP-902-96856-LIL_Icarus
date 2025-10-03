@@ -49,7 +49,7 @@ impl JwtClaims {
     }
 
     pub fn is_valid(&self) -> bool {
-        let now = chrono::Local::now().timestamp() as usize;
+        let now = usize::try_from(chrono::Local::now().timestamp()).unwrap_or(0);
         self.iat <= now && self.exp >= now
     }
 }
@@ -62,8 +62,9 @@ impl From<User> for JwtClaims {
             sub: ulid,
             email: user.email,
             role: user.role,
-            iat: chrono::Local::now().timestamp() as usize,
-            exp: (chrono::Local::now() + chrono::Duration::days(1)).timestamp() as usize,
+            iat: usize::try_from(chrono::Local::now().timestamp()).unwrap_or(0),
+            exp: usize::try_from((chrono::Local::now() + chrono::Duration::days(1)).timestamp())
+                .unwrap_or(0),
         }
     }
 }

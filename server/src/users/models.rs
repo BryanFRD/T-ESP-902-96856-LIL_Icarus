@@ -52,7 +52,7 @@ impl User {
         last_name: String,
         email: String,
         role: String,
-        password: String,
+        password: &str,
     ) -> Self {
         Self {
             id: Ulid::new().to_string(),
@@ -61,7 +61,7 @@ impl User {
             last_name,
             email,
             role: role.into(),
-            password_hash: hash_password(password.as_str()),
+            password_hash: hash_password(password),
             is_connected: false,
             avatar_url: None,
             created_at: chrono::Local::now().naive_utc(),
@@ -83,7 +83,7 @@ impl From<RegisterPayload> for User {
             payload.last_name,
             payload.email,
             "pentester".to_string(),
-            payload.password,
+            &payload.password,
         )
     }
 }
@@ -139,7 +139,6 @@ impl From<String> for UserRole {
         match s.as_str() {
             "admin" => UserRole::Admin,
             "pentester" => UserRole::Pentester,
-            "client" => UserRole::Client,
             _ => UserRole::Client,
         }
     }

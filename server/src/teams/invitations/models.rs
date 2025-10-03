@@ -1,8 +1,10 @@
-use diesel::{Queryable, Insertable, Selectable, Identifiable};
+use diesel::{Identifiable, Insertable, Queryable, Selectable};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Insertable, Selectable, ToSchema)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Insertable, Selectable, ToSchema,
+)]
 #[diesel(table_name = crate::schema::teams_invitations)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[serde(rename_all = "camelCase")]
@@ -20,7 +22,12 @@ pub struct TeamInvitation {
 }
 
 impl TeamInvitation {
-    pub fn new(team_id: String, created_by: String, max_uses: i32, expires_at: Option<chrono::NaiveDateTime>) -> Self {
+    pub fn new(
+        team_id: String,
+        created_by: String,
+        max_uses: i32,
+        expires_at: Option<chrono::NaiveDateTime>,
+    ) -> Self {
         let now = chrono::Utc::now().naive_utc();
         TeamInvitation {
             id: ulid::Ulid::new().to_string(),
@@ -71,4 +78,3 @@ impl From<TeamInvitation> for InvitationReturn {
         }
     }
 }
-

@@ -5,7 +5,7 @@ use vaultrs::{
     kv2,
 };
 
-use super::{VaultError, Secrets};
+use super::{Secrets, VaultError};
 
 pub async fn get_secrets() -> Result<Secrets, VaultError> {
     #[cfg(debug_assertions)]

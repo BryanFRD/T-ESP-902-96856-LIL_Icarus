@@ -38,9 +38,10 @@ pub struct ResetPasswordRequestPayload {
 #[derive(Deserialize, Clone, Debug, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ResetPasswordPayload {
-    #[schema(example = "5e0bf8751c9bcfe29632c0bce5dc8e8f4813122051ea13bfd026bb4766db61464120e7fe9d594743ce277946cb6d4a8355b712880b4ed1f8a657bd1858918ede")]
+    #[schema(
+        example = "5e0bf8751c9bcfe29632c0bce5dc8e8f4813122051ea13bfd026bb4766db61464120e7fe9d594743ce277946cb6d4a8355b712880b4ed1f8a657bd1858918ede"
+    )]
     pub token: String,
     #[schema(example = "password123")]
-    pub new_password: String
+    pub new_password: String,
 }
-

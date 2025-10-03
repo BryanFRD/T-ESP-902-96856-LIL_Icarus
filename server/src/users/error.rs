@@ -1,11 +1,11 @@
 use std::io;
 
 use axum::extract::multipart::MultipartError;
+use diesel::{r2d2::PoolError, result::Error as DieselError};
 use image::ImageError;
 use thiserror::Error;
-use diesel::{r2d2::PoolError, result::Error as DieselError};
 use validator::ValidationErrors;
- 
+
 #[derive(Debug, Error)]
 pub enum UserError {
     #[error("Error while getting database connection: {0}")]
@@ -28,6 +28,4 @@ pub enum UserError {
     AvatarNotFound,
     #[error("Image handling error: {0}")]
     ImageHandlingError(#[from] ImageError),
-    #[error("Error converting error to webp")]
-    ImageConvertinError,
 }

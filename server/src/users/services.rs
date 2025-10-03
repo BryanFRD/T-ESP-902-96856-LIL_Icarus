@@ -1,5 +1,5 @@
-use crate::auth::{self, admin_middleware, hash_password, RegisterPayload};
-use crate::schema::users::dsl::*;
+use crate::auth::{self, RegisterPayload, admin_middleware, hash_password};
+use crate::schema::users::dsl::{users, id, username, first_name, last_name, email, password_hash, avatar_url};
 use crate::state::GlobalState;
 use crate::users::UserError;
 use axum::extract::multipart::Multipart;
@@ -14,10 +14,10 @@ use std::path::Path;
 use validator::Validate;
 
 use super::User;
-use super::endpoints::*;
+use super::endpoints::{serve_avatar, me, update_me, delete_me, upload_avatar, delete_avatar, list_users_admin, get_user_admin, update_user_admin, delete_user_admin};
 use super::models::UpdatePayload;
 
-pub fn get_routes(state: GlobalState) -> Router {
+pub fn get_routes(state: &GlobalState) -> Router {
     Router::new()
         .route("/avatars/{filename}", get(serve_avatar))
         .route("/me", get(me))
@@ -27,23 +27,22 @@ pub fn get_routes(state: GlobalState) -> Router {
         .route("/me/avatar", delete(delete_avatar))
         .layer(from_fn(auth::middleware))
         .with_state(state.clone())
-        .merge(get_admin_routes(state.clone()))
+        .merge(get_admin_routes(state))
 }
 
-pub fn get_admin_routes(state: GlobalState) -> Router {
+pub fn get_admin_routes(state: &GlobalState) -> Router {
     Router::new()
         .route("/", get(list_users_admin))
         .route("/{id}", get(get_user_admin))
         .route("/{id}", patch(update_user_admin))
         .route("/{id}", delete(delete_user_admin))
         .layer(middleware::from_fn(admin_middleware))
-        .with_state(state)
+        .with_state(state.clone())
 }
 pub fn get_user_by_email(
     state: &GlobalState,
     query_email: &str,
 ) -> Result<Option<User>, UserError> {
-    use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
     let mut conn = match state.get_db_conn() {
@@ -55,17 +54,14 @@ pub fn get_user_by_email(
         .filter(email.eq(query_email))
         .select(User::as_select())
         .first::<User>(&mut conn)
-        .optional() {
-            Ok(res) => Ok(res),
-            Err(e) => Err(UserError::DatabaseError(e))
+        .optional()
+    {
+        Ok(res) => Ok(res),
+        Err(e) => Err(UserError::DatabaseError(e)),
     }
 }
 
-pub fn get_user_by_id(
-    state: &GlobalState,
-    user_id: &str,
-) -> Result<Option<User>, UserError> {
-    use crate::schema::users::dsl::*;
+pub fn get_user_by_id(state: &GlobalState, user_id: &str) -> Result<Option<User>, UserError> {
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;
@@ -79,27 +75,24 @@ pub fn get_user_by_id(
 }
 
 pub fn get_all_users(state: &GlobalState) -> Result<Vec<User>, UserError> {
-    use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;
 
-    match users
-        .select(User::as_select())
-        .load::<User>(&mut conn) {
-            Ok(user_list) => Ok(user_list),
-            Err(e) => Err(UserError::DatabaseError(e))
+    match users.select(User::as_select()).load::<User>(&mut conn) {
+        Ok(user_list) => Ok(user_list),
+        Err(e) => Err(UserError::DatabaseError(e)),
     }
 }
 
-pub fn create_user(state: &GlobalState, user: User) -> Result<(), UserError> {
+pub fn create_user(state: &GlobalState, user: &User) -> Result<(), UserError> {
     use crate::schema::users;
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;
 
     diesel::insert_into(users::table)
-        .values(&user)
+        .values(user)
         .execute(&mut conn)?;
 
     Ok(())
@@ -109,7 +102,6 @@ pub fn user_exists(
     state: &GlobalState,
     payload: &RegisterPayload,
 ) -> Result<Option<String>, UserError> {
-    use crate::schema::users::dsl::*;
     use diesel::dsl::exists;
     use diesel::select;
 
@@ -158,8 +150,16 @@ pub fn validate_update_payload(payload: &UpdatePayload) -> Result<(), UserError>
         }
         match &payload.confirm_password {
             Some(confirm_pw) if confirm_pw == new_password => {}
-            Some(_) => return Err(UserError::UpdatePayloadError("passwordsDoNotMatch".to_string())),
-            None => return Err(UserError::UpdatePayloadError("confirmationPasswordRequired".to_string())),
+            Some(_) => {
+                return Err(UserError::UpdatePayloadError(
+                    "passwordsDoNotMatch".to_string(),
+                ));
+            }
+            None => {
+                return Err(UserError::UpdatePayloadError(
+                    "confirmationPasswordRequired".to_string(),
+                ));
+            }
         }
     }
 
@@ -171,7 +171,6 @@ pub fn check_update_conflicts(
     payload: &UpdatePayload,
     current_user: &User,
 ) -> Result<Option<String>, UserError> {
-    use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
     let mut conn = state
@@ -272,12 +271,11 @@ pub fn update_user_fields(
 pub async fn update_user_password(
     state: &GlobalState,
     user_id: &str,
-    password: &str
+    password: &str,
 ) -> Result<(), UserError> {
-    use crate::schema::users::dsl::*;
     use diesel::prelude::*;
     let mut conn = state.get_db_conn()?;
-    
+
     diesel::update(users.filter(id.eq(user_id)))
         .set(password_hash.eq(hash_password(password)))
         .execute(&mut conn)?;
@@ -286,14 +284,13 @@ pub async fn update_user_password(
 }
 
 pub fn delete_user(state: &GlobalState, user_id: &str) -> Result<usize, UserError> {
-    use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;
 
     match diesel::delete(users.filter(id.eq(user_id))).execute(&mut conn) {
         Ok(usize) => Ok(usize),
-        Err(e) => Err(UserError::DatabaseError(e))
+        Err(e) => Err(UserError::DatabaseError(e)),
     }
 }
 
@@ -317,7 +314,7 @@ pub async fn save_avatar(
             "image/jpeg" | "image/jpg" | "image/png" | "image/webp" | "image/gif" | "image/bmp" => {
             }
             _ => return Err(UserError::MultipartError("invalidFileType".to_string())),
-        };
+        }
 
         let data = field.bytes().await?;
 
@@ -329,10 +326,7 @@ pub async fn save_avatar(
 
         let resized_img = resize_image_if_needed(img, 512, 512);
 
-        let webp_data = match convert_to_webp(&resized_img, 80.0) {
-            Ok(webp) => webp,
-            Err(_) => return Err(UserError::ImageConvertinError)
-        };
+        let webp_data = convert_to_webp(&resized_img, 80.0);
 
         if webp_data.len() > 2 * 1024 * 1024 {
             return Err(UserError::MultipartError("fileTooLarge".to_string()));
@@ -353,6 +347,7 @@ pub async fn save_avatar(
     Err(UserError::AvatarNotFound)
 }
 
+#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 fn resize_image_if_needed(img: DynamicImage, max_width: u32, max_height: u32) -> DynamicImage {
     let (width, height) = img.dimensions();
 
@@ -370,14 +365,14 @@ fn resize_image_if_needed(img: DynamicImage, max_width: u32, max_height: u32) ->
 fn convert_to_webp(
     img: &DynamicImage,
     quality: f32,
-) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+) -> Vec<u8> {
     let rgb_img = img.to_rgb8();
     let (width, height) = rgb_img.dimensions();
 
-    let encoder = webp::Encoder::from_rgb(&rgb_img, width, height);
-    let encoded = encoder.encode(quality);
+    let webp_encoder = webp::Encoder::from_rgb(&rgb_img, width, height);
+    let webp_data = webp_encoder.encode(quality);
 
-    Ok(encoded.to_vec())
+    webp_data.to_vec()
 }
 
 pub fn update_user_avatar(
@@ -385,7 +380,6 @@ pub fn update_user_avatar(
     user_id: &str,
     avatar_filename: &str,
 ) -> Result<(), diesel::result::Error> {
-    use crate::schema::users::dsl::*;
     use diesel::prelude::*;
 
     let mut conn = state

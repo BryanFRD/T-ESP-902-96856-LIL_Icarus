@@ -60,9 +60,9 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(password_reset_tokens -> users (user_id));
 diesel::joinable!(teams_invitations -> teams (team_id));
 diesel::joinable!(teams_invitations -> users (created_by));
-diesel::joinable!(password_reset_tokens -> users (user_id));
 diesel::joinable!(teams_members -> teams (team_id));
 diesel::joinable!(teams_members -> users (user_id));
 

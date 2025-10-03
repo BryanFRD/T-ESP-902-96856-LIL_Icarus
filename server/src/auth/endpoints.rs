@@ -1,6 +1,7 @@
 use axum::{Json, extract::State, response::IntoResponse};
 use http::StatusCode;
 use rand::Rng;
+use std::fmt::Write;
 #[cfg(not(debug_assertions))]
 use tower_cookies::cookie::SameSite;
 use tower_cookies::{Cookie, Cookies, cookie::time};
@@ -8,7 +9,13 @@ use tracing::error;
 use validator::Validate;
 
 use crate::{
-    auth::{models::ResetPasswordRequestPayload, services::{consume_token, get_token, save_reset_password_token}}, mails::send_reset_password_mail, state::GlobalState, users::{create_user, get_user_by_email, get_user_by_id, update_user_password, user_exists}
+    auth::{
+        models::ResetPasswordRequestPayload,
+        services::{consume_token, get_token, save_reset_password_token},
+    },
+    mails::send_reset_password_mail,
+    state::GlobalState,
+    users::{create_user, get_user_by_email, get_user_by_id, update_user_password, user_exists},
 };
 
 use super::models::{JwtClaims, LoginPayload, RegisterPayload, ResetPasswordPayload};
@@ -31,28 +38,49 @@ pub async fn login(
     Json(payload): Json<LoginPayload>,
 ) -> impl IntoResponse {
     if payload.validate().is_err() {
-        return (StatusCode::BAD_REQUEST, Json("error.user.login.invalidEmail")).into_response();
+        return (
+            StatusCode::BAD_REQUEST,
+            Json("error.user.login.invalidEmail"),
+        )
+            .into_response();
     }
 
     let user = match get_user_by_email(&state, &payload.email) {
         Ok(user) => match user {
             Some(user) => user,
-            None => return (StatusCode::UNAUTHORIZED, Json("error.user.auth.invalidCredentials")).into_response(),
+            None => {
+                return (
+                    StatusCode::UNAUTHORIZED,
+                    Json("error.user.auth.invalidCredentials"),
+                )
+                    .into_response();
+            }
         },
         Err(e) => {
             error!("Failed to get user by email: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
         }
     };
 
     if !user.verify_password(&payload.password) {
-        return (StatusCode::UNAUTHORIZED, Json("error.user.auth.invalidCredentials")).into_response();
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json("error.user.auth.invalidCredentials"),
+        )
+            .into_response();
     }
 
     let jwt = JwtClaims::from(user);
-    let jwt = match jwt.to_string(state.get_secrets().jwt_secret.as_str()) {
-        Ok(jwt) => jwt,
-        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response(),
+    let Ok(jwt) = jwt.to_string(state.get_secrets().jwt_secret.as_str()) else {
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json("error.server.internalError"),
+        )
+            .into_response();
     };
 
     let mut cookie = Cookie::new("auth", jwt);
@@ -86,23 +114,40 @@ pub async fn register(
     Json(payload): Json<RegisterPayload>,
 ) -> impl IntoResponse {
     if payload.validate().is_err() {
-        return (StatusCode::BAD_REQUEST, Json("error.user.register.invalidEmail")).into_response();
+        return (
+            StatusCode::BAD_REQUEST,
+            Json("error.user.register.invalidEmail"),
+        )
+            .into_response();
     }
 
     match user_exists(&state, &payload) {
         Ok(None) => (),
-        Ok(Some(val)) => return (StatusCode::CONFLICT, Json(format!("error.user.register.conflict.{val}"))).into_response(),
+        Ok(Some(val)) => {
+            return (
+                StatusCode::CONFLICT,
+                Json(format!("error.user.register.conflict.{val}")),
+            )
+                .into_response();
+        }
         Err(e) => {
             error!("Failed to check if user exists: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
         }
     }
 
-    match create_user(&state, payload.into()) {
-        Ok(_) => (StatusCode::CREATED).into_response(),
-        Err(_) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
-        }
+    let user = payload.into();
+    match create_user(&state, &user) {
+        Ok(()) => (StatusCode::CREATED).into_response(),
+        Err(_) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json("error.server.internalError"),
+        )
+            .into_response(),
     }
 }
 
@@ -142,13 +187,20 @@ pub async fn logout(cookies: Cookies) -> impl IntoResponse {
     ),
     tag = "Auth",
 )]
-pub async fn request_password_reset(State(state): State<GlobalState>, Json(payload): Json<ResetPasswordRequestPayload>) -> impl IntoResponse {
+pub async fn request_password_reset(
+    State(state): State<GlobalState>,
+    Json(payload): Json<ResetPasswordRequestPayload>,
+) -> impl IntoResponse {
     let user = match get_user_by_email(&state, &payload.reset_email) {
         Ok(Some(u)) => u,
         Ok(None) => return (StatusCode::OK).into_response(),
         Err(e) => {
             error!("Error while getting user by email: {e}");
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
         }
     };
 
@@ -157,27 +209,37 @@ pub async fn request_password_reset(State(state): State<GlobalState>, Json(paylo
         let mut rng = state.get_rand().lock().await;
         token_bytes = rng.random();
     }
-    let token: String = token_bytes
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect::<Vec<String>>()
-        .join("");
 
-    if save_reset_password_token(&state, &user.id, &token).await.is_err() {
-        return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
-    };
-    
+    // Crée un string, écrit les octets en format hexa et les ajoute à la string
+    let token = token_bytes.iter().fold(String::new(), |mut output, b| {
+        let _ = write!(output, "{b:02X}");
+        output
+    });
+
+    if save_reset_password_token(&state, &user.id, &token)
+        .await
+        .is_err()
+    {
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json("error.server.internalError"),
+        )
+            .into_response();
+    }
+
     let resend = state.get_resend().lock().await;
     match send_reset_password_mail(token, user.first_name, payload.reset_email, &resend).await {
         Ok(_) => (StatusCode::OK).into_response(),
         Err(e) => {
             error!("Error while sending password mail: {e}");
-            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response()
         }
-
     }
 }
-
 
 #[utoipa::path(
     post,
@@ -188,39 +250,74 @@ pub async fn request_password_reset(State(state): State<GlobalState>, Json(paylo
     ),
     tag = "Auth",
 )]
-pub async fn reset_password(State(state): State<GlobalState>, Json(payload): Json<ResetPasswordPayload>) -> impl IntoResponse {
+pub async fn reset_password(
+    State(state): State<GlobalState>,
+    Json(payload): Json<ResetPasswordPayload>,
+) -> impl IntoResponse {
     let token = match get_token(&state, &payload.token).await {
         Ok(Some(token)) => token,
-        Ok(None) => return (StatusCode::BAD_REQUEST, Json("error.auth.resetPassword.invalidToken")).into_response(),
+        Ok(None) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json("error.auth.resetPassword.invalidToken"),
+            )
+                .into_response();
+        }
         Err(e) => {
             error!("Error while getting token: {e}");
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
         }
     };
 
     if token.is_expired() {
-        return (StatusCode::BAD_REQUEST, Json("error.auth.resetPassword.expiredToken")).into_response();
+        return (
+            StatusCode::BAD_REQUEST,
+            Json("error.auth.resetPassword.expiredToken"),
+        )
+            .into_response();
     }
 
     let user = match get_user_by_id(&state, &token.user_id) {
         Ok(Some(user)) => user,
-        Ok(None) => return (StatusCode::BAD_REQUEST, Json("error.auth.resetPassword.invalidToken")).into_response(),
+        Ok(None) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json("error.auth.resetPassword.invalidToken"),
+            )
+                .into_response();
+        }
         Err(e) => {
             error!("Error while getting user by id: {e}");
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
         }
     };
 
     if consume_token(&state, &token.user_id).await.is_err() {
         error!("Error while consuming token");
-        return (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response();
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json("error.server.internalError"),
+        )
+            .into_response();
     }
 
     match update_user_password(&state, &user.id, &payload.new_password).await {
-        Ok(_) => (StatusCode::OK).into_response(),
+        Ok(()) => (StatusCode::OK).into_response(),
         Err(e) => {
             error!("Error while updating password: {e}");
-            (StatusCode::INTERNAL_SERVER_ERROR, Json("error.server.internalError")).into_response()
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response()
         }
     }
 }
