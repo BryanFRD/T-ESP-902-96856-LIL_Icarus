@@ -1,5 +1,5 @@
 use crate::auth;
-use crate::auth::{LoginPayload, RegisterPayload};
+use crate::auth::{ConfirmEmailPayload, RegisterPayload, LoginPayload};
 use crate::status;
 use crate::teams;
 use crate::teams::{CreateInvitationPayload, CreateTeam, InvitationReturn};
@@ -11,6 +11,7 @@ use utoipa::OpenApi;
     paths(
         auth::endpoints::login,
         auth::endpoints::register,
+        auth::endpoints::confirm_email,
         auth::endpoints::logout,
         auth::endpoints::request_password_reset,
         auth::endpoints::reset_password,
@@ -35,7 +36,7 @@ use utoipa::OpenApi;
         status::endpoints::get_status,
     ),
     components(
-        schemas(LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn),
+        schemas(ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn),
     ),
     tags(
         (name = "Auth", description = "Authentication endpoints"),

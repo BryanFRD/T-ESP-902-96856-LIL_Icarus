@@ -45,3 +45,11 @@ pub struct ResetPasswordPayload {
     #[schema(example = "password123")]
     pub new_password: String,
 }
+
+#[derive(Deserialize, Clone, Debug, ToSchema)]
+pub struct ConfirmEmailPayload {
+    #[schema(
+        example = "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789-_"
+    )]
+    pub token: String,
+}
