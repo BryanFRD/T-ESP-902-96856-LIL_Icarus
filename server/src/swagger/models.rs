@@ -29,6 +29,7 @@ use utoipa::OpenApi;
         teams::endpoints::get_my_teams,
         teams::endpoints::update_team,
         teams::endpoints::delete_team,
+        teams::endpoints::remove_member,
         teams::invitations::endpoints::create_invitation,
         teams::invitations::endpoints::list_invitations,
         teams::invitations::endpoints::delete_invitation,
