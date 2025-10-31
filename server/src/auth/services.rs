@@ -1,4 +1,4 @@
-use super::endpoints::{login, logout, register, request_password_reset};
+use super::endpoints::{confirm_email, login, logout, register, request_password_reset};
 use axum::{Router, middleware::from_fn, routing::post};
 use diesel::{
     dsl::{IntervalDsl, now},
@@ -22,6 +22,7 @@ pub fn get_routes(state: GlobalState) -> Router {
         .layer(from_fn(auth::middleware))
         .route("/request-password-reset", post(request_password_reset))
         .route("/reset-password", post(reset_password))
+        .route("/confirm-email", post(confirm_email))
         .route("/login", post(login))
         .route("/register", post(register))
         .with_state(state)
