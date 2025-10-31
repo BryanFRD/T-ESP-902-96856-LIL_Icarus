@@ -1,6 +1,6 @@
 use super::endpoints;
-use crate::teams::invitations::endpoints as invitation_endpoints;
 use crate::{
+    teams::invitations::endpoints as invitation_endpoints,
     auth,
     state::GlobalState,
     teams::{Team, TeamError, TeamMember, TeamReturn, TeamRole, UpdateTeam},
@@ -12,7 +12,12 @@ use axum::{
     routing::{delete, get, patch, post},
 };
 use diesel::{
-    BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper, dsl::update,
+    BelongingToDsl,
+    ExpressionMethods,
+    QueryDsl,
+    RunQueryDsl,
+    SelectableHelper,
+    dsl::update,
 };
 use std::collections::HashMap;
 
@@ -39,6 +44,10 @@ pub fn get_routes(state: &GlobalState) -> axum::Router {
         .route(
             "/invitations/join/{token}",
             post(invitation_endpoints::consume_invitation),
+        )
+        .route(
+            "/{team_id}/members/{member_id}",
+            delete(endpoints::remove_member),
         )
         .with_state(state.clone())
 }
@@ -124,6 +133,46 @@ pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamRetu
         .collect();
 
     Ok(result)
+}
+
+pub fn get_team_member(
+    state: &GlobalState,
+    team_id: &str,
+    user_id: &str,
+) -> Result<Option<TeamMember>, TeamError> {
+    use crate::schema::teams_members::dsl::{team_id as tm_team_id, teams_members, user_id as tm_user_id};
+    use diesel::prelude::*;
+
+    let mut conn = state.get_db_conn()?;
+
+    let member = teams_members
+        .filter(tm_team_id.eq(team_id))
+        .filter(tm_user_id.eq(user_id))
+        .select(TeamMember::as_select())
+        .first::<TeamMember>(&mut conn)
+        .optional()?;
+
+    Ok(member)
+}
+
+pub fn remove_team_member(
+    state: &GlobalState,
+    team_id: &str,
+    user_id: &str,
+) -> Result<(), TeamError> {
+    use crate::schema::teams_members::dsl::{team_id as tm_team_id, teams_members, user_id as tm_user_id};
+    use diesel::prelude::*;
+
+    let mut conn = state.get_db_conn()?;
+
+    diesel::delete(
+        teams_members
+            .filter(tm_team_id.eq(team_id))
+            .filter(tm_user_id.eq(user_id)),
+    )
+    .execute(&mut conn)?;
+
+    Ok(())
 }
 
 pub fn does_team_exist(state: &GlobalState, team_id: &str) -> Result<bool, TeamError> {

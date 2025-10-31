@@ -201,3 +201,88 @@ pub async fn delete_team(
         }
     }
 }
+
+#[utoipa::path(
+    delete,
+    path = "/v1/teams/{team_id}/members/{member_id}",
+    tag = "Teams",
+    responses(
+        (status = 204, description = "Member removed successfully"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Team member not found"),
+    ),
+)]
+pub async fn remove_member(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    Path((team_id, member_id)): Path<(Ulid, Ulid)>,
+) -> impl IntoResponse {
+    let team_id = team_id.to_string();
+    let member_id = member_id.to_string();
+    let requester_id = jwt_user.sub.to_string();
+
+    let can_manage = if requester_id == member_id || jwt_user.is_admin() {
+        true
+    } else {
+        match super::is_team_owner_or_moderator(&state, &team_id, &requester_id) {
+            Ok(res) => res,
+            Err(e) => {
+                error!("Failed to check team permissions: {:?}", e);
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json("error.server.internalError"),
+                )
+                    .into_response();
+            }
+        }
+    };
+
+    if !can_manage {
+        return (
+            StatusCode::FORBIDDEN,
+            Json("error.user.auth.forbidden"),
+        )
+            .into_response();
+    }
+
+    let member = match super::get_team_member(&state, &team_id, &member_id) {
+        Ok(Some(member)) => member,
+        Ok(None) => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json("error.team.member.notFound"),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            error!("Failed to fetch team member: {:?}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
+        }
+    };
+
+    if requester_id != member.user_id {
+        if let Ok(true) = super::is_team_owner(&state, &team_id, &member.user_id) {
+            return (
+                StatusCode::FORBIDDEN,
+                Json("error.team.member.cannotRemoveOwner"),
+            )
+                .into_response();
+        }
+    }
+
+    if let Err(e) = super::remove_team_member(&state, &team_id, &member.user_id) {
+        error!("Failed to remove team member: {:?}", e);
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json("error.server.internalError"),
+        )
+            .into_response();
+    }
+
+    StatusCode::NO_CONTENT.into_response()
+}
