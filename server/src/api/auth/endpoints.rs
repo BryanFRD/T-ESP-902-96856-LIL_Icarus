@@ -8,14 +8,16 @@ use tower_cookies::{Cookie, Cookies, cookie::time};
 use tracing::error;
 use validator::Validate;
 
-use crate::{
+use crate::api::{
     auth::{
         models::ResetPasswordRequestPayload,
         services::{consume_token, get_token, save_reset_password_token},
     },
-    mails::{send_confirmation_mail, send_reset_password_mail},
-    state::GlobalState,
     users::{create_user, get_user_by_email, get_user_by_id, update_user_password, user_exists},
+};
+use crate::{
+    mails::{send_confirmation_mail, send_reset_password_mail},
+    state::GlobalState
 };
 
 use super::models::{ConfirmEmailPayload, EmailConfirmationToken, JwtClaims, LoginPayload, RegisterPayload, ResetPasswordPayload};
@@ -140,7 +142,7 @@ pub async fn register(
         }
     }
 
-    let user: crate::users::User = payload.into();
+    let user: crate::api::users::User = payload.into();
 
     let token = EmailConfirmationToken::new(
         user.username.clone(),
@@ -411,13 +413,13 @@ pub async fn confirm_email(
         }
     }
 
-    let user = crate::users::User {
+    let user = crate::api::users::User {
         id: ulid::Ulid::new().to_string(),
         username: token.username,
         first_name: token.first_name,
         last_name: token.last_name,
         email: token.email,
-        role: crate::users::UserRole::Pentester,
+        role: crate::api::users::UserRole::Pentester,
         password_hash: token.password_hash,
         is_connected: false,
         avatar_url: None,

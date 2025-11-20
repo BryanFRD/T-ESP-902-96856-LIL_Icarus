@@ -11,11 +11,11 @@ use tower_cookies::cookie::SameSite;
 use tower_cookies::{Cookie, Cookies, cookie::time};
 use tracing::{error, info};
 
-use crate::{
+use crate::api::{
     auth::{JwtClaims, hash_password},
-    state::GlobalState,
     users::{UserError, get_all_users, models::AvatarForm},
 };
+use crate::state::GlobalState;
 
 use super::{
     User, check_update_conflicts, delete_user, get_user_by_email, get_user_by_id,

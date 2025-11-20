@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use ulid::Ulid;
 
-use crate::users::{User, UserRole};
+use crate::api::users::{User, UserRole};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JwtClaims {

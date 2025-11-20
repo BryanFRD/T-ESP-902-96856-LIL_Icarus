@@ -7,9 +7,9 @@ use http::StatusCode;
 use tracing::error;
 use ulid::Ulid;
 
-use crate::{
+use crate::state::GlobalState;
+use crate::api::{
     auth::JwtClaims,
-    state::GlobalState,
     teams::{
         TeamReturn, UpdateTeam,
         models::{CreateTeam, Team},

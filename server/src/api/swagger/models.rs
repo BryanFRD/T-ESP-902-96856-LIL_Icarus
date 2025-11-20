@@ -1,9 +1,9 @@
-use crate::auth;
-use crate::auth::{ConfirmEmailPayload, RegisterPayload, LoginPayload};
-use crate::status;
-use crate::teams;
-use crate::teams::{CreateInvitationPayload, CreateTeam, InvitationReturn};
-use crate::users;
+use crate::api::auth;
+use crate::api::auth::{ConfirmEmailPayload, RegisterPayload, LoginPayload};
+use crate::api::status;
+use crate::api::teams;
+use crate::api::teams::{CreateInvitationPayload, CreateTeam, InvitationReturn};
+use crate::api::users;
 use utoipa::OpenApi;
 
 #[derive(OpenApi)]

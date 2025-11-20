@@ -6,7 +6,8 @@ use axum::{
 use http::StatusCode;
 use tracing::error;
 
-use crate::{auth::JwtClaims, state::GlobalState};
+use crate::api::auth::JwtClaims;
+use crate::state::GlobalState;
 
 use super::{CreateInvitationPayload, InvitationError, InvitationReturn};
 

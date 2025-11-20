@@ -13,9 +13,7 @@ use ulid::Ulid;
 use utoipa::ToSchema;
 use validator::Validate;
 
-use crate::auth::hash_password;
-
-use crate::auth::RegisterPayload;
+use crate::api::auth::{hash_password, RegisterPayload};
 
 #[derive(
     Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable, ToSchema, Identifiable,

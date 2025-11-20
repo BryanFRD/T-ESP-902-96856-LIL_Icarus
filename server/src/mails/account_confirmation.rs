@@ -26,7 +26,7 @@ pub async fn send_confirmation_mail(
         .replace("{{site_name}}", "Icarus")
         .replace("{{first_name}}", &first_name)
         .replace("{{confirm_url}}", &url)
-        .replace("{{expiry_hours}}", "0.17")
+        .replace("{{expiry_hours}}", "1")
         .replace("{{support_email}}", "support@icarus-cyber.fr")
         .replace("{{year}}", &year);
 

@@ -1,13 +1,9 @@
 #![allow(clippy::needless_for_each)]
 
-mod auth;
+mod api;
 mod mails;
 mod schema;
 mod state;
-mod status;
-mod swagger;
-mod teams;
-mod users;
 mod utils;
 mod vault;
 

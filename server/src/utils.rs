@@ -1,6 +1,6 @@
 use std::vec;
 
-use crate::swagger::ApiDoc;
+use crate::api::swagger::ApiDoc;
 use axum::Router;
 use http::{HeaderName, HeaderValue, Method};
 use tower_cookies::CookieManagerLayer;
@@ -12,7 +12,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::state::GlobalState;
 use crate::vault::get_secrets;
-use crate::{auth, status, teams, users};
+use crate::api::{auth, status, teams, users};
 
 pub fn start_logger() {
     tracing_subscriber::fmt()

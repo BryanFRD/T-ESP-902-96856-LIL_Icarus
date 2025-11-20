@@ -1,7 +1,7 @@
+use crate::api::teams::{does_team_exist, is_team_owner_or_moderator, TeamMember, TeamRole};
 use crate::{
     schema::teams_invitations,
     state::GlobalState,
-    teams::{does_team_exist, is_team_owner_or_moderator},
 };
 
 use super::{InvitationError, TeamInvitation};
@@ -145,10 +145,10 @@ pub fn consume_invitation_by_token(
     }
 
     diesel::insert_into(teams_members::table)
-        .values(&crate::teams::TeamMember {
+        .values(&TeamMember {
             team_id: invitation.team_id.clone(),
             user_id: joiner_user_id.to_string(),
-            role: crate::teams::TeamRole::Member,
+            role: TeamRole::Member,
             created_at: chrono::Utc::now().naive_utc(),
             updated_at: chrono::Utc::now().naive_utc(),
         })

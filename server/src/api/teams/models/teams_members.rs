@@ -3,7 +3,7 @@ use diesel::{
     prelude::{Associations, Identifiable, Insertable, Queryable},
 };
 
-use crate::{
+use crate::api::{
     teams::{TeamRole, models::teams::Team},
     users::User,
 };

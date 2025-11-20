@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::status::StatusEnum;
+use crate::api::status::StatusEnum;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Secrets {

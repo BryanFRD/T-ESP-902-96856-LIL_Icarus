@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::{teams::Team, users::User};
+use crate::api::{teams::Team, users::User};
 
 #[derive(Debug, Clone, Deserialize, ToSchema)]
 pub struct CreateTeam {

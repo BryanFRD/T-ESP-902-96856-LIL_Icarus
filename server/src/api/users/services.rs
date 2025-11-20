@@ -1,7 +1,7 @@
-use crate::auth::{self, RegisterPayload, admin_middleware, hash_password};
+use crate::api::auth::{self, RegisterPayload, admin_middleware, hash_password};
 use crate::schema::users::dsl::{users, id, username, first_name, last_name, email, password_hash, avatar_url};
 use crate::state::GlobalState;
-use crate::users::UserError;
+use crate::api::users::UserError;
 use axum::extract::multipart::Multipart;
 use axum::middleware::from_fn;
 use axum::routing::{delete, get, patch, post};
@@ -244,7 +244,7 @@ pub fn update_user_fields(
         payload
             .new_password
             .as_ref()
-            .map(|val| password_hash.eq(crate::auth::hash_password(val))),
+            .map(|val| password_hash.eq(auth::hash_password(val))),
     );
 
     // Only update if there is at least one field to set

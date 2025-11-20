@@ -6,15 +6,15 @@ use diesel::{
 };
 use sha2::{Digest, Sha256};
 
-use crate::{
+use crate::api::{
     auth::{
         self,
         endpoints::reset_password,
         models::{AddPasswordResetToken, PasswordResetToken},
     },
-    state::GlobalState,
     users::UserError,
 };
+use crate::state::GlobalState;
 
 pub fn get_routes(state: GlobalState) -> Router {
     Router::new()

@@ -1,4 +1,4 @@
-use crate::teams::TeamError;
+use crate::api::teams::TeamError;
 use diesel::{r2d2::PoolError, result::Error as DieselError};
 use thiserror::Error;
 

@@ -1,7 +1,7 @@
 use diesel::{r2d2::PoolError, result::Error as DieselError};
 use thiserror::Error;
 
-use crate::users::UserError;
+use crate::api::users::UserError;
 
 #[derive(Debug, Error)]
 pub enum TeamError {

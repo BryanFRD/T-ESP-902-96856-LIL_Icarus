@@ -1,11 +1,11 @@
 use super::endpoints;
 use crate::{
-    teams::invitations::endpoints as invitation_endpoints,
-    auth,
+    api::teams::invitations::endpoints as invitation_endpoints,
     state::GlobalState,
-    teams::{Team, TeamError, TeamMember, TeamReturn, TeamRole, UpdateTeam},
-    users::{User, UserError, get_user_by_id},
+    api::teams::{Team, TeamError, TeamMember, TeamReturn, TeamRole, UpdateTeam},
+    api::users::{User, UserError, get_user_by_id},
 };
+use crate::api::auth;
 use axum::{
     Router,
     middleware::from_fn,
@@ -26,7 +26,7 @@ pub fn get_routes(state: &GlobalState) -> axum::Router {
         .route("/{id}", delete(endpoints::delete_team))
         .route("/{id}", patch(endpoints::update_team))
         .route("/me", post(endpoints::create_team))
-        .layer(from_fn(crate::auth::pentester_middleware))
+        .layer(from_fn(auth::pentester_middleware))
         .route("/me", get(endpoints::get_my_teams))
         .layer(from_fn(auth::middleware))
         .route(
