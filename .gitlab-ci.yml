@@ -66,7 +66,7 @@ stages:
       else
         TAG="-t app-dev:latest"
       fi
-    - buildah bud $TAG .
+    - buildah bud --storage-driver=vfs $TAG .
 
 ✈_deploy_dev:
   image: quay.io/buildah/stable:latest
@@ -77,9 +77,9 @@ stages:
     - when: manual
   script:
     - echo "Pushing dev image to registry..."
-    - echo $DOCKER_REGISTRY_PASSWORD_DEV | buildah login --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
-    - buildah tag app-dev:latest $DOCKER_REGISTRY/app-dev:latest
-    - buildah push $DOCKER_REGISTRY/app-v:latest
+    - echo $DOCKER_REGISTRY_PASSWORD_DEV | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
+    - buildah tag --storage-driver=vfs app-dev:latest $DOCKER_REGISTRY/app-dev:latest
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app-dev:latest
   allow_failure: true
 
 ✈_deploy_prod:
@@ -90,6 +90,6 @@ stages:
       when: on_success
   script:
     - echo "Pushing production image to registry..."
-    - echo $DOCKER_REGISTRY_PASSWORD_PROD | buildah login --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
-    - buildah tag app:latest $DOCKER_REGISTRY/app:latest
-    - buildah push $DOCKER_REGISTRY/app:latest
+    - echo $DOCKER_REGISTRY_PASSWORD_PROD | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
+    - buildah tag --storage-driver=vfs app:latest $DOCKER_REGISTRY/app:latest
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app:latest
