@@ -31,6 +31,7 @@ stages:
       when: on_success
   script:
     - echo "Running cargo clippy ..."
+    - rustup component add clippy
     - cargo clippy -- -W clippy::pedantic -Dwarnings
 
 🧪_test:
@@ -78,7 +79,7 @@ stages:
     - echo "Pushing dev image to registry..."
     - echo $DOCKER_REGISTRY_PASSWORD_DEV | buildah login --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
     - buildah tag app-dev:latest $DOCKER_REGISTRY/app-dev:latest
-    - buildah push $DOCKER_REGISTRY/app-dev:latest
+    - buildah push $DOCKER_REGISTRY/app-v:latest
   allow_failure: true
 
 ✈_deploy_prod:
