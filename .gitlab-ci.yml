@@ -46,7 +46,8 @@ stages:
   before_script:
     - echo "Installing test dependencies..."
     - rustup component add llvm-tools-preview
-    - cargo install cargo-llvm-cov cargo-nextest
+    - curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+    - cargo binstall --no-confirm cargo-llvm-cov cargo-nextest
   script:
     - echo "Running tests with coverage..."
     - mkdir -p coverage test-results
