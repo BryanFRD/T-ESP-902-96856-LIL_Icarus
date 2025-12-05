@@ -7,5 +7,5 @@ target
 
 # Test and coverage reports
 coverage/
-test-results/
+reports/
 .sonar/

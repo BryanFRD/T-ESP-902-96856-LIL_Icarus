@@ -31,7 +31,13 @@ stages:
   script:
     - echo "Running cargo clippy ..."
     - rustup component add clippy
-    - cargo clippy -- -W clippy::pedantic -Dwarnings
+    - mkdir -p reports
+    - cargo clippy --workspace --all-features --message-format=json -- -W clippy::pedantic -Dwarnings > reports/clippy-report.json || true
+    - cargo clippy --workspace --all-features -- -W clippy::pedantic -Dwarnings
+  artifacts:
+    paths:
+      - reports/clippy-report.json
+    expire_in: 30 days
 
 🧪_test:
   image: rust:1.87
@@ -50,18 +56,15 @@ stages:
     - cargo binstall --no-confirm cargo-llvm-cov
   script:
     - echo "Running tests with coverage..."
-    - mkdir -p coverage test-results
+    - mkdir -p coverage
     - cargo llvm-cov --all-features --workspace --lcov --output-path coverage/lcov.info || echo "No tests found, coverage report may be empty"
-    - echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="placeholder" tests="0" failures="0" errors="0" skipped="0"></testsuite></testsuites>' > test-results/junit.xml
   artifacts:
     reports:
-      junit: test-results/junit.xml
       coverage_report:
         coverage_format: cobertura
         path: coverage/lcov.info
     paths:
       - coverage/
-      - test-results/
     expire_in: 30 days
 
 📊_sonar:
@@ -69,6 +72,7 @@ stages:
   stage: sonar
   dependencies:
     - 🧪_test
+    - 📏_clippy
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
