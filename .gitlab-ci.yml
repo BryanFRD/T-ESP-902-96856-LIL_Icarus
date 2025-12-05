@@ -50,12 +50,12 @@ stages:
   before_script:
     - echo "Installing test dependencies..."
     - rustup component add llvm-tools-preview
-    - cargo install cargo-llvm-cov cargo2junit
+    - cargo install cargo-llvm-cov cargo-nextest
   script:
     - echo "Running tests with coverage..."
     - mkdir -p coverage test-results
-    - cargo llvm-cov --all-features --workspace --lcov --output-path coverage/lcov.info
-    - cargo test --workspace -- -Z unstable-options --format json --report-time | cargo2junit > test-results/junit.xml
+    - cargo llvm-cov nextest --all-features --workspace --lcov --output-path coverage/lcov.info
+    - find target/nextest -name "junit.xml" -exec cp {} test-results/junit.xml \; || echo "Warning: JUnit report not found"
   artifacts:
     reports:
       junit: test-results/junit.xml
