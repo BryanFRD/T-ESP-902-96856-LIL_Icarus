@@ -59,24 +59,43 @@ stages:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
   script:
-    - echo "Building Docker image with Buildah..."
+    - echo "Building Docker images with Buildah..."
     - |
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
-        TAG="-t app:latest -t app-dev:latest"
+        # Build both tags for main branch
+        buildah bud --storage-driver=vfs -t app:latest -t app-dev:latest .
+        # Export both images as tar
+        buildah push --storage-driver=vfs app:latest oci-archive:app-latest.tar
+        buildah push --storage-driver=vfs app-dev:latest oci-archive:app-dev-latest.tar
       else
-        TAG="-t app-dev:latest"
+        # Build only dev tag for merge requests
+        buildah bud --storage-driver=vfs -t app-dev:latest .
+        buildah push --storage-driver=vfs app-dev:latest oci-archive:app-dev-latest.tar
       fi
-    - buildah bud --storage-driver=vfs $TAG .
+  artifacts:
+    paths:
+      - app-latest.tar
+      - app-dev-latest.tar
+    expire_in: 1 hour
 
 ✈_deploy_dev:
   image: quay.io/buildah/stable:latest
   stage: deploy
+  dependencies:
+    - 🛠_build
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
     - when: manual
   script:
-    - echo "Pushing dev image to registry..."
+    - echo "Importing and pushing dev image..."
+    # Import the image from tar
+    - buildah pull --storage-driver=vfs oci-archive:app-dev-latest.tar
+    # Get the imported image ID
+    - IMAGE_ID=$(buildah images --storage-driver=vfs --format "{{.ID}}" | head -n 1)
+    # Tag the image
+    - buildah tag --storage-driver=vfs $IMAGE_ID app-dev:latest
+    # Push to registry
     - echo $DOCKER_REGISTRY_PASSWORD_DEV | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
     - buildah tag --storage-driver=vfs app-dev:latest $DOCKER_REGISTRY/app-dev:latest
     - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app-dev:latest
@@ -85,11 +104,20 @@ stages:
 ✈_deploy_prod:
   image: quay.io/buildah/stable:latest
   stage: deploy
+  dependencies:
+    - 🛠_build
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   script:
-    - echo "Pushing production image to registry..."
+    - echo "Importing and pushing production image..."
+    # Import the image from tar
+    - buildah pull --storage-driver=vfs oci-archive:app-latest.tar
+    # Get the imported image ID
+    - IMAGE_ID=$(buildah images --storage-driver=vfs --format "{{.ID}}" | head -n 1)
+    # Tag the image
+    - buildah tag --storage-driver=vfs $IMAGE_ID app:latest
+    # Push to registry
     - echo $DOCKER_REGISTRY_PASSWORD_PROD | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
     - buildah tag --storage-driver=vfs app:latest $DOCKER_REGISTRY/app:latest
     - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app:latest
