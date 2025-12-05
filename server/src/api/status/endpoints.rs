@@ -17,7 +17,7 @@ use super::models::Status;
 pub async fn get_status(State(state): State<GlobalState>) -> impl IntoResponse {
     let secrets = state.get_secrets();
     let status = secrets.status.clone();
-    let status_message = secrets.status_message.clone();
+    let status_message = "Test".to_string();
 
     (StatusCode::OK, Json(Status::new(status, status_message))).into_response()
 }
