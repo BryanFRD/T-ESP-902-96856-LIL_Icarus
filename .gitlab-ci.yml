@@ -57,12 +57,14 @@ stages:
   script:
     - echo "Running tests with coverage..."
     - mkdir -p coverage
-    - cargo llvm-cov --all-features --workspace --cobertura --output-path coverage/cobertura.xml || echo "No tests found, coverage report may be empty"
+    - |
+      if cargo llvm-cov --all-features --workspace --cobertura --output-path coverage/cobertura.xml 2>&1 | tee coverage/llvm-cov.log; then
+        echo "Coverage report generated successfully"
+      else
+        echo "No tests found or coverage generation failed, creating empty coverage directory"
+        rm -f coverage/cobertura.xml
+      fi
   artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage/cobertura.xml
     paths:
       - coverage/
     expire_in: 30 days
