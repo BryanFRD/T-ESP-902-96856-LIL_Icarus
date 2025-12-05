@@ -21,8 +21,6 @@ stages:
 📏_clippy:
   image: rust:1.87
   stage: test
-  needs:
-    - job: 🔎_check
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
@@ -38,8 +36,6 @@ stages:
 🧪_test:
   image: rust:1.87
   stage: test
-  needs:
-    - job: 🔎_check
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
@@ -55,7 +51,12 @@ stages:
     - echo "Running tests with coverage..."
     - mkdir -p coverage test-results
     - cargo llvm-cov nextest --all-features --workspace --lcov --output-path coverage/lcov.info
-    - find target/nextest -name "junit.xml" -exec cp {} test-results/junit.xml \; || echo "Warning: JUnit report not found"
+    - |
+      if [ -f target/nextest/default/junit.xml ]; then
+        cp target/nextest/default/junit.xml test-results/junit.xml
+      else
+        echo "Warning: JUnit report not found at expected location"
+      fi
   artifacts:
     reports:
       junit: test-results/junit.xml
