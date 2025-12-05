@@ -4,3 +4,8 @@ target
 .idea
 .env
 .claude
+
+# Test and coverage reports
+coverage/
+test-results/
+.sonar/
