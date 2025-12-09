@@ -2,7 +2,7 @@ use super::endpoints;
 use crate::{
     api::teams::invitations::endpoints as invitation_endpoints,
     state::GlobalState,
-    api::teams::{Team, TeamError, TeamMember, TeamReturn, TeamRole, UpdateTeam},
+    api::teams::{Team, TeamError, TeamMember, TeamMemberWithRole, TeamReturn, TeamRole, UpdateTeam},
     api::users::{User, UserError, get_user_by_id},
 };
 use crate::api::auth;
@@ -48,6 +48,10 @@ pub fn get_routes(state: &GlobalState) -> axum::Router {
         .route(
             "/{team_id}/members/{member_id}",
             delete(endpoints::remove_member),
+        )
+        .route(
+            "/{team_id}/members/{member_id}",
+            patch(endpoints::update_member_role),
         )
         .with_state(state.clone())
 }
@@ -119,9 +123,13 @@ pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamRetu
         .select((TeamMember::as_select(), User::as_select()))
         .load::<(TeamMember, User)>(&mut conn)?;
 
-    let mut members_map: HashMap<String, Vec<User>> = HashMap::new();
+    let mut members_map: HashMap<String, Vec<TeamMemberWithRole>> = HashMap::new();
     for (tm, user) in team_members {
-        members_map.entry(tm.team_id).or_default().push(user);
+        members_map.entry(tm.team_id).or_default().push(TeamMemberWithRole {
+            team_role: tm.role,
+            user_role: user.role.clone(),
+            user,
+        });
     }
 
     let result = teams_vec
@@ -153,6 +161,48 @@ pub fn get_team_member(
         .optional()?;
 
     Ok(member)
+}
+
+pub fn get_member_role(
+    state: &GlobalState,
+    team_id: &str,
+    user_id: &str,
+) -> Result<Option<TeamRole>, TeamError> {
+    use crate::schema::teams_members::dsl::{role, team_id as tm_team_id, teams_members, user_id as tm_user_id};
+    use diesel::prelude::*;
+
+    let mut conn = state.get_db_conn()?;
+
+    let member_role = teams_members
+        .filter(tm_team_id.eq(team_id))
+        .filter(tm_user_id.eq(user_id))
+        .select(role)
+        .first::<TeamRole>(&mut conn)
+        .optional()?;
+
+    Ok(member_role)
+}
+
+pub fn update_member_role(
+    state: &GlobalState,
+    team_id: &str,
+    user_id: &str,
+    new_role: TeamRole,
+) -> Result<(), TeamError> {
+    use crate::schema::teams_members::dsl::{role, team_id as tm_team_id, teams_members, user_id as tm_user_id};
+    use diesel::prelude::*;
+
+    let mut conn = state.get_db_conn()?;
+
+    diesel::update(
+        teams_members
+            .filter(tm_team_id.eq(team_id))
+            .filter(tm_user_id.eq(user_id)),
+    )
+    .set(role.eq(new_role))
+    .execute(&mut conn)?;
+
+    Ok(())
 }
 
 pub fn remove_team_member(

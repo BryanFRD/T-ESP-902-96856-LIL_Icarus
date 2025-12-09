@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::api::{teams::Team, users::User};
+use crate::api::teams::TeamRole;
 
 #[derive(Debug, Clone, Deserialize, ToSchema)]
 pub struct CreateTeam {
@@ -21,7 +22,7 @@ pub struct UpdateTeam {
 
 #[derive(Serialize, Debug, Clone, ToSchema)]
 pub struct TeamReturn {
-    #[schema(example = "01F8MECHZX3TBDSZ7XK4F5G9ZQ")]
+    #[schema(example = "xxxxxxxxxxxxxxxxxxxxxx")]
     pub id: String,
     #[schema(example = "Example Team")]
     pub name: String,
@@ -29,11 +30,11 @@ pub struct TeamReturn {
     pub description: String,
     pub created_at: String,
     pub updated_at: String,
-    pub members: Vec<User>,
+    pub members: Vec<TeamMemberWithRole>,
 }
 
 impl TeamReturn {
-    pub fn new(team: Team, members: Vec<User>) -> Self {
+    pub fn new(team: Team, members: Vec<TeamMemberWithRole>) -> Self {
         TeamReturn {
             id: team.id,
             name: team.name,
@@ -43,4 +44,19 @@ impl TeamReturn {
             members,
         }
     }
+}
+
+#[derive(Serialize, Debug, Clone, ToSchema)]
+pub struct TeamMemberWithRole {
+    #[serde(rename = "team_role")]
+    pub team_role: TeamRole,
+    #[serde(rename = "user_role")]
+    pub user_role: crate::api::users::UserRole,
+    #[serde(flatten)]
+    pub user: User,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct UpdateMemberRolePayload {
+    pub role: TeamRole,
 }

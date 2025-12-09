@@ -5,10 +5,12 @@ use diesel::{
     serialize::{Output, ToSql},
     sql_types::Text,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Debug, Clone, Serialize, FromSqlRow, AsExpression)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromSqlRow, AsExpression, ToSchema, PartialEq, Eq)]
 #[diesel(sql_type = Text)]
+#[serde(rename_all = "lowercase")]
 pub enum TeamRole {
     Owner,
     Moderator,
