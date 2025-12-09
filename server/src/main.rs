@@ -7,6 +7,9 @@ mod state;
 mod utils;
 mod vault;
 
+#[cfg(test)]
+mod tests;
+
 #[tokio::main]
 async fn main() {
     utils::start_logger();

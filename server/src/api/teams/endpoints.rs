@@ -11,8 +11,8 @@ use crate::state::GlobalState;
 use crate::api::{
     auth::JwtClaims,
     teams::{
-        TeamReturn, UpdateTeam,
-        models::{CreateTeam, Team},
+        TeamReturn, TeamRole, UpdateTeam,
+        models::{CreateTeam, Team, UpdateMemberRolePayload},
     },
 };
 
@@ -285,4 +285,86 @@ pub async fn remove_member(
     }
 
     StatusCode::NO_CONTENT.into_response()
+}
+
+#[utoipa::path(
+    patch,
+    path = "/v1/teams/{team_id}/members/{member_id}",
+    tag = "Teams",
+    request_body = UpdateMemberRolePayload,
+    responses(
+        (status = 200, description = "Member role updated"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Team member not found"),
+    ),
+)]
+pub async fn update_member_role(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    Path((team_id, member_id)): Path<(Ulid, Ulid)>,
+    Json(payload): Json<UpdateMemberRolePayload>,
+) -> impl IntoResponse {
+    let team_id = team_id.to_string();
+    let member_id = member_id.to_string();
+    let requester_id = jwt_user.sub.to_string();
+
+    match super::get_team_member(&state, &team_id, &member_id) {
+        Ok(Some(_)) => {}
+        Ok(None) => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json("error.team.member.notFound"),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            error!("Failed to fetch team member: {:?}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
+        }
+    }
+
+    if !jwt_user.is_admin() {
+        let actor_role = match super::get_member_role(&state, &team_id, &requester_id) {
+            Ok(Some(role)) => role,
+            Ok(None) => {
+                return (
+                    StatusCode::FORBIDDEN,
+                    Json("error.user.auth.forbidden"),
+                )
+                    .into_response();
+            }
+            Err(e) => {
+                error!("Failed to fetch requester role: {:?}", e);
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json("error.server.internalError"),
+                )
+                    .into_response();
+            }
+        };
+
+        if actor_role != TeamRole::Owner {
+            return (
+                StatusCode::FORBIDDEN,
+                Json("error.user.auth.forbidden"),
+            )
+                .into_response();
+        }
+    }
+
+    if let Err(e) = super::update_member_role(&state, &team_id, &member_id, payload.role) {
+        error!("Failed to update member role: {:?}", e);
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json("error.server.internalError"),
+        )
+            .into_response();
+    }
+
+    StatusCode::OK.into_response()
 }
