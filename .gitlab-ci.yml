@@ -58,17 +58,17 @@ stages:
     - echo "Running tests with coverage..."
     - mkdir -p coverage
     - |
-      if cargo llvm-cov --all-features --workspace --cobertura --output-path coverage/cobertura.xml 2>&1 | tee coverage/llvm-cov.log; then
+      if cargo llvm-cov --all-features --workspace --lcov --output-path coverage/lcov.info 2>&1 | tee coverage/llvm-cov.log; then
         echo "Coverage report generated successfully"
       else
         echo "No tests found or coverage generation failed, creating empty coverage directory"
-        rm -f coverage/cobertura.xml
+        rm -f coverage/lcov.info
       fi
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: coverage/cobertura.xml
+        path: coverage/lcov.info
     paths:
       - coverage/
     expire_in: 30 days
