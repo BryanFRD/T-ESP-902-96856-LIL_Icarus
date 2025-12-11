@@ -65,6 +65,10 @@ stages:
         rm -f coverage/cobertura.xml
       fi
   artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura.xml
     paths:
       - coverage/
     expire_in: 30 days
