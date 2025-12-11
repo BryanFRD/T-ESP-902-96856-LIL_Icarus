@@ -54,15 +54,17 @@ stages:
     - rustup component add llvm-tools-preview
     - curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
     - cargo binstall --no-confirm cargo-llvm-cov
+    - apt-get update && apt-get install -y python3
   script:
     - echo "Running tests with coverage..."
     - mkdir -p coverage
     - |
-      if cargo llvm-cov --all-features --workspace --cobertura --output-path coverage/cobertura.xml 2>&1 | tee coverage/llvm-cov.log; then
-        echo "Coverage report generated successfully"
+      if cargo llvm-cov --all-features --workspace --lcov --output-path coverage/lcov.info 2>&1 | tee coverage/llvm-cov.log; then
+        echo "LCOV coverage report generated successfully"
+        echo "Converting LCOV to SonarQube Generic Coverage XML format..."
+        python3 scripts/lcov_to_generic_coverage.py coverage/lcov.info coverage/generic-coverage.xml
       else
-        echo "No tests found or coverage generation failed, creating empty coverage directory"
-        rm -f coverage/cobertura.xml
+        echo "No tests found or coverage generation failed"
       fi
   artifacts:
     paths:
