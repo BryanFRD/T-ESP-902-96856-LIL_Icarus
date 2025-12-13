@@ -1,5 +1,5 @@
 # ─── Builder (all on Debian Bookworm) ────────────────────────────────────────────
-FROM rust:1.87.0-bookworm AS builder
+FROM rust:1.91.0-bookworm AS builder
 
 RUN apt-get update && \
     apt-get install -y \

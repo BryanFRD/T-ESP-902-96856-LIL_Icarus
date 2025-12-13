@@ -118,16 +118,14 @@ pub async fn update_me(
         }
     };
 
-    if payload.new_password.is_some() {
-        if let Some(ref current_pw) = payload.password {
-            let hashed = hash_password(current_pw);
-            if hashed != user.password_hash {
-                return (
-                    StatusCode::UNAUTHORIZED,
-                    Json("error.user.auth.unauthorized"),
-                )
-                    .into_response();
-            }
+    if payload.new_password.is_some() && let Some(ref current_pw) = payload.password {
+        let hashed = hash_password(current_pw);
+        if hashed != user.password_hash {
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json("error.user.auth.unauthorized"),
+            )
+                .into_response();
         }
     }
 

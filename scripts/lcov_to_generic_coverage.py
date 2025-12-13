@@ -18,29 +18,43 @@ Generic Coverage XML format:
 """
 
 import sys
+import os
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 
-def parse_lcov(lcov_path: str) -> Dict[str, List[Tuple[int, bool]]]:
+def parse_lcov(lcov_path: str, project_root: str) -> Dict[str, List[Tuple[int, bool]]]:
     """
-    Parse LCOV file and extract coverage data.
+    Parse LCOV file and extract coverage data with relative paths.
+
+    Args:
+        lcov_path: Path to LCOV file
+        project_root: Project root directory for converting to relative paths
 
     Returns:
-        Dictionary mapping file paths to list of (line_number, is_covered) tuples
+        Dictionary mapping relative file paths to list of (line_number, is_covered) tuples
     """
     coverage_data: Dict[str, List[Tuple[int, bool]]] = {}
     current_file: str | None = None
+    project_root_path = Path(project_root).resolve()
 
     with open(lcov_path, 'r', encoding='utf-8') as f:
         for line in f:
             line = line.strip()
 
             if line.startswith('SF:'):
-                # Source file
-                current_file = line[3:]  # Remove 'SF:' prefix
-                coverage_data[current_file] = []
+                # Source file - convert to relative path
+                absolute_path = line[3:]  # Remove 'SF:' prefix
+                try:
+                    # Convert absolute path to relative path from project root
+                    relative_path = Path(absolute_path).resolve().relative_to(project_root_path)
+                    current_file = str(relative_path)
+                    coverage_data[current_file] = []
+                except ValueError:
+                    # Path is not relative to project root, keep as is
+                    current_file = absolute_path
+                    coverage_data[current_file] = []
 
             elif line.startswith('DA:'):
                 # Data line: DA:line_number,hit_count
@@ -102,16 +116,18 @@ def indent_xml(elem: ET.Element, level: int = 0) -> None:
             elem.tail = i
 
 
-def convert_lcov_to_generic_coverage(lcov_path: str, output_path: str) -> None:
+def convert_lcov_to_generic_coverage(lcov_path: str, output_path: str, project_root: str) -> None:
     """
     Convert LCOV file to SonarQube Generic Coverage XML format.
 
     Args:
         lcov_path: Path to input LCOV file
         output_path: Path to output XML file
+        project_root: Project root directory for relative paths
     """
     print(f"Reading LCOV file: {lcov_path}")
-    coverage_data = parse_lcov(lcov_path)
+    print(f"Project root: {project_root}")
+    coverage_data = parse_lcov(lcov_path, project_root)
 
     total_files = len(coverage_data)
     total_lines = sum(len(lines) for lines in coverage_data.values())
@@ -144,13 +160,17 @@ def convert_lcov_to_generic_coverage(lcov_path: str, output_path: str) -> None:
 
 def main() -> int:
     """Main entry point."""
-    if len(sys.argv) != 3:
-        print("Usage: lcov_to_generic_coverage.py <input_lcov> <output_xml>")
+    if len(sys.argv) < 3 or len(sys.argv) > 4:
+        print("Usage: lcov_to_generic_coverage.py <input_lcov> <output_xml> [project_root]")
         print("Example: lcov_to_generic_coverage.py coverage/lcov.info coverage/generic-coverage.xml")
+        print("         lcov_to_generic_coverage.py coverage/lcov.info coverage/generic-coverage.xml /builds/project")
+        print("")
+        print("If project_root is not specified, the current working directory is used.")
         return 1
 
     lcov_path = sys.argv[1]
     output_path = sys.argv[2]
+    project_root = sys.argv[3] if len(sys.argv) == 4 else os.getcwd()
 
     # Validate input file exists
     if not Path(lcov_path).exists():
@@ -162,7 +182,7 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        convert_lcov_to_generic_coverage(lcov_path, output_path)
+        convert_lcov_to_generic_coverage(lcov_path, output_path, project_root)
         return 0
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)

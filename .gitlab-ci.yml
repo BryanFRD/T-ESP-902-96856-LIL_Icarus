@@ -5,7 +5,7 @@ stages:
   - deploy
 
 🔎_check:
-  image: rust:1.87
+  image: rust:1.91
   stage: test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -19,7 +19,7 @@ stages:
     - cargo check
 
 📏_clippy:
-  image: rust:1.87
+  image: rust:1.91
   stage: test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -40,8 +40,14 @@ stages:
     expire_in: 30 days
 
 🧪_test:
-  image: rust:1.87
+  image: rust:1.91
   stage: test
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
@@ -59,7 +65,7 @@ stages:
     - echo "Running tests with coverage..."
     - mkdir -p coverage
     - |
-      if cargo llvm-cov --all-features --workspace --lcov --output-path coverage/lcov.info 2>&1 | tee coverage/llvm-cov.log; then
+      if cargo llvm-cov --all-features -p server --bin server --lcov --output-path coverage/lcov.info 2>&1 | tee coverage/llvm-cov.log; then
         echo "LCOV coverage report generated successfully"
         echo "Converting LCOV to SonarQube Generic Coverage XML format..."
         python3 scripts/lcov_to_generic_coverage.py coverage/lcov.info coverage/generic-coverage.xml

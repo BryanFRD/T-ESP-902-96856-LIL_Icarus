@@ -124,10 +124,8 @@ pub fn consume_invitation_by_token(
         return Err(InvitationError::Canceled);
     }
 
-    if let Some(exp) = invitation.expires_at {
-        if chrono::Utc::now().naive_utc() > exp {
-            return Err(InvitationError::Expired);
-        }
+    if let Some(exp) = invitation.expires_at &&  chrono::Utc::now().naive_utc() > exp {
+        return Err(InvitationError::Expired);
     }
 
     if invitation.used_count >= invitation.max_uses {

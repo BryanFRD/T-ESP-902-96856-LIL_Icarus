@@ -5,7 +5,7 @@ use std::fmt::Write;
 #[cfg(not(debug_assertions))]
 use tower_cookies::cookie::SameSite;
 use tower_cookies::{Cookie, Cookies, cookie::time};
-use tracing::error;
+use tracing::{error, info};
 use validator::Validate;
 
 use crate::api::{
@@ -165,21 +165,27 @@ pub async fn register(
         }
     };
 
-    let resend = state.get_resend().lock().await;
-    if let Err(e) = send_confirmation_mail(
-        encrypted_token,
-        user.first_name.clone(),
-        user.email.clone(),
-        &resend,
-    )
-    .await
-    {
-        error!("Failed to send confirmation email: {}", e);
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json("error.server.internalError"),
+    // Skip email sending in test mode (when using test API key)
+    let secrets = state.get_secrets();
+    if secrets.resend_api_key == "test_resend_api_key" {
+        info!("Test mode: Skipping confirmation email send");
+    } else {
+        let resend = state.get_resend().lock().await;
+        if let Err(e) = send_confirmation_mail(
+            encrypted_token,
+            user.first_name.clone(),
+            user.email.clone(),
+            &resend,
         )
-            .into_response();
+        .await
+        {
+            error!("Failed to send confirmation email: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json("error.server.internalError"),
+            )
+                .into_response();
+        }
     }
 
     (StatusCode::OK).into_response()
@@ -261,16 +267,23 @@ pub async fn request_password_reset(
             .into_response();
     }
 
-    let resend = state.get_resend().lock().await;
-    match send_reset_password_mail(token, user.first_name, payload.reset_email, &resend).await {
-        Ok(_) => (StatusCode::OK).into_response(),
-        Err(e) => {
-            error!("Error while sending password mail: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response()
+    // Skip email sending in test mode (when using test API key)
+    let secrets = state.get_secrets();
+    if secrets.resend_api_key == "test_resend_api_key" {
+        info!("Test mode: Skipping password reset email send");
+        (StatusCode::OK).into_response()
+    } else {
+        let resend = state.get_resend().lock().await;
+        match send_reset_password_mail(token, user.first_name, payload.reset_email, &resend).await {
+            Ok(_) => (StatusCode::OK).into_response(),
+            Err(e) => {
+                error!("Error while sending password mail: {e}");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json("error.server.internalError"),
+                )
+                    .into_response()
+            }
         }
     }
 }

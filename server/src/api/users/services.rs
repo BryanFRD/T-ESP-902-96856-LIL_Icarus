@@ -203,21 +203,15 @@ pub fn check_update_conflicts(
         .first::<(String, String, String, String)>(&mut conn)
         .optional()?;
 
-    if let Some((db_email, db_username, db_first, db_last)) = existing {
-        if let Some(ref new_email) = payload.email {
-            if &db_email == new_email {
-                return Ok(Some("email".to_string()));
-            }
+    if let Some((db_email, db_username, db_first, db_last)) = existing && let Some(ref new_email) = payload.email {
+        if &db_email == new_email {
+            return Ok(Some("email".to_string()));
         }
-        if let Some(ref new_username) = payload.username {
-            if &db_username == new_username {
-                return Ok(Some("username".to_string()));
-            }
+        if let Some(ref new_username) = payload.username && &db_username == new_username {
+            return Ok(Some("username".to_string()));
         }
-        if let (Some(new_first), Some(new_last)) = (&payload.first_name, &payload.last_name) {
-            if &db_first == new_first && &db_last == new_last {
-                return Ok(Some("name".to_string()));
-            }
+        if let (Some(new_first), Some(new_last)) = (&payload.first_name, &payload.last_name) && &db_first == new_first && &db_last == new_last {
+            return Ok(Some("name".to_string()));
         }
     }
 
@@ -401,9 +395,7 @@ pub fn update_user_avatar(
 
 pub fn delete_avatar_file(filename: &str) {
     let file_path = format!("dist/avatars/{filename}");
-    if Path::new(&file_path).exists() {
-        if let Err(e) = fs::remove_file(&file_path) {
-            tracing::error!("Failed to delete avatar file {}: {}", filename, e);
-        }
+    if Path::new(&file_path).exists() && let Err(e) = fs::remove_file(&file_path) {
+        tracing::error!("Failed to delete avatar file {}: {}", filename, e);
     }
 }
