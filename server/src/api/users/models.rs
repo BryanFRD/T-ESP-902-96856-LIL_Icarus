@@ -142,7 +142,7 @@ impl From<String> for UserRole {
     }
 }
 
-#[derive(Deserialize, Clone, Debug, Validate, ToSchema)]
+#[derive(Deserialize, Serialize, Clone, Debug, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdatePayload {
     #[schema(example = "johndoe")]

@@ -1,8 +1,8 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
-#[derive(Deserialize, Clone, Debug, Validate, ToSchema)]
+#[derive(Deserialize, Serialize, Clone, Debug, Validate, ToSchema)]
 pub struct LoginPayload {
     #[validate(email)]
     #[schema(example = "johndoe@example.com")]
@@ -11,7 +11,7 @@ pub struct LoginPayload {
     pub password: String,
 }
 
-#[derive(Deserialize, Clone, Debug, Validate, ToSchema)]
+#[derive(Deserialize, Serialize, Clone, Debug, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct RegisterPayload {
     #[schema(example = "johndoe")]
@@ -28,14 +28,14 @@ pub struct RegisterPayload {
     pub password: String,
 }
 
-#[derive(Deserialize, Clone, Debug, ToSchema)]
+#[derive(Deserialize, Serialize, Clone, Debug, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ResetPasswordRequestPayload {
     #[schema(example = "johndoe@example.com")]
     pub reset_email: String,
 }
 
-#[derive(Deserialize, Clone, Debug, ToSchema)]
+#[derive(Deserialize, Serialize, Clone, Debug, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ResetPasswordPayload {
     #[schema(
@@ -46,7 +46,7 @@ pub struct ResetPasswordPayload {
     pub new_password: String,
 }
 
-#[derive(Deserialize, Clone, Debug, ToSchema)]
+#[derive(Deserialize, Serialize, Clone, Debug, ToSchema)]
 pub struct ConfirmEmailPayload {
     #[schema(
         example = "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789-_"

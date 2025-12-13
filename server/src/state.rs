@@ -62,4 +62,26 @@ impl GlobalState {
     pub fn get_rand(&self) -> &Mutex<StdRng> {
         &self.rng
     }
+
+    /// Constructeur pour les tests qui accepte un pool de connexions personnalisé
+    #[cfg(test)]
+    pub fn new_with_pool(
+        db_pool: Arc<Pool<ConnectionManager<PgConnection>>>,
+        secrets: Secrets,
+    ) -> Self {
+        // Set JWT_SECRET comme dans le constructeur normal
+        unsafe {
+            std::env::set_var("JWT_SECRET", &secrets.jwt_secret);
+        }
+
+        let resend = Resend::new(&secrets.resend_api_key);
+        let rng = StdRng::seed_from_u64(42); // RNG avec seed fixe pour reproductibilité
+
+        Self {
+            db_pool,
+            resend: Arc::new(Mutex::new(resend)),
+            rng: Arc::new(Mutex::new(rng)),
+            secrets: Arc::new(secrets),
+        }
+    }
 }

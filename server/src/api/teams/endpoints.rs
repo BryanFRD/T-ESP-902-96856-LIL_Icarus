@@ -265,14 +265,13 @@ pub async fn remove_member(
         }
     };
 
-    if requester_id != member.user_id {
-        if let Ok(true) = super::is_team_owner(&state, &team_id, &member.user_id) {
-            return (
-                StatusCode::FORBIDDEN,
-                Json("error.team.member.cannotRemoveOwner"),
-            )
-                .into_response();
-        }
+    if requester_id != member.user_id && let Ok(true) = super::is_team_owner(&state, &team_id, &member.user_id) {
+        return (
+            StatusCode::FORBIDDEN,
+            Json("error.team.member.cannotRemoveOwner"),
+        )
+            .into_response();
+        
     }
 
     if let Err(e) = super::remove_team_member(&state, &team_id, &member.user_id) {
