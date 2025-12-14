@@ -43,11 +43,15 @@ stages:
   image: rust:1.91
   stage: test
   services:
-    - docker:27-dind
+    - postgres:17
   variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_DRIVER: overlay2
+    # PostgreSQL service configuration for integration tests
+    POSTGRES_DB: testdb
+    POSTGRES_USER: testuser
+    POSTGRES_PASSWORD: testpass
+    DATABASE_URL: postgres://testuser:testpass@postgres:5432/testdb
+    # Flag to indicate we're in CI (use service instead of testcontainers)
+    CI_DATABASE: "true"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
