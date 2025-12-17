@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::api::{teams::Team, users::User};
+use crate::api::{teams::{Team, CompanyReturn}, users::User};
 use crate::api::teams::TeamRole;
 
 #[derive(Debug, Clone, Deserialize, ToSchema)]
@@ -31,10 +31,11 @@ pub struct TeamReturn {
     pub created_at: String,
     pub updated_at: String,
     pub members: Vec<TeamMemberWithRole>,
+    pub companies: Vec<CompanyReturn>,
 }
 
 impl TeamReturn {
-    pub fn new(team: Team, members: Vec<TeamMemberWithRole>) -> Self {
+    pub fn new(team: Team, members: Vec<TeamMemberWithRole>, companies: Vec<CompanyReturn>) -> Self {
         TeamReturn {
             id: team.id,
             name: team.name,
@@ -42,6 +43,7 @@ impl TeamReturn {
             created_at: team.created_at.to_string(),
             updated_at: team.updated_at.to_string(),
             members,
+            companies,
         }
     }
 }

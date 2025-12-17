@@ -2,6 +2,9 @@
 pub mod auth;
 
 #[cfg(test)]
+pub mod companies;
+
+#[cfg(test)]
 pub mod users;
 
 #[cfg(test)]

@@ -26,7 +26,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         // Créer le router et le serveur de test
@@ -66,7 +66,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -153,7 +153,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -261,7 +261,7 @@ mod auth_integration_tests {
             "existinguser",
             "existing@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -294,7 +294,7 @@ mod auth_integration_tests {
             "existinguser",
             "existing@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -405,7 +405,7 @@ mod auth_integration_tests {
             "existinguser",
             "different@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -441,7 +441,7 @@ mod auth_integration_tests {
             "differentuser",
             "existing@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -481,7 +481,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -533,7 +533,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "oldpassword",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         // Créer un token de reset valide
@@ -595,7 +595,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         // Créer un token expiré
@@ -628,7 +628,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         // Créer un token de reset valide
@@ -723,7 +723,7 @@ mod auth_integration_tests {
             "resetuser",
             "reset@example.com",
             "oldpassword",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -849,7 +849,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_middleware_test_router(state);
@@ -946,7 +946,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         // Créer un JWT expiré manuellement
@@ -995,7 +995,7 @@ mod auth_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         // Créer un JWT avec un mauvais secret
@@ -1045,7 +1045,7 @@ mod auth_integration_tests {
             "adminuser",
             "admin@example.com",
             "password123",
-            UserRole::Admin,
+            &UserRole::Admin,
         );
 
         let app = create_middleware_test_router(state);
@@ -1089,7 +1089,7 @@ mod auth_integration_tests {
             "pentesteruser",
             "pentester@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_middleware_test_router(state);
@@ -1133,7 +1133,7 @@ mod auth_integration_tests {
             "clientuser",
             "client@example.com",
             "password123",
-            UserRole::Client,
+            &UserRole::Client,
         );
 
         let app = create_middleware_test_router(state);
@@ -1201,7 +1201,7 @@ mod auth_integration_tests {
             "pentesteruser",
             "pentester@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_middleware_test_router(state);
@@ -1245,7 +1245,7 @@ mod auth_integration_tests {
             "adminuser",
             "admin@example.com",
             "password123",
-            UserRole::Admin,
+            &UserRole::Admin,
         );
 
         let app = create_middleware_test_router(state);
@@ -1289,7 +1289,7 @@ mod auth_integration_tests {
             "clientuser",
             "client@example.com",
             "password123",
-            UserRole::Client,
+            &UserRole::Client,
         );
 
         let app = create_middleware_test_router(state);

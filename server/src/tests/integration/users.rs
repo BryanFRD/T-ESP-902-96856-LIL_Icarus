@@ -42,7 +42,7 @@ mod users_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -106,7 +106,7 @@ mod users_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -166,7 +166,7 @@ mod users_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);
@@ -251,7 +251,7 @@ mod users_integration_tests {
             "testuser",
             "test@example.com",
             "password123",
-            UserRole::Pentester,
+            &UserRole::Pentester,
         );
 
         let app = create_test_router(state);

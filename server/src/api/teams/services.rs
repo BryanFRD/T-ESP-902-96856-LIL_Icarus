@@ -1,8 +1,9 @@
 use super::endpoints;
 use crate::{
+    api::teams::companies::endpoints as company_endpoints,
     api::teams::invitations::endpoints as invitation_endpoints,
     state::GlobalState,
-    api::teams::{Team, TeamError, TeamMember, TeamMemberWithRole, TeamReturn, TeamRole, UpdateTeam},
+    api::teams::{Company, CompanyReturn, Team, TeamError, TeamMember, TeamMemberWithRole, TeamReturn, TeamRole, UpdateTeam},
     api::users::{User, UserError, get_user_by_id},
 };
 use crate::api::auth;
@@ -25,9 +26,14 @@ pub fn get_routes(state: &GlobalState) -> axum::Router {
     Router::new()
         .route("/{id}", delete(endpoints::delete_team))
         .route("/{id}", patch(endpoints::update_team))
+        .route("/{team_id}/company", post(company_endpoints::create_company))
+        .route("/{team_id}/company/{company_id}", patch(company_endpoints::update_company))
+        .route("/{team_id}/company/{company_id}", delete(company_endpoints::delete_company))
         .route("/me", post(endpoints::create_team))
         .layer(from_fn(auth::pentester_middleware))
         .route("/me", get(endpoints::get_my_teams))
+        .route("/{team_id}/company", get(company_endpoints::list_companies))
+        .route("/{team_id}/company/{company_id}", get(company_endpoints::get_company))
         .layer(from_fn(auth::middleware))
         .route(
             "/{team_id}/invitations",
@@ -100,7 +106,7 @@ pub fn add_team_member(
 }
 
 pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamReturn>, TeamError> {
-    use crate::schema::{teams, teams_members, users};
+    use crate::schema::{companies, teams, teams_members, users};
 
     let user = match get_user_by_id(state, user_id) {
         Ok(Some(user)) => user,
@@ -132,11 +138,26 @@ pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamRetu
         });
     }
 
+    // Load companies for all teams
+    let companies_data: Vec<Company> = companies::table
+        .filter(companies::team_id.eq_any(&team_ids))
+        .select(Company::as_select())
+        .load::<Company>(&mut conn)?;
+
+    let mut companies_map: HashMap<String, Vec<CompanyReturn>> = HashMap::new();
+    for company in companies_data {
+        companies_map
+            .entry(company.team_id.clone())
+            .or_default()
+            .push(CompanyReturn::from(company));
+    }
+
     let result = teams_vec
         .into_iter()
         .map(|team| {
             let members = members_map.remove(&team.id).unwrap_or_default();
-            TeamReturn::new(team, members)
+            let companies = companies_map.remove(&team.id).unwrap_or_default();
+            TeamReturn::new(team, members, companies)
         })
         .collect();
 
