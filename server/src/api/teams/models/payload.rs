@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 use crate::api::{teams::{Team, CompanyReturn}, users::User};
 use crate::api::teams::TeamRole;
 
-#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct CreateTeam {
     #[schema(example = "Example Team")]
     pub name: String,
@@ -12,7 +12,7 @@ pub struct CreateTeam {
     pub description: String,
 }
 
-#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct UpdateTeam {
     #[schema(example = "Example Team")]
     pub name: Option<String>,
@@ -58,7 +58,7 @@ pub struct TeamMemberWithRole {
     pub user: User,
 }
 
-#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct UpdateMemberRolePayload {
     pub role: TeamRole,
 }
