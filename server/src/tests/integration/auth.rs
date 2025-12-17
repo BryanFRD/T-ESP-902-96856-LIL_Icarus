@@ -792,7 +792,7 @@ mod auth_integration_tests {
     }
 
     // Router de test avec endpoints protégés par middlewares
-    fn create_middleware_test_router(state: crate::state::GlobalState) -> Router {
+    fn create_middleware_test_router(state: &crate::state::GlobalState) -> Router {
         use crate::api::{auth, status, teams, users};
         use tower_cookies::CookieManagerLayer;
 
@@ -816,8 +816,8 @@ mod auth_integration_tests {
 
         // Créer le router complet avec les routes de test ET les routes d'API
         let router_v1 = Router::new()
-            .nest("/teams", teams::get_routes(&state))
-            .nest("/users", users::get_routes(&state))
+            .nest("/teams", teams::get_routes(state))
+            .nest("/users", users::get_routes(state))
             .nest("/auth", auth::get_routes(state.clone()))
             .nest("/status", status::get_routes(state.clone()))
             .merge(protected_route)
@@ -852,7 +852,7 @@ mod auth_integration_tests {
             &UserRole::Pentester,
         );
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Se connecter pour obtenir le cookie auth
@@ -889,7 +889,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
         unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Test: Accéder sans cookie auth
@@ -909,7 +909,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
         unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Test: Accéder avec un JWT invalide
@@ -964,7 +964,7 @@ mod auth_integration_tests {
             .http_only(true)
             .build();
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Test: Accéder avec un JWT expiré
@@ -1013,7 +1013,7 @@ mod auth_integration_tests {
             .http_only(true)
             .build();
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Test: Accéder avec un JWT signé avec le mauvais secret
@@ -1048,7 +1048,7 @@ mod auth_integration_tests {
             &UserRole::Admin,
         );
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Se connecter en tant qu'admin
@@ -1092,7 +1092,7 @@ mod auth_integration_tests {
             &UserRole::Pentester,
         );
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Se connecter en tant que pentester
@@ -1136,7 +1136,7 @@ mod auth_integration_tests {
             &UserRole::Client,
         );
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Se connecter en tant que client
@@ -1172,7 +1172,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
         unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Test: Accéder sans authentification
@@ -1204,7 +1204,7 @@ mod auth_integration_tests {
             &UserRole::Pentester,
         );
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Se connecter en tant que pentester
@@ -1248,7 +1248,7 @@ mod auth_integration_tests {
             &UserRole::Admin,
         );
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Se connecter en tant qu'admin
@@ -1292,7 +1292,7 @@ mod auth_integration_tests {
             &UserRole::Client,
         );
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Se connecter en tant que client
@@ -1328,7 +1328,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
         unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
 
-        let app = create_middleware_test_router(state);
+        let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
 
         // Test: Accéder sans authentification

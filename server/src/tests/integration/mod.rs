@@ -9,3 +9,6 @@ pub mod users;
 
 #[cfg(test)]
 pub mod status;
+
+#[cfg(test)]
+pub mod teams;
