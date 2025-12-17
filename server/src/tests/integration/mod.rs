@@ -3,3 +3,6 @@ pub mod auth;
 
 #[cfg(test)]
 pub mod users;
+
+#[cfg(test)]
+pub mod status;
