@@ -2,7 +2,7 @@ use crate::api::auth;
 use crate::api::auth::{ConfirmEmailPayload, RegisterPayload, LoginPayload};
 use crate::api::status;
 use crate::api::teams;
-use crate::api::teams::{CreateInvitationPayload, CreateTeam, InvitationReturn, TeamMemberWithRole, TeamRole};
+use crate::api::teams::{CompanyReturn, CreateCompanyPayload, CreateInvitationPayload, CreateTeam, InvitationReturn, TeamMemberWithRole, TeamRole, UpdateCompanyPayload};
 use crate::api::teams::models::UpdateMemberRolePayload;
 use crate::api::users;
 use utoipa::OpenApi;
@@ -36,10 +36,15 @@ use utoipa::OpenApi;
         teams::invitations::endpoints::list_invitations,
         teams::invitations::endpoints::delete_invitation,
         teams::invitations::endpoints::consume_invitation,
+        teams::companies::endpoints::create_company,
+        teams::companies::endpoints::list_companies,
+        teams::companies::endpoints::get_company,
+        teams::companies::endpoints::update_company,
+        teams::companies::endpoints::delete_company,
         status::endpoints::get_status,
     ),
     components(
-        schemas(ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole),
+        schemas(ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload),
     ),
     tags(
         (name = "Auth", description = "Authentication endpoints"),

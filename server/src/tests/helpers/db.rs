@@ -19,7 +19,7 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 #[cfg(test)]
 pub type DbPool = Arc<r2d2::Pool<ConnectionManager<PgConnection>>>;
 
-/// Configure et démarre un container PostgreSQL pour les tests
+/// Configure et démarre un container ``PostgreSQL`` pour les tests
 /// Retourne le container et l'URL de connexion à la base de données
 #[cfg(test)]
 pub async fn setup_test_postgres() -> (ContainerAsync<Postgres>, String) {
@@ -38,8 +38,7 @@ pub async fn setup_test_postgres() -> (ContainerAsync<Postgres>, String) {
     // Construire l'URL de connexion
     // testcontainers-modules utilise "postgres" comme user et password par défaut
     let database_url = format!(
-        "postgres://postgres:postgres@127.0.0.1:{}/postgres",
-        host_port
+        "postgres://postgres:postgres@127.0.0.1:{host_port}/postgres"
     );
 
     (container, database_url)
@@ -77,49 +76,60 @@ pub fn cleanup_database(pool: &DbPool) {
 
     // Utiliser une seule requête avec RESTART IDENTITY pour éviter les deadlocks
     sql_query(
-        "TRUNCATE TABLE password_reset_tokens, teams_invitations, teams_members, teams, users RESTART IDENTITY CASCADE"
+        "TRUNCATE TABLE companies, password_reset_tokens, teams_invitations, teams_members, teams, users RESTART IDENTITY CASCADE"
     )
     .execute(&mut conn)
     .expect("Failed to truncate tables");
 }
 
-/// Fonction helper qui configure tout : démarre PostgreSQL, crée le pool, exécute les migrations
-/// Retourne le container PostgreSQL (Option - None en CI) et le pool de connexions
+/// Fonction helper qui configure tout : démarre ``PostgreSQL``, crée le pool, exécute les migrations
+/// Retourne le container ``PostgreSQL`` (Option - None si DB partagée) et le pool de connexions
 ///
-/// En CI (quand CI_DATABASE=true), utilise le service PostgreSQL de GitLab
-/// En local, utilise testcontainers pour lancer un container PostgreSQL
+/// Trois modes possibles:
+/// 1. CI (``CI_DATABASE=true``): utilise le service ``PostgreSQL`` de GitLab avec ``DATABASE_URL``
+/// 2. Local partagé (``LOCAL_DATABASE_URL`` défini): utilise une DB locale partagée (ex: docker-compose)
+/// 3. Local isolé (défaut): utilise testcontainers pour créer un nouveau container par test
 #[cfg(test)]
 pub async fn setup_test_db() -> (Option<ContainerAsync<Postgres>>, DbPool) {
-    // Détecter si on est en CI avec un service PostgreSQL
+    // Détecter le mode d'exécution
     let use_ci_database = std::env::var("CI_DATABASE").is_ok();
+    let local_database_url = std::env::var("LOCAL_DATABASE_URL").ok();
 
-    let (container, database_url) = if use_ci_database {
-        // En CI: utiliser le service PostgreSQL de GitLab
+    let (container, database_url, use_shared_db) = if use_ci_database {
+        // Mode 1: CI avec service PostgreSQL de GitLab
         let db_url = std::env::var("DATABASE_URL")
             .expect("DATABASE_URL must be set when CI_DATABASE=true");
 
         // Attendre que PostgreSQL soit prêt
         wait_for_postgres(&db_url).await;
 
-        (None, db_url)
+        (None, db_url, true)
+    } else if let Some(db_url) = local_database_url {
+        // Mode 2: Local avec base de données partagée (ex: docker-compose up -d)
+        println!("Using shared local database: {db_url}");
+
+        // Attendre que PostgreSQL soit prêt
+        wait_for_postgres(&db_url).await;
+
+        (None, db_url, true)
     } else {
-        // En local: utiliser testcontainers
+        // Mode 3: Local avec testcontainers (nouveau container par test)
         let (container, db_url) = setup_test_postgres().await;
-        (Some(container), db_url)
+        (Some(container), db_url, false)
     };
 
     let pool = create_test_pool(&database_url);
     run_migrations(&pool);
 
-    // En CI, nettoyer la base de données avant chaque test (car elle est partagée)
-    if use_ci_database {
+    // Nettoyer la base de données si elle est partagée (CI ou local partagé)
+    if use_shared_db {
         cleanup_database(&pool);
     }
 
     (container, pool)
 }
 
-/// Attendre que PostgreSQL soit prêt (pour les services CI)
+/// Attendre que ``PostgreSQL`` soit prêt (pour les services CI)
 #[cfg(test)]
 async fn wait_for_postgres(database_url: &str) {
     use std::time::Duration;
@@ -132,10 +142,8 @@ async fn wait_for_postgres(database_url: &str) {
                 return;
             }
             Err(e) => {
-                if attempt == 30 {
-                    panic!("PostgreSQL not ready after 30 attempts: {}", e);
-                }
-                println!("Waiting for PostgreSQL... (attempt {}/30)", attempt);
+                assert!(attempt != 30, "PostgreSQL not ready after 30 attemps: {e}"); 
+                println!("Waiting for PostgreSQL... (attempt {attempt}/30)");
                 sleep(Duration::from_secs(1)).await;
             }
         }
