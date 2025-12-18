@@ -5,8 +5,11 @@ use std::fmt::Write;
 #[cfg(not(debug_assertions))]
 use tower_cookies::cookie::SameSite;
 use tower_cookies::{Cookie, Cookies, cookie::time};
-use tracing::{error, info};
+use tracing::info;
 use validator::Validate;
+
+use crate::helpers::{create_auth_cookie, internal_error, bad_request_error, conflict_error};
+use crate::api::users::get_user_or_error;
 
 use crate::api::{
     auth::{
@@ -40,32 +43,15 @@ pub async fn login(
     Json(payload): Json<LoginPayload>,
 ) -> impl IntoResponse {
     if payload.validate().is_err() {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json("error.user.login.invalidEmail"),
-        )
-            .into_response();
+        return bad_request_error("error.user.login.invalidEmail");
     }
 
-    let user = match get_user_by_email(&state, &payload.email) {
-        Ok(user) => match user {
-            Some(user) => user,
-            None => {
-                return (
-                    StatusCode::UNAUTHORIZED,
-                    Json("error.user.auth.invalidCredentials"),
-                )
-                    .into_response();
-            }
-        },
-        Err(e) => {
-            error!("Failed to get user by email: {}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
-        }
+    let Ok(user) = get_user_or_error(&state, &payload.email) else {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json("error.user.auth.invalidCredentials"),
+        )
+            .into_response();
     };
 
     if !user.verify_password(&payload.password) {
@@ -78,24 +64,10 @@ pub async fn login(
 
     let jwt = JwtClaims::from(user);
     let Ok(jwt) = jwt.to_string(state.get_secrets().jwt_secret.as_str()) else {
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json("error.server.internalError"),
-        )
-            .into_response();
+        return internal_error("Failed to create JWT", "JWT creation failed");
     };
 
-    let mut cookie = Cookie::new("auth", jwt);
-
-    #[cfg(not(debug_assertions))]
-    cookie.set_secure(true);
-    #[cfg(not(debug_assertions))]
-    cookie.set_same_site(SameSite::None);
-    cookie.set_expires(time::OffsetDateTime::now_utc() + time::Duration::days(7));
-    cookie.set_http_only(true);
-    cookie.set_path("/");
-    cookies.add(cookie);
-
+    create_auth_cookie(jwt, &cookies);
     (StatusCode::OK).into_response()
 }
 
@@ -116,29 +88,16 @@ pub async fn register(
     Json(payload): Json<RegisterPayload>,
 ) -> impl IntoResponse {
     if payload.validate().is_err() {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json("error.user.register.invalidEmail"),
-        )
-            .into_response();
+        return bad_request_error("error.user.register.invalidEmail");
     }
 
     match user_exists(&state, &payload) {
         Ok(None) => (),
         Ok(Some(val)) => {
-            return (
-                StatusCode::CONFLICT,
-                Json(format!("error.user.register.conflict.{val}")),
-            )
-                .into_response();
+            return conflict_error(&format!("error.user.register.conflict.{val}"));
         }
         Err(e) => {
-            error!("Failed to check if user exists: {}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to check if user exists", e);
         }
     }
 
@@ -156,12 +115,7 @@ pub async fn register(
     let encrypted_token = match token.encrypt(jwt_secret.as_bytes()) {
         Ok(t) => t,
         Err(e) => {
-            error!("Failed to encrypt confirmation token: {}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to encrypt confirmation token", e);
         }
     };
 
@@ -179,12 +133,7 @@ pub async fn register(
         )
         .await
         {
-            error!("Failed to send confirmation email: {}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to send confirmation email", e);
         }
     }
 
@@ -235,12 +184,7 @@ pub async fn request_password_reset(
         Ok(Some(u)) => u,
         Ok(None) => return (StatusCode::OK).into_response(),
         Err(e) => {
-            error!("Error while getting user by email: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Error while getting user by email", e);
         }
     };
 
@@ -256,15 +200,8 @@ pub async fn request_password_reset(
         output
     });
 
-    if save_reset_password_token(&state, &user.id, &token)
-        .await
-        .is_err()
-    {
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json("error.server.internalError"),
-        )
-            .into_response();
+    if let Err(e) = save_reset_password_token(&state, &user.id, &token).await {
+        return internal_error("Failed to save reset password token", e);
     }
 
     // Skip email sending in test mode (when using test API key)
@@ -276,14 +213,7 @@ pub async fn request_password_reset(
         let resend = state.get_resend().lock().await;
         match send_reset_password_mail(token, user.first_name, payload.reset_email, &resend).await {
             Ok(_) => (StatusCode::OK).into_response(),
-            Err(e) => {
-                error!("Error while sending password mail: {e}");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json("error.server.internalError"),
-                )
-                    .into_response()
-            }
+            Err(e) => internal_error("Error while sending password mail", e),
         }
     }
 }
@@ -304,68 +234,34 @@ pub async fn reset_password(
     let token = match get_token(&state, &payload.token).await {
         Ok(Some(token)) => token,
         Ok(None) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json("error.auth.resetPassword.invalidToken"),
-            )
-                .into_response();
+            return bad_request_error("error.auth.resetPassword.invalidToken");
         }
         Err(e) => {
-            error!("Error while getting token: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Error while getting token", e);
         }
     };
 
     if token.is_expired() {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json("error.auth.resetPassword.expiredToken"),
-        )
-            .into_response();
+        return bad_request_error("error.auth.resetPassword.expiredToken");
     }
 
     let user = match get_user_by_id(&state, &token.user_id) {
         Ok(Some(user)) => user,
         Ok(None) => {
-            return (
-                StatusCode::BAD_REQUEST,
-                Json("error.auth.resetPassword.invalidToken"),
-            )
-                .into_response();
+            return bad_request_error("error.auth.resetPassword.invalidToken");
         }
         Err(e) => {
-            error!("Error while getting user by id: {e}");
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Error while getting user by id", e);
         }
     };
 
-    if consume_token(&state, &token.user_id).await.is_err() {
-        error!("Error while consuming token");
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json("error.server.internalError"),
-        )
-            .into_response();
+    if let Err(e) = consume_token(&state, &token.user_id).await {
+        return internal_error("Error while consuming token", e);
     }
 
     match update_user_password(&state, &user.id, &payload.new_password).await {
         Ok(()) => (StatusCode::OK).into_response(),
-        Err(e) => {
-            error!("Error while updating password: {e}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response()
-        }
+        Err(e) => internal_error("Error while updating password", e),
     }
 }
 
@@ -387,16 +283,8 @@ pub async fn confirm_email(
 ) -> impl IntoResponse {
     let jwt_secret = std::env::var("JWT_SECRET").unwrap_or_default();
 
-    let token = match EmailConfirmationToken::decrypt(&payload.token, jwt_secret.as_bytes()) {
-        Ok(t) => t,
-        Err(e) => {
-            error!("Failed to decrypt confirmation token: {}", e);
-            return (
-                StatusCode::BAD_REQUEST,
-                Json("error.auth.confirmEmail.invalidToken"),
-            )
-                .into_response();
-        }
+    let Ok(token) = EmailConfirmationToken::decrypt(&payload.token, jwt_secret.as_bytes()) else {
+        return bad_request_error("error.auth.confirmEmail.invalidToken");
     };
 
     let check_payload = RegisterPayload {
@@ -410,19 +298,10 @@ pub async fn confirm_email(
     match user_exists(&state, &check_payload) {
         Ok(None) => (),
         Ok(Some(val)) => {
-            return (
-                StatusCode::CONFLICT,
-                Json(format!("error.user.register.conflict.{val}")),
-            )
-                .into_response();
+            return conflict_error(&format!("error.user.register.conflict.{val}"));
         }
         Err(e) => {
-            error!("Failed to check if user exists: {}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to check if user exists", e);
         }
     }
 
@@ -443,13 +322,6 @@ pub async fn confirm_email(
 
     match create_user(&state, &user) {
         Ok(()) => (StatusCode::CREATED, Json("success.auth.confirmEmail")).into_response(),
-        Err(e) => {
-            error!("Failed to create user: {}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response()
-        }
+        Err(e) => internal_error("Failed to create user", e),
     }
 }

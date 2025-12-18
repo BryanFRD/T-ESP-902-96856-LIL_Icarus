@@ -13,6 +13,16 @@ use std::fs;
 use std::path::Path;
 use validator::Validate;
 
+/// Helper to handle database query results in services
+fn handle_db_result<T>(result: Result<T, diesel::result::Error>) -> Result<T, UserError> {
+    result.map_err(UserError::DatabaseError)
+}
+
+/// Helper to handle database query Option results in services
+fn handle_db_option<T>(result: Result<Option<T>, diesel::result::Error>) -> Result<Option<T>, UserError> {
+    result.map_err(UserError::DatabaseError)
+}
+
 use super::User;
 use super::endpoints::{serve_avatar, me, update_me, delete_me, upload_avatar, delete_avatar, list_users_admin, get_user_admin, update_user_admin, delete_user_admin};
 use super::models::UpdatePayload;
@@ -45,20 +55,15 @@ pub fn get_user_by_email(
 ) -> Result<Option<User>, UserError> {
     use diesel::prelude::*;
 
-    let mut conn = match state.get_db_conn() {
-        Ok(conn) => conn,
-        Err(e) => return Err(UserError::DatabaseConnectionError(e)),
-    };
+    let mut conn = state.get_db_conn()?;
 
-    match users
-        .filter(email.eq(query_email))
-        .select(User::as_select())
-        .first::<User>(&mut conn)
-        .optional()
-    {
-        Ok(res) => Ok(res),
-        Err(e) => Err(UserError::DatabaseError(e)),
-    }
+    handle_db_option(
+        users
+            .filter(email.eq(query_email))
+            .select(User::as_select())
+            .first::<User>(&mut conn)
+            .optional()
+    )
 }
 
 pub fn get_user_by_id(state: &GlobalState, user_id: &str) -> Result<Option<User>, UserError> {
@@ -66,12 +71,13 @@ pub fn get_user_by_id(state: &GlobalState, user_id: &str) -> Result<Option<User>
 
     let mut conn = state.get_db_conn()?;
 
-    users
-        .filter(id.eq(user_id))
-        .select(User::as_select())
-        .first::<User>(&mut conn)
-        .optional()
-        .map_err(|_| UserError::UserNotFound)
+    handle_db_option(
+        users
+            .filter(id.eq(user_id))
+            .select(User::as_select())
+            .first::<User>(&mut conn)
+            .optional()
+    )
 }
 
 pub fn get_all_users(state: &GlobalState) -> Result<Vec<User>, UserError> {
@@ -79,10 +85,11 @@ pub fn get_all_users(state: &GlobalState) -> Result<Vec<User>, UserError> {
 
     let mut conn = state.get_db_conn()?;
 
-    match users.select(User::as_select()).load::<User>(&mut conn) {
-        Ok(user_list) => Ok(user_list),
-        Err(e) => Err(UserError::DatabaseError(e)),
-    }
+    handle_db_result(
+        users
+            .select(User::as_select())
+            .load::<User>(&mut conn)
+    )
 }
 
 pub fn create_user(state: &GlobalState, user: &User) -> Result<(), UserError> {
@@ -91,9 +98,11 @@ pub fn create_user(state: &GlobalState, user: &User) -> Result<(), UserError> {
 
     let mut conn = state.get_db_conn()?;
 
-    diesel::insert_into(users::table)
-        .values(user)
-        .execute(&mut conn)?;
+    handle_db_result(
+        diesel::insert_into(users::table)
+            .values(user)
+            .execute(&mut conn)
+    )?;
 
     Ok(())
 }
@@ -270,9 +279,11 @@ pub async fn update_user_password(
     use diesel::prelude::*;
     let mut conn = state.get_db_conn()?;
 
-    diesel::update(users.filter(id.eq(user_id)))
-        .set(password_hash.eq(hash_password(password)))
-        .execute(&mut conn)?;
+    handle_db_result(
+        diesel::update(users.filter(id.eq(user_id)))
+            .set(password_hash.eq(hash_password(password)))
+            .execute(&mut conn)
+    )?;
 
     Ok(())
 }
@@ -282,10 +293,10 @@ pub fn delete_user(state: &GlobalState, user_id: &str) -> Result<usize, UserErro
 
     let mut conn = state.get_db_conn()?;
 
-    match diesel::delete(users.filter(id.eq(user_id))).execute(&mut conn) {
-        Ok(usize) => Ok(usize),
-        Err(e) => Err(UserError::DatabaseError(e)),
-    }
+    handle_db_result(
+        diesel::delete(users.filter(id.eq(user_id)))
+            .execute(&mut conn)
+    )
 }
 
 pub async fn save_avatar(
@@ -397,5 +408,51 @@ pub fn delete_avatar_file(filename: &str) {
     let file_path = format!("dist/avatars/{filename}");
     if Path::new(&file_path).exists() && let Err(e) = fs::remove_file(&file_path) {
         tracing::error!("Failed to delete avatar file {}: {}", filename, e);
+    }
+}
+
+/// Gets a user by email and returns appropriate error responses
+///
+/// # Arguments
+/// * `state` - The global application state
+/// * `email` - The user's email
+///
+/// # Returns
+/// * `Ok(User)` if user found
+/// * `Err(Response)` if user not found or error occurred
+#[allow(clippy::result_large_err)]
+pub fn get_user_or_error(
+    state: &GlobalState,
+    user_email: &str,
+) -> Result<User, axum::response::Response> {
+    use crate::helpers::{internal_error, unauthorized_error};
+
+    match get_user_by_email(state, user_email) {
+        Ok(Some(user)) => Ok(user),
+        Ok(None) => Err(unauthorized_error()),
+        Err(e) => Err(internal_error("Failed to get user by email", e)),
+    }
+}
+
+/// Gets a user by ID and returns appropriate error responses
+///
+/// # Arguments
+/// * `state` - The global application state
+/// * `user_id` - The user's ID
+///
+/// # Returns
+/// * `Ok(User)` if user found
+/// * `Err(Response)` if user not found or error occurred
+#[allow(clippy::result_large_err)]
+pub fn get_user_by_id_or_error(
+    state: &GlobalState,
+    user_id: &str,
+) -> Result<User, axum::response::Response> {
+    use crate::helpers::{internal_error, unauthorized_error};
+
+    match get_user_by_id(state, user_id) {
+        Ok(Some(user)) => Ok(user),
+        Ok(None) => Err(unauthorized_error()),
+        Err(e) => Err(internal_error("Failed to get user by ID", e)),
     }
 }
