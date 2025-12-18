@@ -4,9 +4,9 @@ use axum::{
     response::IntoResponse,
 };
 use http::StatusCode;
-use tracing::error;
 use ulid::Ulid;
 
+use crate::helpers::{internal_error, bad_request_error, not_found_error};
 use crate::state::GlobalState;
 use crate::api::{
     auth::JwtClaims,
@@ -39,14 +39,7 @@ pub async fn create_team(
         payload.description,
     ) {
         Ok(team) => (StatusCode::CREATED, Json(team)).into_response(),
-        Err(e) => {
-            error!("Failed to create team: {:?}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response()
-        }
+        Err(e) => internal_error("Failed to create team", e),
     }
 }
 
@@ -65,14 +58,7 @@ pub async fn get_my_teams(
 ) -> impl IntoResponse {
     match super::get_user_teams(&state, &jwt_user.sub.to_string()) {
         Ok(teams) => (StatusCode::OK, Json(teams)).into_response(),
-        Err(e) => {
-            error!("Failed to get teams: {:?}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response()
-        }
+        Err(e) => internal_error("Failed to get teams", e),
     }
 }
 
@@ -94,23 +80,14 @@ pub async fn update_team(
     Json(payload): Json<UpdateTeam>,
 ) -> impl IntoResponse {
     if payload.name.is_none() && payload.description.is_none() {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json("error.team.update.validate.noFieldProvided"),
-        )
-            .into_response();
+        return bad_request_error("error.team.update.validate.noFieldProvided");
     }
 
     match super::does_team_exist(&state, &team_id.to_string()) {
         Ok(true) => (),
-        Ok(false) => return (StatusCode::NOT_FOUND, Json("error.team.notFound")).into_response(),
+        Ok(false) => return not_found_error("error.team.notFound"),
         Err(e) => {
-            error!("Failed to check team existence: {:?}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to check team existence", e);
         }
     }
 
@@ -122,25 +99,13 @@ pub async fn update_team(
             }
         }
         Err(e) => {
-            error!("Failed to check team ownership: {:?}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to check team ownership", e);
         }
     }
 
     match super::update_team(&state, &team_id.to_string(), &payload) {
         Ok(_) => (StatusCode::OK).into_response(),
-        Err(e) => {
-            error!("Failed to update team: {:?}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response()
-        }
+        Err(e) => internal_error("Failed to update team", e),
     }
 }
 
@@ -161,14 +126,9 @@ pub async fn delete_team(
 ) -> impl IntoResponse {
     match super::does_team_exist(&state, &team_id.to_string()) {
         Ok(true) => (),
-        Ok(false) => return (StatusCode::NOT_FOUND, Json("error.team.notFound")).into_response(),
+        Ok(false) => return not_found_error("error.team.notFound"),
         Err(e) => {
-            error!("Failed to check team existence: {:?}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to check team existence", e);
         }
     }
 
@@ -180,25 +140,13 @@ pub async fn delete_team(
             }
         }
         Err(e) => {
-            error!("Failed to check team ownership: {:?}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to check team ownership", e);
         }
     }
 
     match super::delete_team(&state, &team_id.to_string()) {
         Ok(_) => (StatusCode::NO_CONTENT).into_response(),
-        Err(e) => {
-            error!("Failed to delete team: {:?}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response()
-        }
+        Err(e) => internal_error("Failed to delete team", e),
     }
 }
 
@@ -228,12 +176,7 @@ pub async fn remove_member(
         match super::is_team_owner_or_moderator(&state, &team_id, &requester_id) {
             Ok(res) => res,
             Err(e) => {
-                error!("Failed to check team permissions: {:?}", e);
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json("error.server.internalError"),
-                )
-                    .into_response();
+                return internal_error("Failed to check team permissions", e);
             }
         }
     };
@@ -249,19 +192,10 @@ pub async fn remove_member(
     let member = match super::get_team_member(&state, &team_id, &member_id) {
         Ok(Some(member)) => member,
         Ok(None) => {
-            return (
-                StatusCode::NOT_FOUND,
-                Json("error.team.member.notFound"),
-            )
-                .into_response();
+            return not_found_error("error.team.member.notFound");
         }
         Err(e) => {
-            error!("Failed to fetch team member: {:?}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to fetch team member", e);
         }
     };
 
@@ -275,12 +209,7 @@ pub async fn remove_member(
     }
 
     if let Err(e) = super::remove_team_member(&state, &team_id, &member.user_id) {
-        error!("Failed to remove team member: {:?}", e);
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json("error.server.internalError"),
-        )
-            .into_response();
+        return internal_error("Failed to remove team member", e);
     }
 
     StatusCode::NO_CONTENT.into_response()
@@ -311,19 +240,10 @@ pub async fn update_member_role(
     match super::get_team_member(&state, &team_id, &member_id) {
         Ok(Some(_)) => {}
         Ok(None) => {
-            return (
-                StatusCode::NOT_FOUND,
-                Json("error.team.member.notFound"),
-            )
-                .into_response();
+            return not_found_error("error.team.member.notFound");
         }
         Err(e) => {
-            error!("Failed to fetch team member: {:?}", e);
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json("error.server.internalError"),
-            )
-                .into_response();
+            return internal_error("Failed to fetch team member", e);
         }
     }
 
@@ -338,12 +258,7 @@ pub async fn update_member_role(
                     .into_response();
             }
             Err(e) => {
-                error!("Failed to fetch requester role: {:?}", e);
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json("error.server.internalError"),
-                )
-                    .into_response();
+                return internal_error("Failed to fetch requester role", e);
             }
         };
 
@@ -357,12 +272,7 @@ pub async fn update_member_role(
     }
 
     if let Err(e) = super::update_member_role(&state, &team_id, &member_id, payload.role) {
-        error!("Failed to update member role: {:?}", e);
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json("error.server.internalError"),
-        )
-            .into_response();
+        return internal_error("Failed to update member role", e);
     }
 
     StatusCode::OK.into_response()

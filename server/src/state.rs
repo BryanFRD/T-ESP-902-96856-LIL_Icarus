@@ -34,6 +34,9 @@ impl GlobalState {
 
         info!("Successfully connected to database");
 
+        // Run pending database migrations at startup
+        crate::migrations::run_pending_migrations_on_startup(&pool);
+
         let resend = Resend::new(&secrets.resend_api_key);
         let rng = StdRng::from_os_rng();
 

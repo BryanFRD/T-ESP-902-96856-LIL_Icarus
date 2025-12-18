@@ -31,13 +31,6 @@ RUN cargo build --release --target x86_64-pc-windows-gnu -p agent
 # 2) Build the Linux server (default x86_64-unknown-linux-gnu)
 RUN cargo build --release -p server
 
-# 3) Install diesel_cli (Postgres) for the GNU target
-RUN cargo install \
-    diesel_cli \
-    --no-default-features \
-    --features postgres \
-    --root /app/diesel-install
-
 
 # ─── Runner (Debian Bookworm-slim) ───────────────────────────────────────────────
 FROM debian:bookworm-slim AS runner
@@ -53,12 +46,11 @@ RUN apt-get update && \
 WORKDIR /app
 
 COPY --from=builder /app/target/release/server ./server
-COPY --from=builder /app/diesel-install/bin/diesel /usr/local/bin/diesel
 
 COPY --from=builder /app/target/x86_64-pc-windows-gnu/release/agent.exe ./agent.exe
 
-RUN chmod +x server /usr/local/bin/diesel
+RUN chmod +x server
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["./server"]

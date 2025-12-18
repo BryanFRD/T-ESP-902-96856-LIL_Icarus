@@ -1,7 +1,9 @@
 #![allow(clippy::needless_for_each)]
 
 mod api;
+mod helpers;
 mod mails;
+mod migrations;
 mod schema;
 mod state;
 mod utils;
