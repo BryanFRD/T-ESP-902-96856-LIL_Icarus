@@ -3,6 +3,7 @@
 mod api;
 mod helpers;
 mod mails;
+mod middlewares;
 mod migrations;
 mod schema;
 mod state;

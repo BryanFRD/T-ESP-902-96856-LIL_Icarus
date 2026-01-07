@@ -10,9 +10,10 @@ use tracing::Level;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
+use crate::api::{auth, status, teams, users};
+use crate::middlewares::CsrfProtection;
 use crate::state::GlobalState;
 use crate::vault::get_secrets;
-use crate::api::{auth, status, teams, users};
 
 pub fn start_logger() {
     tracing_subscriber::fmt()
@@ -61,8 +62,12 @@ pub async fn get_router() -> Router {
         .allow_headers(vec![
             HeaderName::from_static("content-type"),
             HeaderName::from_static("authorization"),
+            HeaderName::from_static("x-csrf-token"),
         ])
         .allow_credentials(true);
+
+    let csrf_protection =
+        std::sync::Arc::new(CsrfProtection::new(state.csrf_secret.as_ref().clone()));
 
     let router_v1 = Router::new()
         .nest("/teams", teams::get_routes(&state))
@@ -73,6 +78,10 @@ pub async fn get_router() -> Router {
     let main_router = Router::new()
         .nest("/v1", router_v1)
         .layer(CookieManagerLayer::new())
+        .layer(axum::middleware::from_fn_with_state(
+            csrf_protection,
+            crate::middlewares::csrf_middleware,
+        ))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
