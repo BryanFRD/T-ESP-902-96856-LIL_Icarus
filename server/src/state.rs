@@ -15,6 +15,7 @@ pub struct GlobalState {
     pub resend: Arc<Mutex<Resend>>,
     pub rng: Arc<Mutex<StdRng>>,
     secrets: Arc<Secrets>,
+    pub csrf_secret: Arc<String>,
 }
 
 impl GlobalState {
@@ -34,17 +35,19 @@ impl GlobalState {
 
         info!("Successfully connected to database");
 
-        // Run pending database migrations at startup
         crate::migrations::run_pending_migrations_on_startup(&pool);
 
         let resend = Resend::new(&secrets.resend_api_key);
         let rng = StdRng::from_os_rng();
+
+        let csrf_secret = format!("csrf-{}", secrets.jwt_secret);
 
         Self {
             db_pool: Arc::new(pool),
             resend: Arc::new(Mutex::new(resend)),
             rng: Arc::new(Mutex::new(rng)),
             secrets: Arc::new(secrets),
+            csrf_secret: Arc::new(csrf_secret),
         }
     }
 
@@ -66,25 +69,26 @@ impl GlobalState {
         &self.rng
     }
 
-    /// Constructeur pour les tests qui accepte un pool de connexions personnalisé
     #[cfg(test)]
     pub fn new_with_pool(
         db_pool: Arc<Pool<ConnectionManager<PgConnection>>>,
         secrets: Secrets,
     ) -> Self {
-        // Set JWT_SECRET comme dans le constructeur normal
         unsafe {
             std::env::set_var("JWT_SECRET", &secrets.jwt_secret);
         }
 
         let resend = Resend::new(&secrets.resend_api_key);
-        let rng = StdRng::seed_from_u64(42); // RNG avec seed fixe pour reproductibilité
+        let rng = StdRng::seed_from_u64(42);
+
+        let csrf_secret = format!("csrf-{}", secrets.jwt_secret);
 
         Self {
             db_pool,
             resend: Arc::new(Mutex::new(resend)),
             rng: Arc::new(Mutex::new(rng)),
             secrets: Arc::new(secrets),
+            csrf_secret: Arc::new(csrf_secret),
         }
     }
 }

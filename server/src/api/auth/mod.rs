@@ -1,9 +1,8 @@
 pub mod endpoints;
-mod middleware;
 pub mod models;
 mod services;
 
-pub use middleware::{admin_middleware, middleware, pentester_middleware};
+pub use crate::middlewares::auth::{admin_middleware, middleware, pentester_middleware};
 pub use services::get_routes;
 pub use services::hash_password;
 

@@ -8,7 +8,7 @@ use axum::{
 use tower_cookies::Cookies;
 use tracing::error;
 
-use super::models::JwtClaims;
+use crate::api::auth::models::JwtClaims;
 
 pub async fn middleware(_jwt: JwtClaims, req: Request, next: Next) -> impl IntoResponse {
     next.run(req).await
