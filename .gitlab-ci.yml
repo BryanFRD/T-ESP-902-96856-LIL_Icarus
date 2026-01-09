@@ -1,8 +1,69 @@
 stages:
+  - notify
   - test
   - sonar
   - build
   - deploy
+
+# ================= NOTIFY =================
+
+🔔_notify_discord_reviewer:
+  stage: notify
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache jq curl
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_IID'
+      when: always
+  allow_failure: true
+  script:
+    - echo "Notifying Discord reviewer..."
+    - |
+      echo "CI_PROJECT_ID=$CI_PROJECT_ID"
+      echo "CI_MERGE_REQUEST_IID=$CI_MERGE_REQUEST_IID"
+
+      GITLAB_URL="${CI_SERVER_URL}"
+
+      MR_INFO=$(curl -s --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" "${GITLAB_URL}/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID")
+
+      REVIEWER_IDS=$(echo "$MR_INFO" | jq -r '.reviewers[].username')
+
+      if [ -z "$REVIEWER_IDS" ]; then
+        echo "No reviewers in this MR, exiting."
+        exit 0
+      fi
+
+      echo "Reviewers: $REVIEWER_IDS"
+
+      # === Mapping reviewers → Discord IDs ===
+      REVIEWER_MAPPING='{
+        "Antoine": "260109480455307264",
+        "azoulux": "477253430033907722",
+        "Bryan": "210742118669484034",
+        "corentincollery": "684002215139999774",
+        "Natchi59": "213390185528819713",
+        "Reweilk ": "924211405866037278",
+        "Edwin": "394941518634549248"
+      }'
+
+      for REVIEWER in $REVIEWER_IDS; do
+        DISCORD_ID=$(echo "$REVIEWER_MAPPING" | jq -r --arg r "$REVIEWER" '.[$r]')
+        if [ "$DISCORD_ID" = "null" ] || [ -z "$DISCORD_ID" ]; then
+          echo "Reviewer $REVIEWER not found in mapping, skipping notification."
+          continue
+        fi
+
+        curl -X POST -H "Content-Type: application/json" -d "{
+          \"content\": \"<@$DISCORD_ID> you have a new merge request to review !\",
+          \"embeds\": [{
+            \"title\": \"👀 Review asked\",
+            \"description\": \"**${CI_MERGE_REQUEST_TITLE}** by ${GITLAB_USER_NAME}\n<${CI_MERGE_REQUEST_PROJECT_URL}/-/merge_requests/${CI_MERGE_REQUEST_IID}>\",
+            \"color\": 5814783
+          }]
+        }" $DISCORD_REVIEW_WEBHOOK
+      done
+
+# ================= TEST =================
 
 🔎_check:
   image: rust:1.91
