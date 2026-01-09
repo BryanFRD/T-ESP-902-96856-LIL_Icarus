@@ -1,0 +1,11 @@
+meta {
+  name: Server status
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{icarus_api_url}}/v1/status
+  body: none
+  auth: inherit
+}
