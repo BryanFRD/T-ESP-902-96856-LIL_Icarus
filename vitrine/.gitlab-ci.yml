@@ -1,0 +1,39 @@
+stages:
+  - install
+  - test
+  - build
+  - deploy
+
+build:
+  image: quay.io/buildah/stable:latest
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+  script:
+    - echo "Building Docker image with Buildah..."
+    - buildah bud --storage-driver=vfs -t vitrine:latest .
+    - buildah push --storage-driver=vfs vitrine:latest oci-archive:vitrine-latest.tar
+  artifacts:
+    paths:
+      - vitrine-latest.tar
+    expire_in: 1 hour
+
+deploy:
+  image: quay.io/buildah/stable:latest
+  stage: deploy
+  dependencies:
+    - build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+  script:
+    - echo "Importing and pushing production image..."
+    - buildah pull --storage-driver=vfs oci-archive:vitrine-latest.tar
+    - IMAGE_ID=$(buildah images --storage-driver=vfs --format "{{.ID}}" | head -n 1)
+    - buildah tag --storage-driver=vfs $IMAGE_ID vitrine:latest
+    - echo $DOCKER_REGISTRY_PASSWORD | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME --password-stdin $DOCKER_REGISTRY
+    - buildah tag --storage-driver=vfs vitrine:latest $DOCKER_REGISTRY/vitrine:latest
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/vitrine:latest
