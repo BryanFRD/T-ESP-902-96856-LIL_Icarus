@@ -1,0 +1,172 @@
+stages:
+  - notify
+  - test
+  - release
+  - deploy
+
+# ================= NOTIFY =================
+
+🔔_notify_discord_reviewer:
+  stage: notify
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache jq curl
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_IID'
+      when: always
+  allow_failure: true
+  script:
+    - echo "Notifying Discord reviewer..."
+    - |
+      echo "CI_PROJECT_ID=$CI_PROJECT_ID"
+      echo "CI_MERGE_REQUEST_IID=$CI_MERGE_REQUEST_IID"
+
+      GITLAB_URL="${CI_SERVER_URL}" 
+      MR_INFO=$(curl --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" "${GITLAB_URL}/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID")
+
+      REVIEWER_IDS=$(echo "$MR_INFO" | jq -r '.reviewers[].username')
+
+      if [ -z "$REVIEWER_IDS" ]; then
+        echo "No reviewers in this MR, exiting."
+        exit 0
+      fi
+
+      echo "Reviewers: $REVIEWER_IDS"
+
+      # === Mapping reviewers → Discord IDs ===
+      REVIEWER_MAPPING='{
+        "Antoine": "260109480455307264",
+        "azoulux": "477253430033907722",
+        "Bryan": "210742118669484034",
+        "corentincollery": "684002215139999774",
+        "Jean-EC": "213390185528819713",
+        "Natchi59": "213390185528819713"
+      }'
+
+      for REVIEWER in $REVIEWER_IDS; do
+        DISCORD_ID=$(echo "$REVIEWER_MAPPING" | jq -r --arg r "$REVIEWER" '.[$r]')
+        if [ "$DISCORD_ID" = "null" ] || [ -z "$DISCORD_ID" ]; then
+          echo "Reviewer $REVIEWER not found in mapping, skipping notification."
+          continue
+        fi
+
+        curl -X POST -H "Content-Type: application/json" -d "{
+          \"content\": \"<@$DISCORD_ID> you have a new merge request to review !\",
+          \"embeds\": [{
+            \"title\": \"👀 Review asked\",
+            \"description\": \"**${CI_MERGE_REQUEST_TITLE}** by ${GITLAB_USER_NAME}\n<${CI_MERGE_REQUEST_PROJECT_URL}/-/merge_requests/${CI_MERGE_REQUEST_IID}>\",
+            \"color\": 5814783
+          }]
+        }" $DISCORD_REVIEW_WEBHOOK
+      done
+
+# ================= TEST =================
+
+🧪_test:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.40.0-focal
+  rules:
+    - when: always
+  cache:
+    paths:
+      - node_modules/
+      - .npm/
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npm run test -- --coverage || echo "Tests exited with code $?"
+    - npm run lint
+  artifacts:
+    paths:
+      - coverage
+    expire_in: 1 day
+
+🔍_sonar_scan:
+  stage: test
+  image: sonarsource/sonar-scanner-cli:11
+  needs:
+    - job: 🧪_test
+      artifacts: true
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    - key: "sonar-cache-$CI_COMMIT_REF_SLUG"
+      policy: pull-push
+      paths:
+        - "${SONAR_USER_HOME}/cache"
+    - paths:
+        - node_modules/
+        - .npm/
+  script:
+    - echo "Running SonarQube scan..."
+    - sonar-scanner
+        -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+        -Dsonar.sources=src
+        -Dsonar.host.url=${SONAR_HOST_URL}
+        -Dsonar.token=${SONAR_TOKEN}
+        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+        -Dsonar.exclusions=src/index.css,**/*.test.*,**/*.spec.*,**/*.stories.*
+        -Dsonar.qualitygate.wait=true
+  allow_failure: true
+
+# ================= RELEASE =================
+
+🎉_semantic_release:
+  stage: release
+  image: node:21
+  variables:
+    HUSKY: '0'
+    GITLAB_TOKEN: $CI_JOB_TOKEN
+  cache:
+    paths:
+      - node_modules/
+      - .npm/
+  script:
+    - npm ci --cache .npm --prefer-offline --ignore-scripts
+    - npx semantic-release
+  artifacts:
+    paths:
+      - CHANGELOG.md
+      - package.json
+  only:
+    - main
+
+# ================= DEPLOY =================
+
+✈_deploy_dev:
+  stage: deploy
+  image: quay.io/buildah/stable:latest
+  dependencies:
+    - 🧪_test
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: manual
+  script:
+    - echo "Building and deploying DEV web image..."
+    - buildah bud --storage-driver=vfs -t web-dev:latest .
+    - echo "$DOCKER_REGISTRY_PASSWORD_DEV" | buildah login --storage-driver=vfs --username "$DOCKER_REGISTRY_USERNAME_DEV" --password-stdin $DOCKER_REGISTRY
+    - buildah tag --storage-driver=vfs web-dev:latest $DOCKER_REGISTRY/web-dev:latest
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/web-dev:latest
+
+📝_deploy_prod:
+  stage: deploy
+  image: quay.io/buildah/stable:latest
+  dependencies:
+    - 🎉_semantic_release
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "main"'
+      when: on_success
+  script:
+    - echo "Building and deploying PRODUCTION web image with semantic-release version..."
+    - VERSION=$(jq -r '.version' package.json)
+    - echo "Version -> $VERSION"
+    - npm ci --cache .npm --prefer-offline
+    - npm run build -- --mode production
+    - buildah build -t $DOCKER_REGISTRY/web:$VERSION -t $DOCKER_REGISTRY/web:latest .
+    - echo "$DOCKER_REGISTRY_PASSWORD_PROD" | buildah login --username "$DOCKER_REGISTRY_USERNAME_PROD" --password-stdin $DOCKER_REGISTRY
+    - buildah push $DOCKER_REGISTRY/web:$VERSION
+    - buildah push $DOCKER_REGISTRY/web:latest

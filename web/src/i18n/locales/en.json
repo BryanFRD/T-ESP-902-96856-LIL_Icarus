@@ -1,0 +1,192 @@
+{
+  "actions": {
+    "cancel": "Cancel",
+    "goLogin": "Back to Login",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "app": {
+    "description": "Pentest Platform",
+    "name": "Icarus"
+  },
+  "branding": {
+    "advancedPenetration": "Advanced Penetration",
+    "advancedReporting": "Advanced Reporting",
+    "advancedReportingDesc": "Detailed insights and actionable recommendations",
+    "enterpriseSecurity": "Enterprise Security",
+    "enterpriseSecurityDesc": "Bank-grade encryption and compliance standards",
+    "realtimeScanning": "Real-time Scanning",
+    "realtimeScanningDesc": "Continuous monitoring and instant threat detection",
+    "secureInfra": "Secure your infrastructure with comprehensive security assessments and real-time vulnerability detection.",
+    "securityExpert": "Leading Security Expert",
+    "securityQuote": "Security is not a product, but a process. Icarus makes that process seamless and effective.",
+    "testingPlatform": "Testing Platform"
+  },
+  "common": {
+    "cancel": "Cancel"
+  },
+  "confirmEmail": {
+    "error": "Email verification failed.",
+    "errorMessage": "An error occurred while verifying your email. Please try again.",
+    "pleaseWait": "Please wait...",
+    "success": "Email verified successfully.",
+    "successMessage": "Your email has been confirmed. You can now log in.",
+    "verifying": "Verifying your email."
+  },
+  "createAccount": "Create an account",
+  "email": {
+    "invalid": "Please enter a valid email address."
+  },
+  "error": {
+    "invalidImageType": "Invalid image type. Please upload a valid image.",
+    "invalidToken": "The token provided is invalid or has expired.",
+    "profileUpdateFailed": "Failed to update profile. Please try again.",
+    "unknown": "An unknown error occurred.",
+    "validToken": "Invalid token."
+  },
+  "file_upload": {
+    "any": {
+      "placeholder": "Drop files here or click to upload"
+    },
+    "change_avatar": "Change Avatar",
+    "chat": {
+      "placeholder": "Drop files here or click to upload"
+    },
+    "document": {
+      "placeholder": "Drop documents here or click to upload"
+    },
+    "drop_files": "Drop files here or click to upload",
+    "file_selected": "File selected",
+    "gallery": {
+      "placeholder": "Drop images here or click to upload"
+    },
+    "invalid_file": "Invalid file type. Please upload a valid file.",
+    "max_files": "You can upload a maximum of {{maxFiles}} files.",
+    "max_size": "File size exceeds the maximum limit of {{maxSize}}.",
+    "selected_files": "Selected files",
+    "validation_errors": "Error during upload"
+  },
+  "image_crop": {
+    "apply": "Apply Crop",
+    "instructions": "Drag to select the area you want to crop. You can also zoom in and out using the slider.",
+    "preview": "Preview",
+    "preview_alt": "Image preview",
+    "rotate": "Rotate",
+    "title": "Crop Image"
+  },
+  "inputField": {
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "emailRequired": "Email is required.",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "Enter your first name",
+    "firstNameRequired": "First name is required.",
+    "forgotPassword": "Forgot password?",
+    "haveAccount": "Already have an account?",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Enter your last name",
+    "lastNameRequired": "Last name is required.",
+    "logout": "Logout",
+    "noAccount": "Don’t have an account?",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "saveChanges": "Save Changes",
+    "savingChanges": "Saving changes...",
+    "signIn": "Sign in",
+    "signInHere": "Sign in here",
+    "signUp": "Sign up",
+    "signUpHere": "Sign up here",
+    "signingIn": "Signing in...",
+    "signingUp": "Signing up...",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "usernameRequired": "Username is required."
+  },
+  "language": "Language",
+  "languages": {
+    "english": "English",
+    "french": "French"
+  },
+  "loading": {
+    "default": "Loading...",
+    "login": "Logging in...",
+    "logout": "Logging out...",
+    "register": "Registering...",
+    "resetPassword": "Resetting password...",
+    "savingChanges": "Saving changes...",
+    "sendResetPassword": "Sending reset password email...",
+    "uploadingAvatar": "Uploading avatar..."
+  },
+  "newPassword": {
+    "label": "New Password",
+    "newPasswordPlaceholder": "Enter your new password",
+    "submit": "Reset Password",
+    "subtitle": "Choose a new password for your account. It must be different from the old one.",
+    "title": "Reset Your Password"
+  },
+  "password": {
+    "min": "Password must be at least 4 characters long.",
+    "mismatch": "Passwords do not match."
+  },
+  "profileForm": {
+    "description": "Update your profile information",
+    "title": "Profile Information"
+  },
+  "profileScreen": {
+    "createdOn": "Created on",
+    "lastUpdated": "Last updated",
+    "noCreationDate": "Creation date not available",
+    "noUpdateDate": "Last update date not available",
+    "profileDetails": "Profile Details"
+  },
+  "register": {
+    "step": {
+      "account": "Account",
+      "personal": "Personal Information",
+      "security": "Security"
+    }
+  },
+  "registerToContinue": "Register to continue",
+  "resetPassword": {
+    "emailSent": "If an account with that email exists, a password reset link has been sent.",
+    "label": "Email Address",
+    "message": "Enter your email address and we'll send you a link to reset your password.",
+    "onClose": "Close",
+    "placeholder": "Enter your email",
+    "sendButton": "Send password reset link",
+    "title": "Reset Password"
+  },
+  "route": {
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "register": "Register"
+  },
+  "sidebar": {
+    "closeMenu": "Close Menu",
+    "openMenu": "Open Menu"
+  },
+  "signInToDashboard": "Sign in to access your dashboard",
+  "social": {
+    "github": "Github",
+    "google": "Google",
+    "orContinueWith": "Or continue with"
+  },
+  "success": {
+    "avatarUploaded": "Avatar uploaded successfully.",
+    "login": "Logged in successfully.",
+    "logout": "Logged out successfully.",
+    "profileUpdated": "Profile updated successfully.",
+    "register": "Registered successfully.",
+    "resetPassword": "Password reset successfully."
+  },
+  "theme": "Theme",
+  "threatLevel": {
+    "critical": "Critical threat",
+    "high": "High threat",
+    "low": "Low threat",
+    "medium": "Medium threat"
+  },
+  "welcomeBack": "Welcome Back"
+}

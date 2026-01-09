@@ -1,0 +1,192 @@
+{
+  "actions": {
+    "cancel": "Annuler",
+    "goLogin": "Retour à la connexion",
+    "next": "Suivant",
+    "previous": "Précédent"
+  },
+  "app": {
+    "description": "Plateforme de test d’intrusion",
+    "name": "Icarus"
+  },
+  "branding": {
+    "advancedPenetration": "Test d’intrusion avancé",
+    "advancedReporting": "Rapports avancés",
+    "advancedReportingDesc": "Analyses détaillées et recommandations exploitables",
+    "enterpriseSecurity": "Sécurité d’entreprise",
+    "enterpriseSecurityDesc": "Chiffrement de niveau bancaire et conformité",
+    "realtimeScanning": "Analyse en temps réel",
+    "realtimeScanningDesc": "Surveillance continue et détection instantanée des menaces",
+    "secureInfra": "Sécurisez votre infrastructure avec des évaluations complètes et une détection des vulnérabilités en temps réel.",
+    "securityExpert": "Expert en sécurité",
+    "securityQuote": "La sécurité n’est pas un produit, mais un processus. Icarus rend ce processus fluide et efficace.",
+    "testingPlatform": "Plateforme de test"
+  },
+  "common": {
+    "cancel": "Annuler"
+  },
+  "confirmEmail": {
+    "error": "Échec de la vérification de l'e-mail.",
+    "errorMessage": "Une erreur est survenue lors de la vérification de votre e-mail. Veuillez réessayer.",
+    "pleaseWait": "Veuillez patienter...",
+    "success": "Email vérifié avec succès.",
+    "successMessage": "Votre e-mail a été confirmé. Vous pouvez maintenant vous connecter.",
+    "verifying": "Vérification de votre e-mail."
+  },
+  "createAccount": "Créer un compte",
+  "email": {
+    "invalid": "Veuillez entrer une adresse e-mail valide."
+  },
+  "error": {
+    "invalidImageType": "Type d'image invalide. Veuillez télécharger une image valide.",
+    "invalidToken": "Le token fourni est invalide ou a expiré.",
+    "profileUpdateFailed": "Échec de la mise à jour du profil. Veuillez réessayer.",
+    "unknown": "Une erreur est survenue.",
+    "validToken": "Token non valide."
+  },
+  "file_upload": {
+    "any": {
+      "placeholder": "Déposez des fichiers ici ou cliquez pour télécharger"
+    },
+    "change_avatar": "Changer l'avatar",
+    "chat": {
+      "placeholder": "Déposez des fichiers ici ou cliquez pour télécharger"
+    },
+    "document": {
+      "placeholder": "Déposez des documents ici ou cliquez pour télécharger"
+    },
+    "drop_files": "Déposez les fichiers ici ou cliquez pour télécharger",
+    "file_selected": "Fichier sélectionné",
+    "gallery": {
+      "placeholder": "Déposez des images ici ou cliquez pour télécharger"
+    },
+    "invalid_file": "Type de fichier invalide. Veuillez télécharger un fichier valide.",
+    "max_files": "Vous pouvez télécharger un maximum de {{maxFiles}} fichiers.",
+    "max_size": "La taille du fichier dépasse la limite maximale de {{maxSize}}.",
+    "selected_files": "Fichiers sélectionnés",
+    "validation_errors": "Erreur lors de l'upload"
+  },
+  "image_crop": {
+    "apply": "Appliquer le recadrage",
+    "instructions": "Faites glisser pour sélectionner la zone à recadrer. Vous pouvez également zoomer et dézoomer à l'aide du curseur.",
+    "preview": "Prévisualisation",
+    "preview_alt": "Prévisualisation de l'image",
+    "rotate": "Faire pivoter",
+    "title": "Recadrer l'image"
+  },
+  "inputField": {
+    "confirmPassword": "Confirmer le mot de passe",
+    "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+    "email": "E-mail",
+    "emailPlaceholder": "Entrez votre e-mail",
+    "emailRequired": "L'e-mail est requis",
+    "firstName": "Prénom",
+    "firstNamePlaceholder": "Entrez votre prénom",
+    "firstNameRequired": "Le prénom est requis",
+    "forgotPassword": "Mot de passe oublié ?",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "lastName": "Nom",
+    "lastNamePlaceholder": "Entrez votre nom",
+    "lastNameRequired": "Le nom est requis",
+    "logout": "Déconnexion",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "saveChanges": "Enregistrer les modifications",
+    "savingChanges": "Enregistrement des modifications...",
+    "signIn": "Connexion",
+    "signInHere": "Connectez-vous ici",
+    "signUp": "Inscription",
+    "signUpHere": "Inscrivez-vous ici",
+    "signingIn": "Connexion en cours...",
+    "signingUp": "Inscription en cours...",
+    "username": "Nom d'utilisateur",
+    "usernamePlaceholder": "Entrez votre nom d'utilisateur",
+    "usernameRequired": "Le nom d'utilisateur est requis"
+  },
+  "language": "Langue",
+  "languages": {
+    "english": "Anglais",
+    "french": "Français"
+  },
+  "loading": {
+    "default": "Chargement...",
+    "login": "Connexion en cours...",
+    "logout": "Déconnexion en cours...",
+    "register": "Inscription en cours...",
+    "resetPassword": "Réinitialisation du mot de passe en cours...",
+    "savingChanges": "Enregistrement des modifications...",
+    "sendResetPassword": "Envoi de l'e-mail de réinitialisation...",
+    "uploadingAvatar": "Téléchargement de l'avatar en cours..."
+  },
+  "newPassword": {
+    "label": "Nouveau mot de passe",
+    "newPasswordPlaceholder": "Entrez votre nouveau mot de passe",
+    "submit": "Réinitialiser le mot de passe",
+    "subtitle": "Choisissez un nouveau mot de passe pour votre compte. Il doît être différent de l'ancien.",
+    "title": "Réinitialisez votre mot de passe"
+  },
+  "password": {
+    "min": "Le mot de passe doit contenir au moins 8 caractères.",
+    "mismatch": "Les mots de passe ne correspondent pas."
+  },
+  "profileForm": {
+    "description": "Mettez à jour les informations de votre profil",
+    "title": "Informations du profil"
+  },
+  "profileScreen": {
+    "createdOn": "Créé le",
+    "lastUpdated": "Dernière mise à jour",
+    "noCreationDate": "Date de création non disponible",
+    "noUpdateDate": "Date de dernière mise à jour non disponible",
+    "profileDetails": "Détails du profil"
+  },
+  "register": {
+    "step": {
+      "account": "Compte",
+      "personal": "Informations personnelles",
+      "security": "Sécurité"
+    }
+  },
+  "registerToContinue": "Inscrivez-vous pour continuer",
+  "resetPassword": {
+    "emailSent": "Si un compte avec cette adresse e-mail existe, un lien de réinitialisation du mot de passe a été envoyé.",
+    "label": "Adresse e-mail",
+    "message": "Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    "onClose": "Fermer",
+    "placeholder": "Entrez votre e-mail",
+    "sendButton": "Envoyer le lien de réinitialisation du mot de passe",
+    "title": "Réinitialiser le mot de passe"
+  },
+  "route": {
+    "dashboard": "Tableau de bord",
+    "login": "Connexion",
+    "register": "Inscription"
+  },
+  "sidebar": {
+    "closeMenu": "Fermer le menu",
+    "openMenu": "Ouvrir le menu"
+  },
+  "signInToDashboard": "Connectez-vous au tableau de bord",
+  "social": {
+    "github": "Continuer avec GitHub",
+    "google": "Continuer avec Google",
+    "orContinueWith": "ou continuer avec"
+  },
+  "success": {
+    "avatarUploaded": "Avatar téléchargé avec succès.",
+    "login": "Connexion réussie.",
+    "logout": "Déconnexion réussie.",
+    "profileUpdated": "Profil mis à jour avec succès.",
+    "register": "Inscription réussie.",
+    "resetPassword": "Mot de passe réinitialisé avec succès."
+  },
+  "theme": "Thème",
+  "threatLevel": {
+    "critical": "Critique",
+    "high": "Élevé",
+    "low": "Faible",
+    "medium": "Moyen"
+  },
+  "welcomeBack": "Bon retour parmi nous !"
+}
