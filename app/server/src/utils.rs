@@ -77,11 +77,11 @@ pub async fn get_router() -> Router {
 
     let main_router = Router::new()
         .nest("/v1", router_v1)
-        .layer(CookieManagerLayer::new())
         .layer(axum::middleware::from_fn_with_state(
             csrf_protection,
             crate::middlewares::csrf_middleware,
         ))
+        .layer(CookieManagerLayer::new())
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
