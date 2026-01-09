@@ -1,0 +1,11 @@
+target
+/dist
+.vscode
+.idea
+.env
+.claude
+
+# Test and coverage reports
+coverage/
+reports/
+.sonar/
