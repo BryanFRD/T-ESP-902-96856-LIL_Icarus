@@ -1,0 +1,240 @@
+stages:
+  - notify
+  - test
+  - sonar
+  - build
+  - deploy
+
+# ================= NOTIFY =================
+
+🔔_notify_discord_reviewer:
+  stage: notify
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache jq curl
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_IID'
+      when: always
+  allow_failure: true
+  script:
+    - echo "Notifying Discord reviewer..."
+    - |
+      echo "CI_PROJECT_ID=$CI_PROJECT_ID"
+      echo "CI_MERGE_REQUEST_IID=$CI_MERGE_REQUEST_IID"
+
+      GITLAB_URL="${CI_SERVER_URL}"
+
+      MR_INFO=$(curl -s --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" "${GITLAB_URL}/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID")
+
+      REVIEWER_IDS=$(echo "$MR_INFO" | jq -r '.reviewers[].username')
+
+      if [ -z "$REVIEWER_IDS" ]; then
+        echo "No reviewers in this MR, exiting."
+        exit 0
+      fi
+
+      echo "Reviewers: $REVIEWER_IDS"
+
+      # === Mapping reviewers → Discord IDs ===
+      REVIEWER_MAPPING='{
+        "Antoine": "260109480455307264",
+        "azoulux": "477253430033907722",
+        "Bryan": "210742118669484034",
+        "corentincollery": "684002215139999774",
+        "Natchi59": "213390185528819713",
+        "Reweilk ": "924211405866037278",
+        "Edwin": "394941518634549248"
+      }'
+
+      for REVIEWER in $REVIEWER_IDS; do
+        DISCORD_ID=$(echo "$REVIEWER_MAPPING" | jq -r --arg r "$REVIEWER" '.[$r]')
+        if [ "$DISCORD_ID" = "null" ] || [ -z "$DISCORD_ID" ]; then
+          echo "Reviewer $REVIEWER not found in mapping, skipping notification."
+          continue
+        fi
+
+        curl -X POST -H "Content-Type: application/json" -d "{
+          \"content\": \"<@$DISCORD_ID> you have a new merge request to review !\",
+          \"embeds\": [{
+            \"title\": \"👀 Review asked\",
+            \"description\": \"**${CI_MERGE_REQUEST_TITLE}** by ${GITLAB_USER_NAME}\n<${CI_MERGE_REQUEST_PROJECT_URL}/-/merge_requests/${CI_MERGE_REQUEST_IID}>\",
+            \"color\": 5814783
+          }]
+        }" $DISCORD_REVIEW_WEBHOOK
+      done
+
+# ================= TEST =================
+
+🔎_check:
+  image: rust:1.91
+  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+  script:
+    - echo "Running cargo check..."
+    - cargo check
+
+📏_clippy:
+  image: rust:1.91
+  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+  script:
+    - echo "Running cargo clippy ..."
+    - rustup component add clippy
+    - mkdir -p reports
+    - cargo clippy --workspace --all-features --message-format=json -- -W clippy::pedantic -Dwarnings > reports/clippy-report.json || true
+    - cargo clippy --workspace --all-features -- -W clippy::pedantic -Dwarnings
+  artifacts:
+    paths:
+      - reports/clippy-report.json
+    expire_in: 30 days
+
+🧪_test:
+  image: rust:1.91
+  stage: test
+  services:
+    - postgres:17
+  variables:
+    # PostgreSQL service configuration for integration tests
+    POSTGRES_DB: testdb
+    POSTGRES_USER: testuser
+    POSTGRES_PASSWORD: testpass
+    DATABASE_URL: postgres://testuser:testpass@postgres:5432/testdb
+    # Flag to indicate we're in CI (use service instead of testcontainers)
+    CI_DATABASE: "true"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+  before_script:
+    - echo "Installing test dependencies..."
+    - rustup component add llvm-tools-preview
+    - curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+    - cargo binstall --no-confirm cargo-llvm-cov
+    - apt-get update && apt-get install -y python3
+  script:
+    - echo "Running tests with coverage..."
+    - mkdir -p coverage
+    - |
+      if cargo llvm-cov --all-features -p server --bin server --lcov --output-path coverage/lcov.info 2>&1 | tee coverage/llvm-cov.log; then
+        echo "LCOV coverage report generated successfully"
+        echo "Converting LCOV to SonarQube Generic Coverage XML format..."
+        python3 scripts/lcov_to_generic_coverage.py coverage/lcov.info coverage/generic-coverage.xml
+      else
+        echo "No tests found or coverage generation failed"
+      fi
+  artifacts:
+    paths:
+      - coverage/
+    expire_in: 30 days
+
+📊_sonar:
+  image: sonarsource/sonar-scanner-cli:latest
+  stage: sonar
+  dependencies:
+    - 🧪_test
+    - 📏_clippy
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: 0
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner
+      -Dsonar.qualitygate.wait=true
+      -Dsonar.host.url=${SONAR_HOST_URL}
+      -Dsonar.token=${SONAR_TOKEN}
+  allow_failure: true
+
+🛠_build:
+  image: quay.io/buildah/stable:latest
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+  script:
+    - echo "Building Docker images with Buildah..."
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        # Build both tags for main branch
+        buildah bud --storage-driver=vfs -t app:latest -t app-dev:latest .
+        # Export both images as tar
+        buildah push --storage-driver=vfs app:latest oci-archive:app-latest.tar
+        buildah push --storage-driver=vfs app-dev:latest oci-archive:app-dev-latest.tar
+      else
+        # Build only dev tag for merge requests
+        buildah bud --storage-driver=vfs -t app-dev:latest .
+        buildah push --storage-driver=vfs app-dev:latest oci-archive:app-dev-latest.tar
+      fi
+  artifacts:
+    paths:
+      - app-latest.tar
+      - app-dev-latest.tar
+    expire_in: 1 hour
+
+✈_deploy_dev:
+  image: quay.io/buildah/stable:latest
+  stage: deploy
+  dependencies:
+    - 🛠_build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: manual
+  script:
+    - echo "Importing and pushing dev image..."
+    # Import the image from tar
+    - buildah pull --storage-driver=vfs oci-archive:app-dev-latest.tar
+    # Get the imported image ID
+    - IMAGE_ID=$(buildah images --storage-driver=vfs --format "{{.ID}}" | head -n 1)
+    # Tag the image
+    - buildah tag --storage-driver=vfs $IMAGE_ID app-dev:latest
+    # Push to registry
+    - echo $DOCKER_REGISTRY_PASSWORD_DEV | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
+    - buildah tag --storage-driver=vfs app-dev:latest $DOCKER_REGISTRY/app-dev:latest
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app-dev:latest
+  allow_failure: true
+
+✈_deploy_prod:
+  image: quay.io/buildah/stable:latest
+  stage: deploy
+  dependencies:
+    - 🛠_build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+  script:
+    - echo "Importing and pushing production image..."
+    # Import the image from tar
+    - buildah pull --storage-driver=vfs oci-archive:app-latest.tar
+    # Get the imported image ID
+    - IMAGE_ID=$(buildah images --storage-driver=vfs --format "{{.ID}}" | head -n 1)
+    # Tag the image
+    - buildah tag --storage-driver=vfs $IMAGE_ID app:latest
+    # Push to registry
+    - echo $DOCKER_REGISTRY_PASSWORD_PROD | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
+    - buildah tag --storage-driver=vfs app:latest $DOCKER_REGISTRY/app:latest
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app:latest
