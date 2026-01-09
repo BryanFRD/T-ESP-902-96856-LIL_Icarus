@@ -1,0 +1,1 @@
+npx npm-run-all --parallel i18n:check test "lint -- --max-warnings 0" format:check
