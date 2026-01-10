@@ -1,4 +1,7 @@
 #[cfg(test)]
+pub mod audits;
+
+#[cfg(test)]
 pub mod auth;
 
 #[cfg(test)]

@@ -10,7 +10,7 @@ use tracing::Level;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::api::{auth, status, teams, users};
+use crate::api::{audits, auth, status, teams, users};
 use crate::middlewares::CsrfProtection;
 use crate::state::GlobalState;
 use crate::vault::get_secrets;
@@ -70,6 +70,7 @@ pub async fn get_router() -> Router {
         std::sync::Arc::new(CsrfProtection::new(state.csrf_secret.as_ref().clone()));
 
     let router_v1 = Router::new()
+        .nest("/audits", audits::get_routes(&state))
         .nest("/teams", teams::get_routes(&state))
         .nest("/users", users::get_routes(&state))
         .nest("/auth", auth::get_routes(state.clone()))

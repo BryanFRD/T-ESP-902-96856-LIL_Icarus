@@ -1,6 +1,28 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    audits (id) {
+        id -> Varchar,
+        name -> Varchar,
+        description -> Nullable<Varchar>,
+        team_id -> Varchar,
+        company_id -> Varchar,
+        end_date -> Nullable<Timestamp>,
+        is_archived -> Bool,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    audits_clients (audit_id, user_id) {
+        audit_id -> Varchar,
+        user_id -> Varchar,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     companies (id) {
         id -> Varchar,
         team_id -> Varchar,
@@ -72,6 +94,10 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(audits -> companies (company_id));
+diesel::joinable!(audits -> teams (team_id));
+diesel::joinable!(audits_clients -> audits (audit_id));
+diesel::joinable!(audits_clients -> users (user_id));
 diesel::joinable!(companies -> teams (team_id));
 diesel::joinable!(password_reset_tokens -> users (user_id));
 diesel::joinable!(teams_invitations -> teams (team_id));
@@ -80,6 +106,8 @@ diesel::joinable!(teams_members -> teams (team_id));
 diesel::joinable!(teams_members -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    audits,
+    audits_clients,
     companies,
     password_reset_tokens,
     teams,

@@ -1,3 +1,5 @@
+use crate::api::audits;
+use crate::api::audits::{CreateAuditPayload, UpdateAuditPayload};
 use crate::api::auth;
 use crate::api::auth::{ConfirmEmailPayload, RegisterPayload, LoginPayload};
 use crate::api::status;
@@ -10,6 +12,11 @@ use utoipa::OpenApi;
 #[derive(OpenApi)]
 #[openapi(
     paths(
+        audits::endpoints::list_my_audits,
+        audits::endpoints::create_audit,
+        audits::endpoints::update_audit,
+        audits::endpoints::archive_audit,
+        audits::endpoints::remove_client,
         auth::endpoints::login,
         auth::endpoints::register,
         auth::endpoints::confirm_email,
@@ -44,7 +51,7 @@ use utoipa::OpenApi;
         status::endpoints::get_status,
     ),
     components(
-        schemas(ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload),
+        schemas(CreateAuditPayload, UpdateAuditPayload, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload),
     ),
     tags(
         (name = "Auth", description = "Authentication endpoints"),

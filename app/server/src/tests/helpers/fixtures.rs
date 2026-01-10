@@ -172,3 +172,73 @@ pub fn insert_test_company(
 
     company
 }
+
+// ============ Audits fixtures ============
+
+#[cfg(test)]
+use crate::api::audits::{Audit, AuditClient};
+#[cfg(test)]
+use crate::schema::{audits, audits_clients};
+
+/// Crée un audit de test et l'insère en base
+#[cfg(test)]
+pub fn insert_test_audit(
+    pool: &DbPool,
+    name: &str,
+    description: Option<String>,
+    team_id: &str,
+    company_id: &str,
+    end_date: Option<chrono::NaiveDateTime>,
+) -> Audit {
+    let audit = Audit::new(
+        name.to_string(),
+        description,
+        team_id.to_string(),
+        company_id.to_string(),
+        end_date,
+    );
+    let mut conn = pool.get().expect("Failed to get DB connection");
+
+    diesel::insert_into(audits::table)
+        .values(&audit)
+        .execute(&mut conn)
+        .expect("Failed to insert test audit");
+
+    audit
+}
+
+/// Ajoute un client à un audit
+#[cfg(test)]
+pub fn insert_audit_client(pool: &DbPool, audit_id: &str, user_id: &str) -> AuditClient {
+    let audit_client = AuditClient::new(audit_id.to_string(), user_id.to_string());
+    let mut conn = pool.get().expect("Failed to get DB connection");
+
+    diesel::insert_into(audits_clients::table)
+        .values(&audit_client)
+        .execute(&mut conn)
+        .expect("Failed to insert audit client");
+
+    audit_client
+}
+
+/// Crée un audit complet avec équipe, company et propriétaire
+#[cfg(test)]
+pub fn create_complete_audit_setup(pool: &DbPool, owner: &User) -> (Team, Company, Audit) {
+    let team = create_team_with_owner(pool, owner);
+    let company = insert_test_company(
+        pool,
+        &team.id,
+        "Test Company",
+        Some("A test company".to_string()),
+        "12345678901234",
+    );
+    let audit = insert_test_audit(
+        pool,
+        "Test Audit",
+        Some("A test audit".to_string()),
+        &team.id,
+        &company.id,
+        None,
+    );
+    (team, company, audit)
+}
