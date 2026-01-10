@@ -5,7 +5,7 @@ use crate::state::GlobalState;
 #[cfg(test)]
 use crate::vault::Secrets;
 #[cfg(test)]
-use crate::{api::{auth, status, teams, users}, tests::helpers::db::DbPool};
+use crate::{api::{audits, auth, status, teams, users}, tests::helpers::db::DbPool};
 #[cfg(test)]
 use axum::Router;
 #[cfg(test)]
@@ -64,6 +64,7 @@ pub fn create_test_router(state: GlobalState) -> Router {
         .allow_credentials(true);
 
     let router_v1 = Router::new()
+        .nest("/audits", audits::get_routes(&state))
         .nest("/teams", teams::get_routes(&state))
         .nest("/users", users::get_routes(&state))
         .nest("/auth", auth::get_routes(state.clone()))
