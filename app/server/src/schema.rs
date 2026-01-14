@@ -35,6 +35,26 @@ diesel::table! {
 }
 
 diesel::table! {
+    events (id) {
+        id -> Varchar,
+        user_id -> Nullable<Varchar>,
+        action -> Varchar,
+        resource_type -> Varchar,
+        resource_id -> Nullable<Varchar>,
+        request_method -> Varchar,
+        request_path -> Varchar,
+        ip_address -> Nullable<Varchar>,
+        user_agent -> Nullable<Varchar>,
+        metadata -> Nullable<Jsonb>,
+        changes -> Nullable<Jsonb>,
+        metadata_nonce -> Nullable<Bytea>,
+        changes_nonce -> Nullable<Bytea>,
+        created_at -> Timestamp,
+        expires_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     password_reset_tokens (user_id) {
         user_id -> Varchar,
         token_hash -> Varchar,
@@ -99,6 +119,7 @@ diesel::joinable!(audits -> teams (team_id));
 diesel::joinable!(audits_clients -> audits (audit_id));
 diesel::joinable!(audits_clients -> users (user_id));
 diesel::joinable!(companies -> teams (team_id));
+diesel::joinable!(events -> users (user_id));
 diesel::joinable!(password_reset_tokens -> users (user_id));
 diesel::joinable!(teams_invitations -> teams (team_id));
 diesel::joinable!(teams_invitations -> users (created_by));
@@ -109,6 +130,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     audits,
     audits_clients,
     companies,
+    events,
     password_reset_tokens,
     teams,
     teams_invitations,

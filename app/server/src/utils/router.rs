@@ -10,32 +10,18 @@ use tracing::Level;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::api::{audits, auth, status, teams, users};
-use crate::middlewares::CsrfProtection;
+use crate::api::{audits, auth, events, status, teams, users};
+use crate::middlewares::{CsrfProtection, event_logging_middleware};
 use crate::state::GlobalState;
-use crate::vault::get_secrets;
+use crate::utils::init::get_state;
 
-pub fn start_logger() {
-    tracing_subscriber::fmt()
-        .with_target(false)
-        .with_max_level(Level::INFO)
-        .compact()
-        .init();
-}
-
-pub async fn get_state() -> GlobalState {
-    let secrets = match get_secrets().await {
-        Ok(secrets) => secrets,
-        Err(e) => {
-            tracing::error!("Failed to get secrets: {}", e);
-            panic!("Failed to get secrets");
-        }
-    };
-    GlobalState::new(secrets)
-}
-
+#[allow(dead_code)]
 pub async fn get_router() -> Router {
     let state = get_state().await;
+    get_router_with_state(&state)
+}
+
+pub fn get_router_with_state(state: &GlobalState) -> Router {
     let secrets = state.get_secrets();
 
     let allowed_origins: Vec<HeaderValue> = secrets
@@ -70,9 +56,10 @@ pub async fn get_router() -> Router {
         std::sync::Arc::new(CsrfProtection::new(state.csrf_secret.as_ref().clone()));
 
     let router_v1 = Router::new()
-        .nest("/audits", audits::get_routes(&state))
-        .nest("/teams", teams::get_routes(&state))
-        .nest("/users", users::get_routes(&state))
+        .nest("/audits", audits::get_routes(state))
+        .nest("/teams", teams::get_routes(state))
+        .nest("/users", users::get_routes(state))
+        .nest("/events", events::get_routes(state))
         .nest("/auth", auth::get_routes(state.clone()))
         .nest("/status", status::get_routes(state.clone()));
 
@@ -81,6 +68,11 @@ pub async fn get_router() -> Router {
         .layer(axum::middleware::from_fn_with_state(
             csrf_protection,
             crate::middlewares::csrf_middleware,
+        ))
+        .layer(CookieManagerLayer::new())
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            event_logging_middleware,
         ))
         .layer(CookieManagerLayer::new())
         .layer(

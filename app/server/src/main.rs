@@ -18,7 +18,12 @@ async fn main() {
     utils::start_logger();
     tracing::info!("Starting server...");
 
-    let app = utils::get_router().await;
+    let state = utils::init::get_state().await;
+    let app = utils::router::get_router_with_state(&state);
+
+    tokio::spawn(async move {
+        utils::start_cleanup_task(state).await;
+    });
 
     let listener = match tokio::net::TcpListener::bind("0.0.0.0:8080").await {
         Ok(listener) => {

@@ -70,6 +70,7 @@ pub async fn csrf_middleware(
         cookie.set_path("/");
         cookie.set_http_only(false);
         cookie.set_same_site(tower_cookies::cookie::SameSite::Lax);
+        cookie.set_domain(".icarus-cyber.fr");
 
         if std::env::var("VAULT_ENV").unwrap_or_default() == "prod" {
             cookie.set_secure(true);

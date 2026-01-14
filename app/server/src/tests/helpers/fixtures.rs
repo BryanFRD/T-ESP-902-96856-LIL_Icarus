@@ -10,12 +10,7 @@ use diesel::prelude::*;
 /// Crée un utilisateur de test avec des valeurs par défaut
 /// Retourne l'utilisateur créé (pas encore inséré en base)
 #[cfg(test)]
-pub fn create_test_user(
-    username: &str,
-    email: &str,
-    password: &str,
-    role: &UserRole,
-) -> User {
+pub fn create_test_user(username: &str, email: &str, password: &str, role: &UserRole) -> User {
     User::new(
         username.to_string(),
         "Test".to_string(),
@@ -53,6 +48,7 @@ pub fn insert_test_user(
 
 /// Crée un utilisateur admin de test et l'insère en base
 #[cfg(test)]
+#[allow(dead_code)]
 pub fn create_admin_user(pool: &DbPool) -> User {
     insert_test_user(
         pool,
@@ -65,6 +61,7 @@ pub fn create_admin_user(pool: &DbPool) -> User {
 
 /// Crée un utilisateur pentester de test et l'insère en base
 #[cfg(test)]
+#[allow(dead_code)]
 pub fn create_pentester_user(pool: &DbPool) -> User {
     insert_test_user(
         pool,
@@ -77,6 +74,7 @@ pub fn create_pentester_user(pool: &DbPool) -> User {
 
 /// Crée un utilisateur client de test et l'insère en base
 #[cfg(test)]
+#[allow(dead_code)]
 pub fn create_client_user(pool: &DbPool) -> User {
     insert_test_user(
         pool,

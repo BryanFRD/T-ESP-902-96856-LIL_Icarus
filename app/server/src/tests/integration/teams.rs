@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod teams_integration_tests {
     use crate::api::auth::LoginPayload;
-    use crate::api::teams::models::{CreateTeam, UpdateMemberRolePayload, UpdateTeam};
     use crate::api::teams::TeamRole;
+    use crate::api::teams::models::{CreateTeam, UpdateMemberRolePayload, UpdateTeam};
     use crate::api::users::UserRole;
     use crate::tests::helpers::{
         app::{create_test_router, create_test_state},
@@ -40,7 +40,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let user = insert_test_user(&pool, "user", "user@test.com", "password", &UserRole::Pentester);
+        let _user = insert_test_user(
+            &pool,
+            "user",
+            "user@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -98,7 +104,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let user = insert_test_user(&pool, "user", "user@test.com", "password", &UserRole::Pentester);
+        let user = insert_test_user(
+            &pool,
+            "user",
+            "user@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let _team1 = create_team_with_owner(&pool, &user);
         let _team2 = create_team_with_owner(&pool, &user);
 
@@ -126,7 +138,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let _user = insert_test_user(&pool, "user", "user@test.com", "password", &UserRole::Pentester);
+        let _user = insert_test_user(
+            &pool,
+            "user",
+            "user@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -171,7 +189,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let user = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
+        let user = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
@@ -202,8 +226,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let admin = insert_test_user(&pool, "admin", "admin@test.com", "password", &UserRole::Admin);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let _admin = insert_test_user(
+            &pool,
+            "admin",
+            "admin@test.com",
+            "password",
+            &UserRole::Admin,
+        );
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
@@ -234,7 +270,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let user = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
+        let user = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
@@ -256,7 +298,10 @@ mod teams_integration_tests {
             .await;
 
         assert_eq!(response.status_code(), StatusCode::BAD_REQUEST);
-        assert_eq!(response.text(), "\"error.team.update.validate.noFieldProvided\"");
+        assert_eq!(
+            response.text(),
+            "\"error.team.update.validate.noFieldProvided\""
+        );
     }
 
     #[tokio::test]
@@ -266,7 +311,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let user = insert_test_user(&pool, "user", "user@test.com", "password", &UserRole::Pentester);
+        let _user = insert_test_user(
+            &pool,
+            "user",
+            "user@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -298,8 +349,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
@@ -332,8 +395,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let other = insert_test_user(&pool, "other", "other@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let _other = insert_test_user(
+            &pool,
+            "other",
+            "other@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
@@ -365,7 +440,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let user = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
+        let user = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
@@ -395,7 +476,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let user = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
+        let user = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
@@ -420,8 +507,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let admin = insert_test_user(&pool, "admin", "admin@test.com", "password", &UserRole::Admin);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let _admin = insert_test_user(
+            &pool,
+            "admin",
+            "admin@test.com",
+            "password",
+            &UserRole::Admin,
+        );
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
@@ -446,7 +545,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let user = insert_test_user(&pool, "user", "user@test.com", "password", &UserRole::Pentester);
+        let _user = insert_test_user(
+            &pool,
+            "user",
+            "user@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -472,8 +577,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
@@ -500,8 +617,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let other = insert_test_user(&pool, "other", "other@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let _other = insert_test_user(
+            &pool,
+            "other",
+            "other@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
@@ -527,7 +656,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let user = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
+        let user = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
@@ -549,8 +684,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
@@ -576,9 +723,27 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let moderator = insert_test_user(&pool, "moderator", "moderator@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let moderator = insert_test_user(
+            &pool,
+            "moderator",
+            "moderator@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &moderator.id, TeamRole::Moderator);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
@@ -605,8 +770,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
@@ -632,9 +809,27 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let admin = insert_test_user(&pool, "admin", "admin@test.com", "password", &UserRole::Admin);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let _admin = insert_test_user(
+            &pool,
+            "admin",
+            "admin@test.com",
+            "password",
+            &UserRole::Admin,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
@@ -660,7 +855,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
@@ -687,8 +888,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let moderator = insert_test_user(&pool, "moderator", "moderator@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let moderator = insert_test_user(
+            &pool,
+            "moderator",
+            "moderator@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &moderator.id, TeamRole::Moderator);
 
@@ -715,9 +928,27 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let member1 = insert_test_user(&pool, "member1", "member1@test.com", "password", &UserRole::Pentester);
-        let member2 = insert_test_user(&pool, "member2", "member2@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member1 = insert_test_user(
+            &pool,
+            "member1",
+            "member1@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member2 = insert_test_user(
+            &pool,
+            "member2",
+            "member2@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member1.id, TeamRole::Member);
         insert_team_member(&pool, &team.id, &member2.id, TeamRole::Member);
@@ -745,8 +976,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
@@ -771,8 +1014,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
@@ -803,9 +1058,27 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let admin = insert_test_user(&pool, "admin", "admin@test.com", "password", &UserRole::Admin);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let _admin = insert_test_user(
+            &pool,
+            "admin",
+            "admin@test.com",
+            "password",
+            &UserRole::Admin,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
@@ -836,7 +1109,13 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
@@ -868,9 +1147,27 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let moderator = insert_test_user(&pool, "moderator", "moderator@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let moderator = insert_test_user(
+            &pool,
+            "moderator",
+            "moderator@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &moderator.id, TeamRole::Moderator);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
@@ -903,9 +1200,27 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let member1 = insert_test_user(&pool, "member1", "member1@test.com", "password", &UserRole::Pentester);
-        let member2 = insert_test_user(&pool, "member2", "member2@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member1 = insert_test_user(
+            &pool,
+            "member1",
+            "member1@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member2 = insert_test_user(
+            &pool,
+            "member2",
+            "member2@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member1.id, TeamRole::Member);
         insert_team_member(&pool, &team.id, &member2.id, TeamRole::Member);
@@ -938,8 +1253,20 @@ mod teams_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
