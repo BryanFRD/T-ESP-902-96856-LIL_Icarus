@@ -1,4 +1,5 @@
 use crate::vault::Secrets;
+use base64::{engine::general_purpose::STANDARD, Engine};
 use diesel::{
     PgConnection,
     r2d2::{ConnectionManager, Pool, PoolError, PooledConnection},
@@ -16,6 +17,7 @@ pub struct GlobalState {
     pub rng: Arc<Mutex<StdRng>>,
     secrets: Arc<Secrets>,
     pub csrf_secret: Arc<String>,
+    pub event_encryption_key: Arc<Vec<u8>>,
 }
 
 impl GlobalState {
@@ -42,12 +44,19 @@ impl GlobalState {
 
         let csrf_secret = format!("csrf-{}", secrets.jwt_secret);
 
+        let event_key_bytes = STANDARD
+            .decode(&secrets.event_encryption_key)
+            .expect("EVENT_ENCRYPTION_KEY must be valid base64");
+
+        assert!(event_key_bytes.len() == 32, "EVENT_ENCRYPTION_KEY must be 32 bytes (256 bits)");
+
         Self {
             db_pool: Arc::new(pool),
             resend: Arc::new(Mutex::new(resend)),
             rng: Arc::new(Mutex::new(rng)),
             secrets: Arc::new(secrets),
             csrf_secret: Arc::new(csrf_secret),
+            event_encryption_key: Arc::new(event_key_bytes),
         }
     }
 
@@ -83,12 +92,19 @@ impl GlobalState {
 
         let csrf_secret = format!("csrf-{}", secrets.jwt_secret);
 
+        let event_key_bytes = STANDARD
+            .decode(&secrets.event_encryption_key)
+            .expect("EVENT_ENCRYPTION_KEY must be valid base64");
+
+        assert!(event_key_bytes.len() == 32, "EVENT_ENCRYPTION_KEY must be 32 bytes (256 bits)");
+
         Self {
             db_pool,
             resend: Arc::new(Mutex::new(resend)),
             rng: Arc::new(Mutex::new(rng)),
             secrets: Arc::new(secrets),
             csrf_secret: Arc::new(csrf_secret),
+            event_encryption_key: Arc::new(event_key_bytes),
         }
     }
 }

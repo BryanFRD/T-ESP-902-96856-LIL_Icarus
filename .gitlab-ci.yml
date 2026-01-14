@@ -72,9 +72,7 @@ stages:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      when: on_success
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   script:
     - echo "Running cargo check..."
@@ -86,9 +84,7 @@ stages:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      when: on_success
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   script:
     - echo "Running cargo clippy ..."
@@ -117,9 +113,7 @@ stages:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      when: on_success
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   before_script:
     - echo "Installing test dependencies..."
@@ -152,7 +146,7 @@ stages:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   variables:
     SONAR_USER_HOME: '${CI_PROJECT_DIR}/.sonar'

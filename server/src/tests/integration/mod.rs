@@ -8,6 +8,9 @@ pub mod auth;
 pub mod companies;
 
 #[cfg(test)]
+pub mod events;
+
+#[cfg(test)]
 pub mod users;
 
 #[cfg(test)]

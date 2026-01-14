@@ -76,7 +76,7 @@ pub fn cleanup_database(pool: &DbPool) {
 
     // Utiliser une seule requête avec RESTART IDENTITY pour éviter les deadlocks
     sql_query(
-        "TRUNCATE TABLE companies, password_reset_tokens, teams_invitations, teams_members, teams, users RESTART IDENTITY CASCADE"
+        "TRUNCATE TABLE events, companies, password_reset_tokens, teams_invitations, teams_members, teams, users RESTART IDENTITY CASCADE"
     )
     .execute(&mut conn)
     .expect("Failed to truncate tables");

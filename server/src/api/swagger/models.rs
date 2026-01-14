@@ -1,11 +1,18 @@
 use crate::api::audits;
 use crate::api::audits::{CreateAuditPayload, UpdateAuditPayload};
 use crate::api::auth;
-use crate::api::auth::{ConfirmEmailPayload, RegisterPayload, LoginPayload};
+use crate::api::auth::{ConfirmEmailPayload, LoginPayload, RegisterPayload};
+use crate::api::events;
+use crate::api::events::{
+    Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType,
+};
 use crate::api::status;
 use crate::api::teams;
-use crate::api::teams::{CompanyReturn, CreateCompanyPayload, CreateInvitationPayload, CreateTeam, InvitationReturn, TeamMemberWithRole, TeamRole, UpdateCompanyPayload};
 use crate::api::teams::models::UpdateMemberRolePayload;
+use crate::api::teams::{
+    CompanyReturn, CreateCompanyPayload, CreateInvitationPayload, CreateTeam, InvitationReturn,
+    TeamMemberWithRole, TeamRole, UpdateCompanyPayload,
+};
 use crate::api::users;
 use utoipa::OpenApi;
 
@@ -23,6 +30,8 @@ use utoipa::OpenApi;
         auth::endpoints::logout,
         auth::endpoints::request_password_reset,
         auth::endpoints::reset_password,
+        events::endpoints::list_events,
+        events::endpoints::get_event,
         users::endpoints::me,
         users::endpoints::update_me,
         users::endpoints::delete_me,
@@ -51,10 +60,11 @@ use utoipa::OpenApi;
         status::endpoints::get_status,
     ),
     components(
-        schemas(CreateAuditPayload, UpdateAuditPayload, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload),
+        schemas(CreateAuditPayload, UpdateAuditPayload, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload, Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType),
     ),
     tags(
         (name = "Auth", description = "Authentication endpoints"),
+        (name = "Events", description = "Event logging and audit endpoints"),
         (name = "User", description = "User management endpoints"),
         (name = "Admin", description = "Admin management endpoints"),
         (name = "Status", description = "Application status endpoints"),
