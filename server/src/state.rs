@@ -63,6 +63,7 @@ impl GlobalState {
     pub fn get_db_conn(
         &self,
     ) -> Result<PooledConnection<ConnectionManager<PgConnection>>, PoolError> {
+        metrics::counter!("db_queries_total").increment(1);
         self.db_pool.get()
     }
 
