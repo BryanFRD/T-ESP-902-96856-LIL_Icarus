@@ -10,8 +10,8 @@ use tracing::Level;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::api::{audits, auth, events, status, teams, users};
-use crate::middlewares::{CsrfProtection, event_logging_middleware};
+use crate::middlewares::{CsrfProtection, event_logging_middleware, metrics_middleware};
+use crate::api::{audits, auth, events, metrics, status, teams, users};
 use crate::state::GlobalState;
 use crate::utils::init::get_state;
 
@@ -23,6 +23,9 @@ pub async fn get_router() -> Router {
 
 pub fn get_router_with_state(state: &GlobalState) -> Router {
     let secrets = state.get_secrets();
+
+    // Initialize Prometheus metrics recorder
+    metrics::install_recorder(state.clone());
 
     let allowed_origins: Vec<HeaderValue> = secrets
         .origin_cors
@@ -75,6 +78,7 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
             event_logging_middleware,
         ))
         .layer(CookieManagerLayer::new())
+        .layer(axum::middleware::from_fn(metrics_middleware))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
@@ -84,10 +88,14 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
 
     let is_prod = std::env::var("VAULT_ENV").unwrap_or("local".to_string()) == "prod";
 
-    if is_prod {
+    let final_router = if is_prod {
         main_router
     } else {
-        main_router
-            .merge(SwaggerUi::new("/v1/swagger").url("/v1/swagger/openapi.json", ApiDoc::openapi()))
-    }
+        main_router.merge(
+            SwaggerUi::new("/v1/swagger").url("/v1/swagger/openapi.json", ApiDoc::openapi()),
+        )
+    };
+
+    // Metrics available in all environments
+    final_router.merge(metrics::get_routes())
 }

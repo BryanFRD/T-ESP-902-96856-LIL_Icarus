@@ -47,6 +47,7 @@ pub async fn login(
     }
 
     let Ok(user) = get_user_or_error(&state, &payload.email) else {
+        metrics::counter!("auth_login_total", "status" => "failure").increment(1);
         return (
             StatusCode::UNAUTHORIZED,
             Json("error.user.auth.invalidCredentials"),
@@ -55,6 +56,7 @@ pub async fn login(
     };
 
     if !user.verify_password(&payload.password) {
+        metrics::counter!("auth_login_total", "status" => "failure").increment(1);
         return (
             StatusCode::UNAUTHORIZED,
             Json("error.user.auth.invalidCredentials"),
@@ -68,6 +70,7 @@ pub async fn login(
     };
 
     create_auth_cookie(jwt, &cookies);
+    metrics::counter!("auth_login_total", "status" => "success").increment(1);
     (StatusCode::OK).into_response()
 }
 
@@ -88,12 +91,14 @@ pub async fn register(
     Json(payload): Json<RegisterPayload>,
 ) -> impl IntoResponse {
     if payload.validate().is_err() {
+        metrics::counter!("auth_register_total", "status" => "failure").increment(1);
         return bad_request_error("error.user.register.invalidEmail");
     }
 
     match user_exists(&state, &payload) {
         Ok(None) => (),
         Ok(Some(val)) => {
+            metrics::counter!("auth_register_total", "status" => "failure").increment(1);
             return conflict_error(&format!("error.user.register.conflict.{val}"));
         }
         Err(e) => {
@@ -137,6 +142,7 @@ pub async fn register(
         }
     }
 
+    metrics::counter!("auth_register_total", "status" => "success").increment(1);
     (StatusCode::OK).into_response()
 }
 
