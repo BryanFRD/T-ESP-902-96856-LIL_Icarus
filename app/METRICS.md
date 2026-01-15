@@ -2,6 +2,36 @@
 
 Ce document liste toutes les métriques Prometheus exposées par l'application sur `/metrics`.
 
+## Types de métriques et utilisation dans Grafana
+
+### Counters
+Les **counters** augmentent toujours et ne sont jamais reset (ex: `http_requests_total`, `db_queries_total`).
+
+**IMPORTANT:** Ne jamais grapher un counter directement. Utiliser `rate()` ou `irate()` dans Grafana :
+
+```promql
+rate(http_requests_total[1m])      # Taux moyen sur 1 minute
+irate(http_requests_total[1m])     # Taux instantané
+```
+
+Si vous graphez directement `http_requests_total`, le graphe va toujours monter (c'est normal).
+
+### Gauges
+Les **gauges** reflètent une valeur actuelle qui peut monter et descendre (ex: `users_total`, `db_connections_active`).
+
+Peuvent être graphées directement sans transformation.
+
+### Histograms
+Les **histograms** capturent la distribution des valeurs (ex: `http_request_duration_seconds`).
+
+Utilisez `histogram_quantile()` pour calculer les percentiles :
+
+```promql
+histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))  # p95
+```
+
+---
+
 ## Métriques HTTP
 
 ### `http_request_duration_seconds` (histogram)
@@ -102,7 +132,9 @@ Nombre de connexions inactives (disponibles) dans le pool.
 ### `db_queries_total` (counter)
 Nombre total de requêtes exécutées sur la base de données.
 
-**Note:** Actuellement déclaré mais non implémenté (nécessite instrumentation de `get_db_conn()`).
+**Implémentation:** Incrémenté à chaque appel à `get_db_conn()`.
+
+**Grafana:** `rate(db_queries_total[1m])` pour queries/seconde
 
 ---
 
