@@ -1,5 +1,6 @@
 pub mod audits;
 pub mod auth;
+pub mod csrf;
 pub mod events;
 pub mod metrics;
 pub mod status;

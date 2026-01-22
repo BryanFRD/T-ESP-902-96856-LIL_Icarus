@@ -1,7 +1,7 @@
 use std::vec;
 
 use crate::api::swagger::ApiDoc;
-use axum::Router;
+use axum::{Extension, Router, routing::get};
 use http::{HeaderName, HeaderValue, Method};
 use tower_cookies::CookieManagerLayer;
 use tower_http::cors::CorsLayer;
@@ -65,10 +65,12 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
         .nest("/users", users::get_routes(state))
         .nest("/events", events::get_routes(state))
         .nest("/auth", auth::get_routes(state.clone()))
-        .nest("/status", status::get_routes(state.clone()));
+        .nest("/status", status::get_routes(state.clone()))
+        .route("/csrf", get(crate::api::csrf::get_csrf));
 
     let main_router = Router::new()
         .nest("/v1", router_v1)
+        .layer(Extension(csrf_protection.clone()))
         .layer(CookieManagerLayer::new())
         .layer(axum::middleware::from_fn_with_state(
             csrf_protection,

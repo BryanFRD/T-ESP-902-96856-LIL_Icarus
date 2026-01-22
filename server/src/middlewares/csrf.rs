@@ -10,8 +10,8 @@ use sha2::{Digest, Sha256};
 use std::sync::Arc;
 use tower_cookies::{Cookie, Cookies, cookie::time::Duration};
 
-const CSRF_COOKIE_NAME: &str = "csrf_token";
-const CSRF_HEADER_NAME: &str = "x-csrf-token";
+pub const CSRF_COOKIE_NAME: &str = "csrf_token";
+pub const CSRF_HEADER_NAME: &str = "x-csrf-token";
 const CSRF_TOKEN_LENGTH: usize = 32;
 
 pub struct CsrfProtection {
@@ -32,6 +32,32 @@ impl CsrfProtection {
         hasher.update(self.secret.as_bytes());
         let hash = hasher.finalize();
         URL_SAFE_NO_PAD.encode(hash)
+    }
+
+    pub fn ensure_token_cookie(&self, cookies: &Cookies) -> String {
+        let token = cookies.get(CSRF_COOKIE_NAME).map_or_else(
+            || self.generate_token(),
+            |cookie| cookie.value().to_string(),
+        );
+
+        cookies.add(Self::build_cookie(&token));
+
+        token
+    }
+
+    fn build_cookie(token: &str) -> Cookie<'static> {
+        let mut cookie = Cookie::new(CSRF_COOKIE_NAME, token.to_owned());
+        cookie.set_path("/");
+        cookie.set_http_only(false);
+        cookie.set_same_site(tower_cookies::cookie::SameSite::Lax);
+        cookie.set_max_age(Duration::seconds(60 * 60 * 24));
+
+        if std::env::var("VAULT_ENV").unwrap_or_default() == "prod" {
+            cookie.set_domain(".icarus-cyber.fr");
+            cookie.set_secure(true);
+        }
+
+        cookie
     }
 
     fn generate_random_bytes() -> [u8; CSRF_TOKEN_LENGTH] {
@@ -55,32 +81,16 @@ impl CsrfProtection {
 }
 
 pub async fn csrf_middleware(
-    State(csrf): State<Arc<CsrfProtection>>,
+    State(_csrf): State<Arc<CsrfProtection>>,
     cookies: Cookies,
     req: Request,
     next: Next,
 ) -> Result<Response, impl IntoResponse> {
     let method = req.method().clone();
     let path = req.uri().path().to_string();
-
-    let csrf_token = if let Some(cookie) = cookies.get(CSRF_COOKIE_NAME) {
-        cookie.value().to_string()
-    } else {
-        let new_token = csrf.generate_token();
-        let mut cookie = Cookie::new(CSRF_COOKIE_NAME, new_token.clone());
-        cookie.set_path("/");
-        cookie.set_http_only(false);
-        cookie.set_same_site(tower_cookies::cookie::SameSite::Lax);
-        cookie.set_max_age(Duration::seconds(60 * 60 * 24));
-
-        if std::env::var("VAULT_ENV").unwrap_or_default() == "prod" {
-            cookie.set_domain(".icarus-cyber.fr");
-            cookie.set_secure(true);
-        }
-
-        cookies.add(cookie);
-        new_token
-    };
+    let csrf_token = cookies
+        .get(CSRF_COOKIE_NAME)
+        .map(|cookie| cookie.value().to_string());
 
     if CsrfProtection::requires_csrf_protection(&method) {
         let skip_csrf_paths = [
@@ -96,15 +106,10 @@ pub async fn csrf_middleware(
                 .and_then(|h| h.to_str().ok())
                 .unwrap_or("");
 
-            tracing::info!(
-                "Validating CSRF token {} {} for {} {}",
-                header_token,
-                csrf_token,
-                method,
-                path
-            );
-
-            if !CsrfProtection::validate_token(&csrf_token, header_token) {
+            if !csrf_token
+                .as_deref()
+                .is_some_and(|token| CsrfProtection::validate_token(token, header_token))
+            {
                 tracing::warn!("CSRF token validation failed for {} {}", method, path);
                 return Err((StatusCode::FORBIDDEN, "Invalid or missing CSRF token"));
             }
@@ -113,8 +118,9 @@ pub async fn csrf_middleware(
 
     let mut response = next.run(req).await;
 
-    if std::env::var("VAULT_ENV").unwrap_or_default() != "prod"
-        && let Ok(header_value) = HeaderValue::from_str(&csrf_token)
+    if let Some(token) = csrf_token
+        && std::env::var("VAULT_ENV").unwrap_or_default() != "prod"
+        && let Ok(header_value) = HeaderValue::from_str(&token)
     {
         response
             .headers_mut()
