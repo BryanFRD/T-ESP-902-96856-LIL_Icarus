@@ -96,6 +96,14 @@ pub async fn csrf_middleware(
                 .and_then(|h| h.to_str().ok())
                 .unwrap_or("");
 
+            tracing::info!(
+                "Validating CSRF token {} {} for {} {}",
+                header_token,
+                csrf_token,
+                method,
+                path
+            );
+
             if !CsrfProtection::validate_token(&csrf_token, header_token) {
                 tracing::warn!("CSRF token validation failed for {} {}", method, path);
                 return Err((StatusCode::FORBIDDEN, "Invalid or missing CSRF token"));
