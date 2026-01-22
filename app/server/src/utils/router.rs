@@ -10,8 +10,8 @@ use tracing::Level;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::middlewares::{CsrfProtection, event_logging_middleware, metrics_middleware};
 use crate::api::{audits, auth, events, metrics, status, teams, users};
+use crate::middlewares::{CsrfProtection, event_logging_middleware, metrics_middleware};
 use crate::state::GlobalState;
 use crate::utils::init::get_state;
 
@@ -53,6 +53,7 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
             HeaderName::from_static("authorization"),
             HeaderName::from_static("x-csrf-token"),
         ])
+        .expose_headers(vec![HeaderName::from_static("x-csrf-token")])
         .allow_credentials(true);
 
     let csrf_protection =
@@ -91,9 +92,8 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
     let final_router = if is_prod {
         main_router
     } else {
-        main_router.merge(
-            SwaggerUi::new("/v1/swagger").url("/v1/swagger/openapi.json", ApiDoc::openapi()),
-        )
+        main_router
+            .merge(SwaggerUi::new("/v1/swagger").url("/v1/swagger/openapi.json", ApiDoc::openapi()))
     };
 
     // Metrics available in all environments
