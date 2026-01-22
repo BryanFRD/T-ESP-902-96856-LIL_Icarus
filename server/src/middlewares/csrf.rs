@@ -69,11 +69,12 @@ pub async fn csrf_middleware(
         let mut cookie = Cookie::new(CSRF_COOKIE_NAME, new_token.clone());
         cookie.set_path("/");
         cookie.set_http_only(false);
+        cookie.set_same_site(tower_cookies::cookie::SameSite::None);
         cookie.set_max_age(Duration::seconds(60 * 60 * 24));
 
         if std::env::var("VAULT_ENV").unwrap_or_default() == "prod" {
-            cookie.set_same_site(tower_cookies::cookie::SameSite::Lax);
             cookie.set_domain(".icarus-cyber.fr");
+            cookie.set_same_site(tower_cookies::cookie::SameSite::Lax);
             cookie.set_secure(true);
         }
 
