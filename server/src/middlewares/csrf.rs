@@ -105,12 +105,12 @@ pub async fn csrf_middleware(
 
     let mut response = next.run(req).await;
 
-    if std::env::var("VAULT_ENV").unwrap_or_default() != "prod" {
-        if let Ok(header_value) = HeaderValue::from_str(&csrf_token) {
-            response
-                .headers_mut()
-                .insert(HeaderName::from_static(CSRF_HEADER_NAME), header_value);
-        }
+    if std::env::var("VAULT_ENV").unwrap_or_default() != "prod"
+        && let Ok(header_value) = HeaderValue::from_str(&csrf_token)
+    {
+        response
+            .headers_mut()
+            .insert(HeaderName::from_static(CSRF_HEADER_NAME), header_value);
     }
 
     Ok(response)
