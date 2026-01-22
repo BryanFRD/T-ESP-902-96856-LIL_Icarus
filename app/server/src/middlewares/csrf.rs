@@ -1,6 +1,7 @@
 use axum::{
-    extract::{Request, State},
-    http::{Method, StatusCode},
+    extract::Request,
+    extract::State,
+    http::{HeaderValue, Method, StatusCode, header::HeaderName},
     middleware::Next,
     response::{IntoResponse, Response},
 };
@@ -69,12 +70,11 @@ pub async fn csrf_middleware(
         let mut cookie = Cookie::new(CSRF_COOKIE_NAME, new_token.clone());
         cookie.set_path("/");
         cookie.set_http_only(false);
-        cookie.set_same_site(tower_cookies::cookie::SameSite::None);
+        cookie.set_same_site(tower_cookies::cookie::SameSite::Lax);
         cookie.set_max_age(Duration::seconds(60 * 60 * 24));
 
         if std::env::var("VAULT_ENV").unwrap_or_default() == "prod" {
             cookie.set_domain(".icarus-cyber.fr");
-            cookie.set_same_site(tower_cookies::cookie::SameSite::Lax);
             cookie.set_secure(true);
         }
 
@@ -103,5 +103,15 @@ pub async fn csrf_middleware(
         }
     }
 
-    Ok(next.run(req).await)
+    let mut response = next.run(req).await;
+
+    if std::env::var("VAULT_ENV").unwrap_or_default() != "prod" {
+        if let Ok(header_value) = HeaderValue::from_str(&csrf_token) {
+            response
+                .headers_mut()
+                .insert(HeaderName::from_static(CSRF_HEADER_NAME), header_value);
+        }
+    }
+
+    Ok(response)
 }
