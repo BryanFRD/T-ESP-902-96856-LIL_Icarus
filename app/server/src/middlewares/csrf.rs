@@ -7,7 +7,7 @@ use axum::{
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use sha2::{Digest, Sha256};
 use std::sync::Arc;
-use tower_cookies::{Cookie, Cookies};
+use tower_cookies::{Cookie, Cookies, cookie::time::Duration};
 
 const CSRF_COOKIE_NAME: &str = "csrf_token";
 const CSRF_HEADER_NAME: &str = "x-csrf-token";
@@ -69,6 +69,7 @@ pub async fn csrf_middleware(
         let mut cookie = Cookie::new(CSRF_COOKIE_NAME, new_token.clone());
         cookie.set_path("/");
         cookie.set_http_only(false);
+        cookie.set_max_age(Duration::seconds(60 * 60 * 24));
 
         if std::env::var("VAULT_ENV").unwrap_or_default() == "prod" {
             cookie.set_same_site(tower_cookies::cookie::SameSite::Lax);
