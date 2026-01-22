@@ -69,23 +69,23 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
 
     let main_router = Router::new()
         .nest("/v1", router_v1)
+        .layer(CookieManagerLayer::new())
         .layer(axum::middleware::from_fn_with_state(
             csrf_protection,
             crate::middlewares::csrf_middleware,
         ))
-        .layer(CookieManagerLayer::new())
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
             event_logging_middleware,
         ))
-        .layer(CookieManagerLayer::new())
         .layer(axum::middleware::from_fn(metrics_middleware))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         )
-        .layer(cors);
+        .layer(cors)
+        .layer(CookieManagerLayer::new());
 
     let is_prod = std::env::var("VAULT_ENV").unwrap_or("local".to_string()) == "prod";
 
