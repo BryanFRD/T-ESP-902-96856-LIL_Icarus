@@ -45,12 +45,14 @@ impl TeamInvitation {
 }
 
 #[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateInvitationPayload {
     pub max_uses: i32,
     pub expires_at: Option<chrono::NaiveDateTime>,
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct InvitationReturn {
     pub id: String,
     pub team_id: String,
