@@ -5,6 +5,14 @@ ALTER TABLE users ADD COLUMN password_hash_version SMALLINT DEFAULT NULL;
 CREATE INDEX idx_users_password_hash_version ON users(password_hash_version);
 
 -- Update trigger to include new column
+CREATE OR REPLACE FUNCTION update_users_updated_at_func()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at
 BEFORE UPDATE OF
