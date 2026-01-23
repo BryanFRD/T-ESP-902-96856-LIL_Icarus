@@ -6,11 +6,11 @@ use crate::{
         teams::{does_team_exist, is_team_owner},
         users::User,
     },
-    middlewares::auth,
+    middlewares::{audit_step_up_middleware, auth},
     state::GlobalState,
 };
 use axum::{
-    middleware::from_fn,
+    middleware::{from_fn, from_fn_with_state},
     routing::{delete, get, patch, post},
     Router,
 };
@@ -18,11 +18,12 @@ use diesel::{
     ExpressionMethods, JoinOnDsl, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
 };
 
-use super::endpoints;
+use super::{endpoints, step_up};
 
 /// Get routes for audits module
 pub fn get_routes(state: &GlobalState) -> Router {
-    Router::new()
+    // Routes protected by step-up authentication (all existing audit routes)
+    let protected_routes = Router::new()
         .route("/me", get(endpoints::list_my_audits))
         .route("/me", post(endpoints::create_audit))
         .route("/{audit_id}", patch(endpoints::update_audit))
@@ -31,7 +32,21 @@ pub fn get_routes(state: &GlobalState) -> Router {
             "/{audit_id}/clients/{user_id}",
             delete(endpoints::remove_client),
         )
-        .layer(from_fn(auth::middleware))
+        .layer(from_fn_with_state(
+            state.clone(),
+            audit_step_up_middleware,
+        ))
+        .layer(from_fn(auth::middleware));
+
+    // Routes for verification (not protected by step-up)
+    let verify_routes = Router::new()
+        .route("/verify-access", post(step_up::endpoints::verify_access))
+        .route("/check-access", get(step_up::endpoints::check_access))
+        .layer(from_fn(auth::middleware));
+
+    // Merge the two routers
+    protected_routes
+        .merge(verify_routes)
         .with_state(state.clone())
 }
 

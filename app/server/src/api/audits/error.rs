@@ -37,4 +37,20 @@ pub enum AuditError {
 
     #[error("Client not in audit")]
     ClientNotInAudit,
+
+    #[allow(dead_code)]
+    #[error("Step-up authentication required")]
+    StepUpRequired,
+
+    #[allow(dead_code)]
+    #[error("Invalid audit access token")]
+    StepUpInvalidToken,
+
+    #[allow(dead_code)]
+    #[error("Audit access token expired")]
+    StepUpExpired,
+
+    #[allow(dead_code)]
+    #[error("Invalid password for step-up authentication")]
+    StepUpInvalidPassword,
 }

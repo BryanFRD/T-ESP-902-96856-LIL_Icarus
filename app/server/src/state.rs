@@ -17,6 +17,7 @@ pub struct GlobalState {
     pub rng: Arc<Mutex<StdRng>>,
     secrets: Arc<Secrets>,
     pub csrf_secret: Arc<String>,
+    pub audit_access_secret: Arc<String>,
     pub event_encryption_key: Arc<Vec<u8>>,
 }
 
@@ -43,6 +44,7 @@ impl GlobalState {
         let rng = StdRng::from_os_rng();
 
         let csrf_secret = format!("csrf-{}", secrets.jwt_secret);
+        let audit_access_secret = format!("audit-{}", secrets.jwt_secret);
 
         let event_key_bytes = STANDARD
             .decode(&secrets.event_encryption_key)
@@ -56,6 +58,7 @@ impl GlobalState {
             rng: Arc::new(Mutex::new(rng)),
             secrets: Arc::new(secrets),
             csrf_secret: Arc::new(csrf_secret),
+            audit_access_secret: Arc::new(audit_access_secret),
             event_encryption_key: Arc::new(event_key_bytes),
         }
     }
@@ -92,6 +95,7 @@ impl GlobalState {
         let rng = StdRng::seed_from_u64(42);
 
         let csrf_secret = format!("csrf-{}", secrets.jwt_secret);
+        let audit_access_secret = format!("audit-{}", secrets.jwt_secret);
 
         let event_key_bytes = STANDARD
             .decode(&secrets.event_encryption_key)
@@ -105,6 +109,7 @@ impl GlobalState {
             rng: Arc::new(Mutex::new(rng)),
             secrets: Arc::new(secrets),
             csrf_secret: Arc::new(csrf_secret),
+            audit_access_secret: Arc::new(audit_access_secret),
             event_encryption_key: Arc::new(event_key_bytes),
         }
     }
