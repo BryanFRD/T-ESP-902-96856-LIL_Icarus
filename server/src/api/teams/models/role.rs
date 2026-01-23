@@ -10,7 +10,7 @@ use utoipa::ToSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromSqlRow, AsExpression, ToSchema, PartialEq, Eq)]
 #[diesel(sql_type = Text)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "PascalCase")]
 pub enum TeamRole {
     Owner,
     Moderator,

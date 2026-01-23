@@ -5,6 +5,7 @@ use crate::api::{teams::{Team, CompanyReturn}, users::User};
 use crate::api::teams::TeamRole;
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateTeam {
     #[schema(example = "Example Team")]
     pub name: String,
@@ -13,6 +14,7 @@ pub struct CreateTeam {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateTeam {
     #[schema(example = "Example Team")]
     pub name: Option<String>,
@@ -21,6 +23,7 @@ pub struct UpdateTeam {
 }
 
 #[derive(Serialize, Debug, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct TeamReturn {
     #[schema(example = "xxxxxxxxxxxxxxxxxxxxxx")]
     pub id: String,
@@ -49,16 +52,15 @@ impl TeamReturn {
 }
 
 #[derive(Serialize, Debug, Clone, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct TeamMemberWithRole {
-    #[serde(rename = "team_role")]
     pub team_role: TeamRole,
-    #[serde(rename = "user_role")]
-    pub user_role: crate::api::users::UserRole,
     #[serde(flatten)]
     pub user: User,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateMemberRolePayload {
     pub role: TeamRole,
 }
