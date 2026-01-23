@@ -133,7 +133,6 @@ pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamRetu
     for (tm, user) in team_members {
         members_map.entry(tm.team_id).or_default().push(TeamMemberWithRole {
             team_role: tm.role,
-            user_role: user.role.clone(),
             user,
         });
     }
