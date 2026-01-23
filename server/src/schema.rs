@@ -106,6 +106,7 @@ diesel::table! {
         email -> Varchar,
         role -> Varchar,
         password_hash -> Varchar,
+        password_hash_version -> Nullable<Int2>,
         is_connected -> Bool,
         created_at -> Timestamp,
         updated_at -> Timestamp,

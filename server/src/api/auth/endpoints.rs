@@ -8,8 +8,8 @@ use tower_cookies::{Cookie, Cookies, cookie::time};
 use tracing::info;
 use validator::Validate;
 
-use crate::helpers::{create_auth_cookie, internal_error, bad_request_error, conflict_error};
 use crate::api::users::get_user_or_error;
+use crate::helpers::{bad_request_error, conflict_error, create_auth_cookie, internal_error};
 
 use crate::api::{
     auth::{
@@ -20,10 +20,13 @@ use crate::api::{
 };
 use crate::{
     mails::{send_confirmation_mail, send_reset_password_mail},
-    state::GlobalState
+    state::GlobalState,
 };
 
-use super::models::{ConfirmEmailPayload, EmailConfirmationToken, JwtClaims, LoginPayload, RegisterPayload, ResetPasswordPayload};
+use super::models::{
+    ConfirmEmailPayload, EmailConfirmationToken, JwtClaims, LoginPayload, RegisterPayload,
+    ResetPasswordPayload,
+};
 
 #[utoipa::path(
     post,
@@ -62,6 +65,17 @@ pub async fn login(
             Json("error.user.auth.invalidCredentials"),
         )
             .into_response();
+    }
+
+    // MIGRATION: Rehash legacy passwords to Argon2id
+    if user.needs_rehash() {
+        tracing::info!("Rehashing password for user {} to Argon2id", user.id);
+        if let Err(e) = rehash_user_password(&state, &user.id, &payload.password) {
+            tracing::error!("Failed to rehash password during login: {}", e);
+            metrics::counter!("auth_password_rehash_total", "status" => "failure").increment(1);
+        } else {
+            metrics::counter!("auth_password_rehash_total", "status" => "success").increment(1);
+        }
     }
 
     let jwt = JwtClaims::from(user);
@@ -319,6 +333,7 @@ pub async fn confirm_email(
         email: token.email,
         role: crate::api::users::UserRole::Pentester,
         password_hash: token.password_hash,
+        password_hash_version: Some(2), // Email confirmation uses Argon2id
         is_connected: false,
         avatar_url: None,
         created_at: chrono::Local::now().naive_utc(),
@@ -330,4 +345,27 @@ pub async fn confirm_email(
         Ok(()) => (StatusCode::CREATED, Json("success.auth.confirmEmail")).into_response(),
         Err(e) => internal_error("Failed to create user", e),
     }
+}
+
+/// Rehash user password from legacy SHA-256 to Argon2id
+fn rehash_user_password(
+    state: &GlobalState,
+    user_id: &str,
+    plaintext_password: &str,
+) -> Result<(), crate::api::users::UserError> {
+    use crate::api::auth::hash_password_argon2id;
+    use crate::schema::users;
+    use diesel::prelude::*;
+
+    let mut conn = state.get_db_conn()?;
+    let new_hash = hash_password_argon2id(plaintext_password);
+
+    diesel::update(users::table.filter(users::id.eq(user_id)))
+        .set((
+            users::password_hash.eq(new_hash),
+            users::password_hash_version.eq(Some(2)),
+        ))
+        .execute(&mut conn)?;
+
+    Ok(())
 }

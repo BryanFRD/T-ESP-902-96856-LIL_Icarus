@@ -13,7 +13,7 @@ use ulid::Ulid;
 use utoipa::ToSchema;
 use validator::Validate;
 
-use crate::api::auth::{hash_password, RegisterPayload};
+use crate::api::auth::{hash_password_argon2id, verify_password_with_migration, RegisterPayload};
 
 #[derive(
     Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable, ToSchema, Identifiable,
@@ -35,6 +35,8 @@ pub struct User {
     pub role: UserRole,
     #[serde(skip_serializing)]
     pub password_hash: String,
+    #[serde(skip_serializing)]
+    pub password_hash_version: Option<i16>,
     #[serde(skip_serializing)]
     pub is_connected: bool,
     pub avatar_url: Option<String>,
@@ -59,7 +61,8 @@ impl User {
             last_name,
             email,
             role: role.into(),
-            password_hash: hash_password(password),
+            password_hash: hash_password_argon2id(password),
+            password_hash_version: Some(2),
             is_connected: false,
             avatar_url: None,
             created_at: chrono::Local::now().naive_utc(),
@@ -69,7 +72,11 @@ impl User {
     }
 
     pub fn verify_password(&self, password: &str) -> bool {
-        hash_password(password) == self.password_hash
+        verify_password_with_migration(password, &self.password_hash, self.password_hash_version)
+    }
+
+    pub fn needs_rehash(&self) -> bool {
+        matches!(self.password_hash_version, None | Some(1))
     }
 }
 
