@@ -1,4 +1,5 @@
 use crate::api::audits;
+use crate::api::audits::step_up::endpoints::{CheckAccessResponse, VerifyAccessPayload};
 use crate::api::audits::{CreateAuditPayload, UpdateAuditPayload};
 use crate::api::auth;
 use crate::api::auth::{ConfirmEmailPayload, LoginPayload, RegisterPayload};
@@ -24,6 +25,8 @@ use utoipa::OpenApi;
         audits::endpoints::update_audit,
         audits::endpoints::archive_audit,
         audits::endpoints::remove_client,
+        audits::step_up::endpoints::verify_access,
+        audits::step_up::endpoints::check_access,
         auth::endpoints::login,
         auth::endpoints::register,
         auth::endpoints::confirm_email,
@@ -60,7 +63,7 @@ use utoipa::OpenApi;
         status::endpoints::get_status,
     ),
     components(
-        schemas(CreateAuditPayload, UpdateAuditPayload, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload, Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType),
+        schemas(CreateAuditPayload, UpdateAuditPayload, VerifyAccessPayload, CheckAccessResponse, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload, Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType),
     ),
     tags(
         (name = "Auth", description = "Authentication endpoints"),
