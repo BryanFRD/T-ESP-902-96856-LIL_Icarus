@@ -67,9 +67,9 @@ const Modal = ({
   if (!isOpen) return null
 
   return (
-    <dialog
-      open
+    <div
       className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm dark:bg-black/60'
+      role='dialog'
       aria-modal='true'
       aria-labelledby='modal-title'
     >
@@ -113,7 +113,7 @@ const Modal = ({
           </div>
         )}
       </div>
-    </dialog>
+    </div>
   )
 }
 
