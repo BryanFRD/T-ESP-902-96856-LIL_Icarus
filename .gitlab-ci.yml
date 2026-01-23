@@ -22,7 +22,19 @@ stages:
       echo "CI_MERGE_REQUEST_IID=$CI_MERGE_REQUEST_IID"
 
       GITLAB_URL="${CI_SERVER_URL}" 
-      MR_INFO=$(curl --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" "${GITLAB_URL}/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID")
+      MR_INFO=$(curl --silent --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "${GITLAB_URL}/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID")
+
+    
+      if [ -z "$MR_INFO" ] || [ "$MR_INFO" = "null" ]; then
+        echo "Failed to fetch MR info from GitLab API. Response: $MR_INFO"
+        exit 0
+      fi
+
+      REVIEWERS_EXIST=$(echo "$MR_INFO" | jq -r '.reviewers')
+      if [ "$REVIEWERS_EXIST" = "null" ] || [ "$REVIEWERS_EXIST" = "[]" ]; then
+        echo "No reviewers in this MR, exiting."
+        exit 0
+      fi
 
       REVIEWER_IDS=$(echo "$MR_INFO" | jq -r '.reviewers[].username')
 
@@ -33,14 +45,15 @@ stages:
 
       echo "Reviewers: $REVIEWER_IDS"
 
-      # === Mapping reviewers → Discord IDs ===
+      # Map GitLab usernames to Discord IDs
       REVIEWER_MAPPING='{
         "Antoine": "260109480455307264",
         "azoulux": "477253430033907722",
         "Bryan": "210742118669484034",
         "corentincollery": "684002215139999774",
         "Jean-EC": "213390185528819713",
-        "Natchi59": "213390185528819713"
+        "Natchi59": "213390185528819713",
+        "Reweilk": "924211405866037278" 
       }'
 
       for REVIEWER in $REVIEWER_IDS; do
@@ -147,7 +160,8 @@ stages:
     - when: manual
   script:
     - echo "Building and deploying DEV web image..."
-    - buildah bud --storage-driver=vfs -t web-dev:latest .
+    - echo "BUILD_MODE=development"
+    - buildah build --build-arg BUILD_MODE=development --storage-driver=vfs -t web-dev:latest .
     - echo "$DOCKER_REGISTRY_PASSWORD_DEV" | buildah login --storage-driver=vfs --username "$DOCKER_REGISTRY_USERNAME_DEV" --password-stdin $DOCKER_REGISTRY
     - buildah tag --storage-driver=vfs web-dev:latest $DOCKER_REGISTRY/web-dev:latest
     - buildah push --storage-driver=vfs $DOCKER_REGISTRY/web-dev:latest
@@ -160,13 +174,15 @@ stages:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "main"'
       when: on_success
+  before_script:
+    - dnf install -y jq nodejs
   script:
     - echo "Building and deploying PRODUCTION web image with semantic-release version..."
     - VERSION=$(jq -r '.version' package.json)
     - echo "Version -> $VERSION"
     - npm ci --cache .npm --prefer-offline
     - npm run build -- --mode production
-    - buildah build -t $DOCKER_REGISTRY/web:$VERSION -t $DOCKER_REGISTRY/web:latest .
-    - echo "$DOCKER_REGISTRY_PASSWORD_PROD" | buildah login --username "$DOCKER_REGISTRY_USERNAME_PROD" --password-stdin $DOCKER_REGISTRY
-    - buildah push $DOCKER_REGISTRY/web:$VERSION
-    - buildah push $DOCKER_REGISTRY/web:latest
+    - buildah build --storage-driver=vfs -t $DOCKER_REGISTRY/web:$VERSION -t $DOCKER_REGISTRY/web:latest .
+    - echo "$DOCKER_REGISTRY_PASSWORD_PROD" | buildah login --storage-driver=vfs --username "$DOCKER_REGISTRY_USERNAME_PROD" --password-stdin $DOCKER_REGISTRY
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/web:$VERSION
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/web:latest

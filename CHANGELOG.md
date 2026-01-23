@@ -1,3 +1,38 @@
+## [1.25.6](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.5...v1.25.6) (2026-01-23)
+
+
+### Bug Fixes
+
+* gitlab ci deploy dev ([9b88c8e](https://git.icarus-cyber.fr/icarus/web/commit/9b88c8e9e07e18330626c3cf35ca653328580194))
+
+## [1.25.5](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.4...v1.25.5) (2026-01-23)
+
+
+### Bug Fixes
+
+* gitlab ci deploy dev ([a40cf4a](https://git.icarus-cyber.fr/icarus/web/commit/a40cf4a8488e30ff5781859932a8aabdcc98a312))
+
+## [1.25.4](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.3...v1.25.4) (2026-01-23)
+
+
+### Bug Fixes
+
+* gitlab ci deploy prod ([b0fc1e6](https://git.icarus-cyber.fr/icarus/web/commit/b0fc1e6c96ba466546035cc2c3d5b68eb186f2e4))
+
+## [1.25.3](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.2...v1.25.3) (2026-01-23)
+
+
+### Bug Fixes
+
+* gitlab ci deploy prod ([51246fc](https://git.icarus-cyber.fr/icarus/web/commit/51246fc85ae436a807f94bc77602665f53684018))
+
+## [1.25.2](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.1...v1.25.2) (2026-01-23)
+
+
+### Bug Fixes
+
+* **AP-100:** csrf token ([790d520](https://git.icarus-cyber.fr/icarus/web/commit/790d5201f5fa5732f1b67e6122b69c90f5b98673))
+
 ## [1.25.1](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.0...v1.25.1) (2025-12-07)
 
 

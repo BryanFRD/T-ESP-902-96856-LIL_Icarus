@@ -4,8 +4,7 @@ Application web de l’outil Icarus pour le pentest.
 
 ## Prérequis
 
-- Accès à un serveur Vault configuré
-- Fichier `.env.local` correctement renseigné (variables Vault)
+- Node v23 ou supérieur
 - Pour toute question ou accès, contacter : arthur.azoula@epitech.eu, antoine.ousselin@epitech.eu ou bryan.ferrando@epitech.eu
 
 ## Lancer le projet
@@ -34,12 +33,6 @@ Dev
 
 ```bash
 npm run dev # Api de dev (https://api-dev.icarus-cyber.fr)
-```
-
-Prod
-
-```bash
-npm run prod # Api de prod (https://api.icarus-cyber.fr)
 ```
 
 #### Contact
