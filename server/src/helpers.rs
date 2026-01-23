@@ -1,11 +1,13 @@
 #![allow(clippy::result_large_err)]
 #![allow(dead_code)]
 
-use axum::{response::{IntoResponse, Response}, Json};
+use axum::{
+    Json,
+    response::{IntoResponse, Response},
+};
 use http::StatusCode;
-#[cfg(not(debug_assertions))]
-use tower_cookies::cookie::SameSite;
-use tower_cookies::{cookie::time, Cookie, Cookies};
+use tower_cookies::cookie::{SameSite, time};
+use tower_cookies::{Cookie, Cookies};
 use tracing::error;
 
 /// Creates an authentication cookie with proper security settings
@@ -15,17 +17,33 @@ use tracing::error;
 /// * `cookies` - The cookies jar to add the cookie to
 ///
 /// # Security
-/// In production (non-debug builds), sets Secure and SameSite=None flags
+/// Environment-specific security settings based on the `VAULT_ENV` variable:
+/// - prod: Secure=true, SameSite=Lax (same-site only)
+/// - dev: Secure=true, SameSite=None (allows cross-origin)
+/// - local: Secure=false, SameSite=Lax (localhost)
 pub fn create_auth_cookie(jwt: String, cookies: &Cookies) {
     let mut cookie = Cookie::new("auth", jwt);
-
-    #[cfg(not(debug_assertions))]
-    cookie.set_secure(true);
-    #[cfg(not(debug_assertions))]
-    cookie.set_same_site(SameSite::None);
-    cookie.set_expires(time::OffsetDateTime::now_utc() + time::Duration::days(7));
     cookie.set_http_only(true);
     cookie.set_path("/");
+    cookie.set_expires(time::OffsetDateTime::now_utc() + time::Duration::days(7));
+
+    let vault_env = std::env::var("VAULT_ENV").unwrap_or("local".to_string());
+
+    match vault_env.as_str() {
+        "prod" => {
+            cookie.set_secure(true);
+            cookie.set_same_site(SameSite::Lax);
+        }
+        "dev" => {
+            cookie.set_secure(true);
+            cookie.set_same_site(SameSite::None);
+        }
+        _ => {
+            cookie.set_secure(false);
+            cookie.set_same_site(SameSite::Lax);
+        }
+    }
+
     cookies.add(cookie);
 }
 
@@ -142,4 +160,3 @@ pub fn conflict_error(message: &str) -> Response {
 pub fn bad_request_error(message: &str) -> Response {
     (StatusCode::BAD_REQUEST, Json(message)).into_response()
 }
-
