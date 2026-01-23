@@ -11,7 +11,7 @@ use crate::api::teams;
 use crate::api::teams::models::UpdateMemberRolePayload;
 use crate::api::teams::{
     CompanyReturn, CreateCompanyPayload, CreateInvitationPayload, CreateTeam, InvitationReturn,
-    TeamMemberWithRole, TeamRole, UpdateCompanyPayload,
+    TeamMemberWithRole, TeamRole, UpdateCompanyPayload
 };
 use crate::api::users;
 use utoipa::OpenApi;
