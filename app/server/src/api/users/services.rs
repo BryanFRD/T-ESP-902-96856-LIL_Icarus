@@ -1,5 +1,5 @@
-use crate::api::auth::{self, RegisterPayload, admin_middleware, hash_password};
-use crate::schema::users::dsl::{users, id, username, first_name, last_name, email, password_hash, avatar_url};
+use crate::api::auth::{self, RegisterPayload, admin_middleware, hash_password_argon2id};
+use crate::schema::users::dsl::{users, id, username, first_name, last_name, email, password_hash, password_hash_version, avatar_url};
 use crate::state::GlobalState;
 use crate::api::users::UserError;
 use axum::extract::multipart::Multipart;
@@ -239,6 +239,7 @@ pub fn update_user_fields(
     let changes = update(users.filter(id.eq(user_id)));
 
     // Build a tuple of Option fields for updating
+    // Build update fields - password requires both hash and version update
     let update_fields = (
         payload.username.as_ref().map(|val| username.eq(val)),
         payload.first_name.as_ref().map(|val| first_name.eq(val)),
@@ -247,7 +248,11 @@ pub fn update_user_fields(
         payload
             .new_password
             .as_ref()
-            .map(|val| password_hash.eq(auth::hash_password(val))),
+            .map(|val| password_hash.eq(auth::hash_password_argon2id(val))),
+        payload
+            .new_password
+            .as_ref()
+            .map(|_| password_hash_version.eq(Some(2))),
     );
 
     // Only update if there is at least one field to set
@@ -256,6 +261,7 @@ pub fn update_user_fields(
         || update_fields.2.is_some()
         || update_fields.3.is_some()
         || update_fields.4.is_some()
+        || update_fields.5.is_some()
     {
         changes
             .set((
@@ -264,6 +270,7 @@ pub fn update_user_fields(
                 update_fields.2,
                 update_fields.3,
                 update_fields.4,
+                update_fields.5,
             ))
             .execute(&mut conn)?;
     }
@@ -277,11 +284,16 @@ pub async fn update_user_password(
     password: &str,
 ) -> Result<(), UserError> {
     use diesel::prelude::*;
+    use crate::schema::users::dsl::password_hash_version;
+
     let mut conn = state.get_db_conn()?;
 
     handle_db_result(
         diesel::update(users.filter(id.eq(user_id)))
-            .set(password_hash.eq(hash_password(password)))
+            .set((
+                password_hash.eq(hash_password_argon2id(password)),
+                password_hash_version.eq(Some(2)),
+            ))
             .execute(&mut conn)
     )?;
 

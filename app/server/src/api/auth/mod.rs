@@ -3,8 +3,7 @@ pub mod models;
 mod services;
 
 pub use crate::middlewares::auth::{admin_middleware, middleware, pentester_middleware};
-pub use services::get_routes;
-pub use services::hash_password;
+pub use services::{get_routes, hash_password_argon2id, verify_password_with_migration};
 
 pub use models::{ConfirmEmailPayload, JwtClaims, LoginPayload, RegisterPayload};
 

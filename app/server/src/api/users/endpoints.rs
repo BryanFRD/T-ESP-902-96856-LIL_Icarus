@@ -17,7 +17,7 @@ use crate::helpers::{
 use super::{get_user_by_id_or_error, get_user_or_error};
 
 use crate::api::{
-    auth::{JwtClaims, hash_password},
+    auth::JwtClaims,
     users::{UserError, get_all_users, models::AvatarForm},
 };
 use crate::state::GlobalState;
@@ -86,8 +86,8 @@ pub async fn update_me(
     };
 
     if payload.new_password.is_some() && let Some(ref current_pw) = payload.password {
-        let hashed = hash_password(current_pw);
-        if hashed != user.password_hash {
+        // Verify old password using migration-aware verification
+        if !user.verify_password(current_pw) {
             return unauthorized_error();
         }
     }
