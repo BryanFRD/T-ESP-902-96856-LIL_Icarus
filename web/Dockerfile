@@ -14,7 +14,8 @@ COPY . .
 
 # Build application (mode will be set via build arg)
 ARG BUILD_MODE=production
-RUN npm run build -- --mode ${BUILD_MODE}
+RUN echo "Building with BUILD_MODE=${BUILD_MODE}" && \
+    npm run build -- --mode ${BUILD_MODE}
 
 # Production stage
 FROM nginx:alpine

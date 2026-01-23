@@ -1,6 +1,6 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
+import path from 'node:path'
 import { defineConfig } from 'vite'
 
 type ENVIRONMENT = 'sandbox' | 'development' | 'production'
@@ -18,7 +18,11 @@ export default defineConfig(async ({ mode }) => {
     ICARUS_API_URL: API_URLS[currentMode]
   }
 
-  const viteConfig = {
+  console.log(
+    `Running in ${currentMode} mode with API URL: ${config.ICARUS_API_URL}`
+  )
+
+  return {
     plugins: [react(), tailwindcss()],
     define: { __CONFIG__: config },
     resolve: {
@@ -49,6 +53,4 @@ export default defineConfig(async ({ mode }) => {
       }
     }
   }
-
-  return viteConfig
 })

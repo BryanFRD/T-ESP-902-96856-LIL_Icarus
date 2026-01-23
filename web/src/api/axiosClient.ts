@@ -10,12 +10,63 @@ export const API_VERSIONS = {
 
 export type ApiVersion = (typeof API_VERSIONS)[keyof typeof API_VERSIONS]
 
+const CSRF_HEADER_NAME = 'x-csrf-token'
+
+// Stockage en mémoire (pas sessionStorage) pour meilleure sécurité contre XSS
+let csrfTokenCache: string | null = null
+
+function getCsrfToken(): string | null {
+  return csrfTokenCache
+}
+
+function storeCsrfToken(token: string): void {
+  csrfTokenCache = token
+}
+
+function clearCsrfToken(): void {
+  console.log('[CSRF] Clearing token from memory')
+  csrfTokenCache = null
+}
+
+async function ensureCsrfToken(
+  instance: ReturnType<typeof axios.create>
+): Promise<string | null> {
+  try {
+    console.log('[CSRF] Fetching CSRF token from API')
+    const response = await instance.get('/csrf')
+    const token = response.data?.token
+    if (token) {
+      storeCsrfToken(token)
+      console.log('[CSRF] Token fetched and stored successfully')
+      return token
+    } else {
+      console.warn('[CSRF] No token in API response')
+    }
+  } catch (error) {
+    console.warn('[CSRF] Failed to fetch CSRF token', error)
+  }
+  return null
+}
+
+// Test utilities for accessing/manipulating the CSRF token cache
+export const __testUtils__ = {
+  getCsrfToken: () => csrfTokenCache,
+  setCsrfToken: (token: string | null) => {
+    csrfTokenCache = token
+  },
+  clearCsrfToken: () => {
+    csrfTokenCache = null
+  }
+}
+
 export function getAxiosClient(
   version: ApiVersion = API_VERSIONS.V1,
   baseUrl?: string
 ) {
+  const finalBaseUrl = baseUrl ?? __CONFIG__.ICARUS_API_URL
+
   const instance = axios.create({
-    baseURL: `${baseUrl ?? __CONFIG__.ICARUS_API_URL}/${version}`,
+    baseURL: `${finalBaseUrl}/${version}`,
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json'
@@ -23,10 +74,37 @@ export function getAxiosClient(
     withCredentials: true
   })
 
+  instance.interceptors.request.use(async config => {
+    if (
+      config.method &&
+      ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())
+    ) {
+      let token = getCsrfToken()
+
+      if (!token && !config.url?.includes('/csrf')) {
+        token = await ensureCsrfToken(instance)
+      }
+
+      if (token) {
+        config.headers.set(CSRF_HEADER_NAME, token)
+      }
+    }
+
+    return config
+  })
+
   instance.interceptors.response.use(
     response => response,
     (error: AxiosError) => {
       const status = error?.response?.status
+
+      if (status === axios.HttpStatusCode.Forbidden) {
+        const errorMessage = (error.response?.data as { error?: string })?.error
+        if (errorMessage?.includes('CSRF') || errorMessage?.includes('csrf')) {
+          console.warn('[CSRF] CSRF validation failed, clearing token')
+          clearCsrfToken()
+        }
+      }
 
       if (status === axios.HttpStatusCode.Unauthorized) {
         if (UnauthorizedHandler.isCurrentlyRedirecting()) {
