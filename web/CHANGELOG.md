@@ -1,3 +1,10 @@
+## [1.25.7](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.6...v1.25.7) (2026-01-23)
+
+
+### Bug Fixes
+
+* **AP-106:** fix modal ([749382b](https://git.icarus-cyber.fr/icarus/web/commit/749382b988476ab7687806195f173bb18073825c))
+
 ## [1.25.6](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.5...v1.25.6) (2026-01-23)
 
 
