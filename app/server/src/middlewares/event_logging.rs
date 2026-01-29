@@ -108,6 +108,12 @@ pub async fn event_logging_middleware(
     let status_code = response.status().as_u16();
 
     if should_log && let Some((action, resource_type, resource_id)) = event_details {
+        if let Some(ref uid) = user_id
+            && !user_exists(&state, uid) {
+                error!("Failed to log event: User {} not found", uid);
+                return response;
+            }
+
         let mut metadata = json!({
             "response_status": status_code,
             "duration_ms": duration_ms,
@@ -274,4 +280,21 @@ async fn buffer_and_clone_body(req: Request) -> Result<(Request, Option<JsonValu
     let req = Request::from_parts(parts, new_body);
 
     Ok((req, body_json))
+}
+
+/// Check if a user exists in the database
+fn user_exists(state: &GlobalState, user_id: &str) -> bool {
+    use crate::schema::users::dsl::{id, users};
+    use diesel::prelude::*;
+
+    match state.get_db_conn() {
+        Ok(mut conn) => {
+            matches!(users
+                .filter(id.eq(user_id))
+                .select(id)
+                .first::<String>(&mut conn)
+                .optional(), Ok(Some(_)))
+        }
+        Err(_) => false,
+    }
 }

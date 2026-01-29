@@ -3,6 +3,7 @@ use std::vec;
 use crate::api::swagger::ApiDoc;
 use axum::{Extension, Router, routing::get};
 use http::{HeaderName, HeaderValue, Method};
+use socketioxide::SocketIo;
 use tower_cookies::CookieManagerLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
@@ -10,8 +11,8 @@ use tracing::Level;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::api::{audits, auth, events, metrics, status, teams, users};
 use crate::middlewares::{CsrfProtection, event_logging_middleware, metrics_middleware};
+use crate::api::{audits, auth, events, metrics, status, teams, users, ws};
 use crate::state::GlobalState;
 use crate::utils::init::get_state;
 
@@ -59,6 +60,9 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
     let csrf_protection =
         std::sync::Arc::new(CsrfProtection::new(state.csrf_secret.as_ref().clone()));
 
+    let (ws_layer, io) = SocketIo::new_layer();
+    ws::setup_ws(&io);
+
     let router_v1 = Router::new()
         .nest("/audits", audits::get_routes(state))
         .nest("/teams", teams::get_routes(state))
@@ -76,6 +80,11 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
             csrf_protection,
             crate::middlewares::csrf_middleware,
         ))
+        .fallback(|| async move {
+            tracing::warn!("404 fallback hit for unmatched route");
+            (axum::http::StatusCode::NOT_FOUND, "error.route.notFound")
+        })
+        .layer(ws_layer)
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
             event_logging_middleware,

@@ -7,3 +7,4 @@ pub mod status;
 pub mod swagger;
 pub mod teams;
 pub mod users;
+pub mod ws;
