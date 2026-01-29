@@ -5,7 +5,7 @@ use crate::vault::get_secrets;
 
 pub fn start_logger() {
     tracing_subscriber::fmt()
-        .with_target(false)
+        .with_target(true)
         .with_max_level(Level::INFO)
         .compact()
         .init();

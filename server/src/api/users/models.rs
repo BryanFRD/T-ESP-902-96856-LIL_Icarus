@@ -96,6 +96,7 @@ impl From<RegisterPayload> for User {
 #[derive(Serialize, Deserialize, Clone, Debug, AsExpression, FromSqlRow, PartialEq, ToSchema)]
 #[diesel(sql_type = Text)]
 #[schema(example = "Pentester")]
+#[serde(rename_all = "UPPERCASE")]
 pub enum UserRole {
     Admin,
     Pentester,

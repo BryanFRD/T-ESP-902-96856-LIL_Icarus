@@ -54,6 +54,7 @@ argon2 = "0.5"
 diesel_migrations = "2.3.1"
 metrics = "0.24"
 metrics-exporter-prometheus = "0.16"
+socketioxide = { version = "0.18.0", features = ["state"] }
 
 [dev-dependencies]
 mockall = "0.13"

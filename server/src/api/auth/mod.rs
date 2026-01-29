@@ -9,3 +9,6 @@ pub use models::{ConfirmEmailPayload, JwtClaims, LoginPayload, RegisterPayload};
 
 #[cfg(test)]
 pub use models::{EmailConfirmationToken, ResetPasswordPayload, ResetPasswordRequestPayload};
+
+#[cfg(test)]
+pub use services::hash_password;
