@@ -5,6 +5,7 @@ use ulid::Ulid;
 use utoipa::ToSchema;
 use validator::Validate;
 
+use crate::api::teams::companies::models::CompanyReturn;
 use crate::api::users::User;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Insertable, ToSchema)]
@@ -128,7 +129,7 @@ pub struct AuditResponse {
     pub name: String,
     pub description: Option<String>,
     pub team_id: String,
-    pub company_id: String,
+    pub company: CompanyReturn,
     pub clients: Vec<ClientUser>,
     pub end_date: Option<String>,
     pub is_archived: bool,
@@ -160,13 +161,17 @@ impl From<User> for ClientUser {
 
 impl AuditResponse {
     #[must_use]
-    pub fn from_audit_and_clients(audit: Audit, clients: Vec<User>) -> Self {
+    pub fn from_audit_and_clients(
+        audit: Audit,
+        company: CompanyReturn,
+        clients: Vec<User>,
+    ) -> Self {
         Self {
             id: audit.id,
             name: audit.name,
             description: audit.description,
             team_id: audit.team_id,
-            company_id: audit.company_id,
+            company,
             clients: clients.into_iter().map(ClientUser::from).collect(),
             end_date: audit.end_date.map(|d| d.to_string()),
             is_archived: audit.is_archived,
