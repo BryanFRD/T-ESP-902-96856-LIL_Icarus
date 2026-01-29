@@ -48,6 +48,7 @@ impl TeamInvitation {
 #[serde(rename_all = "camelCase")]
 pub struct CreateInvitationPayload {
     pub max_uses: i32,
+    #[serde(deserialize_with = "crate::utils::datetime_serde::deserialize_optional_naive_datetime")]
     pub expires_at: Option<chrono::NaiveDateTime>,
 }
 
