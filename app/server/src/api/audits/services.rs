@@ -3,7 +3,9 @@ use super::{
 };
 use crate::{
     api::{
-        teams::{does_team_exist, is_team_owner},
+        teams::{
+            companies::models::Company, does_team_exist, is_team_owner,
+        },
         users::User,
     },
     middlewares::{audit_step_up_middleware, auth},
@@ -179,7 +181,7 @@ pub fn list_user_audits(
     state: &GlobalState,
     user_id: &str,
 ) -> Result<Vec<AuditResponse>, AuditError> {
-    use crate::schema::{audits, audits_clients, users};
+    use crate::schema::{audits, audits_clients, companies, users};
 
     let team_ids = get_user_team_ids(state, user_id)?;
 
@@ -198,12 +200,16 @@ pub fn list_user_audits(
         .set(audits::is_archived.eq(true))
         .execute(&mut conn)?;
 
-    let audits_list = audits::table
+    let audits_with_companies: Vec<(Audit, Company)> = audits::table
         .filter(audits::team_id.eq_any(&team_ids))
-        .select(Audit::as_select())
-        .load::<Audit>(&mut conn)?;
+        .inner_join(companies::table.on(audits::company_id.eq(companies::id)))
+        .select((Audit::as_select(), Company::as_select()))
+        .load::<(Audit, Company)>(&mut conn)?;
 
-    let audit_ids: Vec<String> = audits_list.iter().map(|a| a.id.clone()).collect();
+    let audit_ids: Vec<String> = audits_with_companies
+        .iter()
+        .map(|(a, _)| a.id.clone())
+        .collect();
 
     if audit_ids.is_empty() {
         return Ok(Vec::new());
@@ -221,11 +227,11 @@ pub fn list_user_audits(
         clients_map.entry(ac.audit_id).or_default().push(user);
     }
 
-    let result = audits_list
+    let result = audits_with_companies
         .into_iter()
-        .map(|audit| {
+        .map(|(audit, company)| {
             let clients = clients_map.remove(&audit.id).unwrap_or_default();
-            AuditResponse::from_audit_and_clients(audit, clients)
+            AuditResponse::from_audit_and_clients(audit, company.into(), clients)
         })
         .collect();
 
@@ -242,7 +248,7 @@ pub fn create_audit(
     payload: CreateAuditPayload,
     is_admin: bool,
 ) -> Result<AuditResponse, AuditError> {
-    use crate::schema::audits;
+    use crate::schema::{audits, companies};
 
     if !does_team_exist(state, &payload.team_id)? {
         return Err(AuditError::TeamNotFound);
@@ -262,7 +268,7 @@ pub fn create_audit(
         payload.name,
         payload.description,
         payload.team_id,
-        payload.company_id,
+        payload.company_id.clone(),
         payload.end_date,
     );
 
@@ -272,7 +278,16 @@ pub fn create_audit(
         .values(&new_audit)
         .execute(&mut conn)?;
 
-    Ok(AuditResponse::from_audit_and_clients(new_audit, Vec::new()))
+    let company = companies::table
+        .filter(companies::id.eq(&payload.company_id))
+        .select(Company::as_select())
+        .first::<Company>(&mut conn)?;
+
+    Ok(AuditResponse::from_audit_and_clients(
+        new_audit,
+        company.into(),
+        Vec::new(),
+    ))
 }
 
 /// Update an audit
@@ -286,7 +301,7 @@ pub fn update_audit(
     payload: &UpdateAuditPayload,
     is_admin: bool,
 ) -> Result<AuditResponse, AuditError> {
-    use crate::schema::{audits, audits_clients, users};
+    use crate::schema::{audits, audits_clients, companies, users};
 
     let mut audit = get_audit(state, audit_id)?;
     auto_archive_if_needed(state, &mut audit)?;
@@ -327,10 +342,11 @@ pub fn update_audit(
             .execute(&mut conn)?;
     }
 
-    let updated_audit = audits::table
+    let (updated_audit, company) = audits::table
         .filter(audits::id.eq(audit_id))
-        .select(Audit::as_select())
-        .first::<Audit>(&mut conn)?;
+        .inner_join(companies::table.on(audits::company_id.eq(companies::id)))
+        .select((Audit::as_select(), Company::as_select()))
+        .first::<(Audit, Company)>(&mut conn)?;
 
     let client_users = audits_clients::table
         .filter(audits_clients::audit_id.eq(audit_id))
@@ -340,6 +356,7 @@ pub fn update_audit(
 
     Ok(AuditResponse::from_audit_and_clients(
         updated_audit,
+        company.into(),
         client_users,
     ))
 }

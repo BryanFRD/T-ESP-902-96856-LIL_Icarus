@@ -71,7 +71,9 @@ mod audits_integration_tests {
         let body: serde_json::Value = response.json();
         assert_eq!(body["name"], "Test Audit");
         assert_eq!(body["teamId"], team.id);
-        assert_eq!(body["companyId"], company.id);
+        assert!(body["company"].is_object());
+        assert_eq!(body["company"]["id"], company.id);
+        assert_eq!(body["company"]["name"], company.name);
         assert_eq!(body["isArchived"], false);
         assert!(body["clients"].is_array());
         assert_eq!(body["clients"].as_array().unwrap().len(), 0);
