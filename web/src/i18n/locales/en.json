@@ -1,13 +1,83 @@
 {
   "actions": {
     "cancel": "Cancel",
+    "delete": "Delete",
+    "done": "Done",
+    "edit": "Edit",
     "goLogin": "Back to Login",
+    "more": "More actions",
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "save": "Save"
   },
   "app": {
     "description": "Pentest Platform",
     "name": "Icarus"
+  },
+  "audit": {
+    "access": {
+      "message": "To access this audit, please enter your password below.",
+      "submit": "Grant Access",
+      "title": "Audit security access"
+    },
+    "accessGranted": "Access granted.",
+    "company": {
+      "invalid": "Invalid company name."
+    },
+    "create": {
+      "auditLabel": "Audit Name",
+      "auditPlaceholder": "Enter the name of the audit",
+      "companyLabel": "Company Name",
+      "companyPlaceholder": "Enter the name of the company",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Enter a brief description of the audit",
+      "endDateLabel": "End Date",
+      "endDatePlaceholder": "Select the end date of the audit",
+      "submit": "Create Audit",
+      "teamLabel": "Team",
+      "teamPlaceholder": "Select the team responsible for the audit"
+    },
+    "createAudit": "Create an audit",
+    "createAuditFormTitle": "New Audit Details",
+    "created": "Audit created successfully.",
+    "creating": "Creating audit...",
+    "date": {
+      "invalid": "Invalid date format."
+    },
+    "description": {
+      "max": "Description cannot exceed 500 characters."
+    },
+    "details": {
+      "company": "null",
+      "description": "null",
+      "endDate": "null",
+      "noDescription": "null",
+      "notFound": "null",
+      "status": "null"
+    },
+    "endDate": "End Date",
+    "list": {
+      "error": "Failed to load audits. Please try again later."
+    },
+    "name": {
+      "max": "Audit name cannot exceed 100 characters.",
+      "min": "Audit name must be at least 3 characters long."
+    },
+    "password": {
+      "label": "Password",
+      "placeholder": "Enter your password",
+      "required": "Password is required to access the audit."
+    },
+    "status": {
+      "active": "Active Audit",
+      "archived": "Archived Audit"
+    },
+    "subtitle": "Manage and view your security audits here.",
+    "team": {
+      "invalid": "Invalid team selection."
+    },
+    "title": "My audits",
+    "verifying": "Verifying audit access..."
   },
   "branding": {
     "advancedPenetration": "Advanced Penetration",
@@ -22,8 +92,27 @@
     "securityQuote": "Security is not a product, but a process. Icarus makes that process seamless and effective.",
     "testingPlatform": "Testing Platform"
   },
+  "changePasswordForm": {
+    "description": "Update your password to secure your account",
+    "title": "Change Password"
+  },
   "common": {
-    "cancel": "Cancel"
+    "back": "Back",
+    "cancel": "Cancel",
+    "days": {
+      "fri": "Fri",
+      "mon": "Mon",
+      "sat": "Sat",
+      "sun": "Sun",
+      "thu": "Thu",
+      "tue": "Tue",
+      "wed": "Wed"
+    },
+    "nextMonth": "Next month",
+    "nextYear": "Next year",
+    "previousMonth": "Previous month",
+    "previousYear": "Previous year",
+    "selectDate": "Select date"
   },
   "confirmEmail": {
     "error": "Email verification failed.",
@@ -38,9 +127,22 @@
     "invalid": "Please enter a valid email address."
   },
   "error": {
+    "auditCreationFailed": "Failed to create audit. Please try again.",
+    "companyCreationFailed": "Failed to create company. Please try again.",
+    "companyDeletionFailed": "Failed to delete company. Please try again.",
+    "companyUpdateFailed": "Failed to update company. Please try again.",
     "invalidImageType": "Invalid image type. Please upload a valid image.",
     "invalidToken": "The token provided is invalid or has expired.",
+    "invitationCancellationFailed": "Failed to cancel invitation. Please try again.",
+    "invitationCreationFailed": "Failed to create invitation. Please try again.",
+    "memberRemovalFailed": "Failed to remove member. Please try again.",
+    "memberRoleUpdateFailed": "Failed to update member role. Please try again.",
+    "passwordChangeFailed": "Failed to change password. Please try again.",
+    "passwordsDoNotMatch": "Passwords do not match.",
     "profileUpdateFailed": "Failed to update profile. Please try again.",
+    "teamCreationFailed": "Failed to create team. Please try again.",
+    "teamDeletionFailed": "Failed to delete team. Please try again.",
+    "teamUpdateFailed": "Failed to update team. Please try again.",
     "unknown": "An unknown error occurred.",
     "validToken": "Invalid token."
   },
@@ -75,8 +177,12 @@
     "title": "Crop Image"
   },
   "inputField": {
+    "changePassword": "Change Password",
+    "changingPassword": "Changing password...",
     "confirmPassword": "Confirm Password",
     "confirmPasswordPlaceholder": "Confirm your password",
+    "currentPassword": "Current Password",
+    "currentPasswordPlaceholder": "Enter your current password",
     "email": "Email",
     "emailPlaceholder": "Enter your email",
     "emailRequired": "Email is required.",
@@ -89,6 +195,8 @@
     "lastNamePlaceholder": "Enter your last name",
     "lastNameRequired": "Last name is required.",
     "logout": "Logout",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter your new password",
     "noAccount": "Don’t have an account?",
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
@@ -110,10 +218,17 @@
     "french": "French"
   },
   "loading": {
-    "default": "Loading...",
+    "cancellingInvitation": "Cancelling invitation...",
+    "changingPassword": "Changing password...",
+    "creatingCompany": "Creating company...",
+    "creatingInvitation": "Creating invitation...",
+    "creatingTeam": "Creating team...",
+    "deletingCompany": "Deleting company...",
+    "deletingTeam": "Deleting team...",
     "login": "Logging in...",
     "logout": "Logging out...",
     "register": "Registering...",
+    "removingMember": "Removing member...",
     "resetPassword": "Resetting password...",
     "savingChanges": "Saving changes...",
     "sendResetPassword": "Sending reset password email...",
@@ -163,6 +278,11 @@
     "login": "Login",
     "register": "Register"
   },
+  "select": {
+    "noOptions": "No options available",
+    "placeholder": "Select an option",
+    "search": "Search..."
+  },
   "sidebar": {
     "closeMenu": "Close Menu",
     "openMenu": "Open Menu"
@@ -175,18 +295,114 @@
   },
   "success": {
     "avatarUploaded": "Avatar uploaded successfully.",
+    "companyCreated": "Company created successfully.",
+    "companyDeleted": "Company deleted successfully.",
+    "companyUpdated": "Company updated successfully.",
+    "invitationCancelled": "Invitation cancelled successfully.",
+    "invitationCreated": "Invitation created successfully.",
     "login": "Logged in successfully.",
     "logout": "Logged out successfully.",
+    "memberRemoved": "Member removed successfully.",
+    "memberRoleUpdated": "Member role updated successfully.",
+    "passwordChanged": "Password changed successfully.",
     "profileUpdated": "Profile updated successfully.",
     "register": "Registered successfully.",
-    "resetPassword": "Password reset successfully."
+    "resetPassword": "Password reset successfully.",
+    "teamCreated": "Team created successfully.",
+    "teamDeleted": "Team deleted successfully.",
+    "teamUpdated": "Team updated successfully."
+  },
+  "team": {
+    "addCompany": "Add Company",
+    "addCompanyTitle": "Add a Company",
+    "backToTeams": "Back to Teams",
+    "cancelInvitation": "Cancel invitation",
+    "changeRole": "Change role",
+    "changeRoleTitle": "Change Member Role",
+    "companyDescriptionPlaceholder": "Enter a description for this company",
+    "companyName": "Company Name",
+    "companyNamePlaceholder": "Enter company name",
+    "copyInvitationLink": "Copy invitation link",
+    "createCompany": "Add Company",
+    "createFirstTeam": "Create your first team",
+    "createInvitation": "Create Invitation",
+    "createInvitationTitle": "Invite to Team",
+    "createTeam": "Create Team",
+    "createTeamTitle": "Create a New Team",
+    "deleteTeam": "Delete Team",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter a description for your team",
+    "editCompany": "Edit Company",
+    "editTeam": "Edit Team",
+    "expiresAt": "Expiration date",
+    "expiresAtHint": "Leave empty for an invitation that never expires.",
+    "invalidInvitationToken": "Invalid or expired invitation link.",
+    "invitationCreatedSuccess": "Invitation created! Share the link below with the person you want to invite.",
+    "invitationExpired": "Expired",
+    "invitationFullyUsed": "Fully used",
+    "invitationLink": "Invitation Link",
+    "invitationLinkCopied": "Invitation link copied to clipboard!",
+    "invitationLinkHint": "Share this link with the person you want to invite.",
+    "joinTeamError": "Unable to Join",
+    "joinTeamErrorDescription": "The invitation may have expired or already been used.",
+    "joinedTeamSuccess": "Welcome to the team!",
+    "joinedTeamSuccessDescription": "You have successfully joined the team.",
+    "joiningTeam": "Joining Team...",
+    "joiningTeamDescription": "Please wait while we process your invitation.",
+    "maxUses": "Number of uses",
+    "maxUsesHint": "Maximum number of people who can use this link.",
+    "maxUsesPlaceholder": "e.g. 10",
+    "noCompanies": "No companies yet",
+    "noCompaniesDescription": "Add companies associated with this team.",
+    "noExpiration": "No expiration",
+    "noInvitations": "No pending invitations",
+    "noInvitationsDescription": "Create invitations to add new members to your team.",
+    "noMembers": "No members yet",
+    "noMembersDescription": "Invite people to join your team.",
+    "noTeams": "No teams yet",
+    "noTeamsDescription": "Create a team to collaborate with others and manage your projects.",
+    "removeMember": "Remove member",
+    "siret": "SIRET Number",
+    "siretHint": "The SIRET number is composed of 14 digits.",
+    "siretPlaceholder": "e.g. 12345678901234",
+    "subtitle": "Manage your teams and collaborate with others.",
+    "tabs": {
+      "companies": "Companies",
+      "invitations": "Invitations",
+      "members": "Members"
+    },
+    "teamName": "Team Name",
+    "teamNamePlaceholder": "Enter team name",
+    "teamNotFound": "Team not found",
+    "teamNotFoundDescription": "The team you're looking for doesn't exist or you don't have access.",
+    "title": "Teams",
+    "unknownMember": "Unknown Member",
+    "validation": {
+      "companyNameMaxLength": "Company name must be at most 100 characters.",
+      "companyNameRequired": "Company name is required.",
+      "descriptionMaxLength": "Description must be at most 500 characters.",
+      "maxUsesMax": "Number of uses cannot exceed 100.",
+      "maxUsesMin": "Number of uses must be at least 1.",
+      "nameMaxLength": "Team name must be at most 100 characters.",
+      "nameRequired": "Team name is required.",
+      "siretInvalid": "SIRET number must contain exactly 14 digits.",
+      "siretRequired": "SIRET number is required."
+    }
+  },
+  "teams": {
+    "roleDescriptions": {
+      "client": "Can view company data and reports.",
+      "member": "Can manage company data and perform tests.",
+      "moderator": "Can manage members and invitations.",
+      "owner": "Full access to all team settings and data."
+    },
+    "roles": {
+      "client": "Client",
+      "member": "Member",
+      "moderator": "Moderator",
+      "owner": "Owner"
+    }
   },
   "theme": "Theme",
-  "threatLevel": {
-    "critical": "Critical threat",
-    "high": "High threat",
-    "low": "Low threat",
-    "medium": "Medium threat"
-  },
   "welcomeBack": "Welcome Back"
 }

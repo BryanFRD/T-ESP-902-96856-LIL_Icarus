@@ -9,12 +9,14 @@ const __dirname = path.dirname(__filename)
 
 const knownKeys: string[] = [
   'error.unknown',
-  'route.login',
-  'route.register',
-  'route.dashboard'
+  'router.login',
+  'router.register',
+  'router.dashboard'
 ]
 const knownDynamicKeys: Record<string, string[]> = {
-  'threatLevel.': ['low', 'medium', 'high', 'critical']
+  'threatLevel.': ['low', 'medium', 'high', 'critical'],
+  'teams.roles.': ['owner', 'moderator', 'member', 'client'],
+  'teams.roleDescriptions.': ['owner', 'moderator', 'member', 'client']
 }
 
 export const srcDir = path.resolve(__dirname, '../src')
@@ -32,12 +34,12 @@ function detectRawJSXText(content: string, filePath: string) {
 
   while ((match = jsxTextRegex.exec(content)) !== null) {
     const text = match[1].trim()
-    // Do not take fragments that look like TypeScript type declarations:
+    // Do not take fragments that look like TypeScript types declarations:
     const looksLikeTypeScriptGeneric =
       /<[^>]+>/.test(text) || // contains <...>
       /extends\s+/.test(text) || // contains "extends "
       /implements\s+/.test(text) || // contains "implements "
-      /:\s*[^;]+;/.test(text) || // contains ": type;"
+      /:\s*[^;]+;/.test(text) || // contains ": types;"
       /[{};]/.test(text) || // contains special TS characters
       /^export\s/.test(text) || // starts with export
       /^import\s/.test(text) // starts with import

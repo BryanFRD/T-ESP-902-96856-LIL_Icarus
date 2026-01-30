@@ -1,6 +1,5 @@
+import Button from '@/components/ui/button/Button.tsx'
 import { buttonSizes, buttonVariants } from '@/types/components/button.type'
-
-import Button from '../components/ui/Button'
 
 export default {
   title: 'UI/Button',

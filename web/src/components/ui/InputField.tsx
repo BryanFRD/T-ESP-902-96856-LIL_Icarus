@@ -1,7 +1,7 @@
 import { AlertCircle, Eye, EyeOff } from 'lucide-react'
 import type { FieldValues } from 'react-hook-form'
 
-import useToggle from '@/hooks/useToggle.tsx'
+import useToggle from '@/hooks/common/useToggle.ts'
 import type { InputFieldProps } from '@/types/global.ts'
 
 const InputField = <T extends FieldValues>({
@@ -12,7 +12,8 @@ const InputField = <T extends FieldValues>({
   register,
   error,
   name,
-  autoComplete = 'off'
+  autoComplete = 'off',
+  registerOptions
 }: InputFieldProps<T>) => {
   const { toggle: togglePassword, value: showPassword } = useToggle(false)
   const inputType = type === 'password' && showPassword ? 'text' : type
@@ -26,18 +27,17 @@ const InputField = <T extends FieldValues>({
       <div className='relative'>
         <input
           type={inputType}
-          {...register(name)}
-          className={`w-full px-4 py-3 pl-12 transition-all duration-300 ${
+          {...register(name, registerOptions)}
+          className={`w-full px-3 py-3 transition-all duration-300 ${
             type === 'password' ? 'pr-12' : 'pr-4'
-          } rounded-xl border-2 bg-white focus:ring-4 focus:ring-blue-100 focus:outline-none dark:bg-gray-900 dark:focus:ring-blue-900 ${
+          } rounded-md border-2 bg-white focus:ring-4 focus:ring-blue-100 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:focus:ring-orange-900 ${
             error
               ? 'border-red-300 focus:border-red-500 dark:border-red-500'
-              : 'border-gray-200 focus:border-blue-500 dark:border-gray-700 dark:focus:border-blue-400'
+              : 'border-gray-200'
           } text-gray-900 placeholder-gray-400 dark:text-gray-100 dark:placeholder-gray-500`}
           placeholder={placeholder}
           autoComplete={autoComplete}
         />
-        <Icon className='absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 transform text-gray-400 transition-all duration-300 dark:text-gray-500' />
 
         {type === 'password' && (
           <button

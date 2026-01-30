@@ -9,12 +9,12 @@ import {
 import type {
   LoginPayload,
   RegisterPayload
-} from '@/domain/commonTypes/authType.ts'
-import type { User } from '@/domain/commonTypes/userTypes.ts'
-import { useLogin } from '@/hooks/auths/useLogin.ts'
-import { useLogout } from '@/hooks/auths/useLogout.ts'
-import { useMe } from '@/hooks/auths/useMe.ts'
-import { useRegister } from '@/hooks/auths/useRegister'
+} from '@/domain/types/Authentication.ts'
+import type { User } from '@/domain/types/User.ts'
+import { useLogin } from '@/hooks/auth/useLogin.ts'
+import { useLogout } from '@/hooks/auth/useLogout.ts'
+import { useMe } from '@/hooks/auth/useMe.ts'
+import { useRegister } from '@/hooks/auth/useRegister'
 
 export type UserContextType = {
   user: User | null

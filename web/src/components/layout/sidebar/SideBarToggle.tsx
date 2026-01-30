@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import SidebarToggleIcon from '@/components/icon/SidebarToggleIcon'
-import Button from '@/components/ui/Button'
+import Button from '@/components/ui/button/Button.tsx'
 import type { SidebarToggleProps } from '@/types/global.ts'
 
 const SidebarToggle = ({

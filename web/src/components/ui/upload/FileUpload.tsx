@@ -2,7 +2,7 @@ import { t } from 'i18next'
 import { Camera, FileText, ImageIcon, Paperclip, Upload } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 
-import { useFileUpload } from '@/hooks/useFileUpload'
+import { useFileUpload } from '@/hooks/common/useFileUpload.ts'
 import type {
   FileUploadProps,
   FileUploadVariant,

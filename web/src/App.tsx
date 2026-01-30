@@ -1,8 +1,8 @@
 import { Toaster } from 'react-hot-toast'
 
-import { ThemeProvider } from './context/ThemeContext'
-import { UserContextProvider } from './context/UserContext'
-import Router from './routes/Router'
+import { ThemeProvider } from '@/context/ThemeContext'
+import { UserContextProvider } from '@/context/UserContext'
+import Router from '@/router/Router'
 
 function App() {
   return (

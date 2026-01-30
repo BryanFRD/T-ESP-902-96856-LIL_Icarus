@@ -7,7 +7,7 @@ import {
   getPreview
 } from '@/utils/fileUploadUtils'
 
-import Button from '../Button'
+import Button from '../button/Button.tsx'
 
 export const AvatarPreview = ({
   files,

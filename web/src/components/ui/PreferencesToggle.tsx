@@ -2,10 +2,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 import ReactCountryFlag from 'react-country-flag'
 
-import { useTheme } from '@/context/ThemeContext'
-import useLanguage from '@/hooks/lang/useLanguage'
+import { useTheme } from '@/context/ThemeContext.tsx'
+import useLanguage from '@/hooks/lang/useLanguage.ts'
 
-import DarkModeIcon from '../icon/DarkModeIcon'
+import DarkModeIcon from '../icon/DarkModeIcon.tsx'
 
 const PreferencesToggle = () => {
   const { theme, toggleTheme } = useTheme()

@@ -1,7 +1,7 @@
 // react-i18next.d.ts
 import 'react-i18next'
 
-// 1. On récupère le type des traductions à partir du JSON importé
+// 1. On récupère le types des traductions à partir du JSON importé
 import en from './locales/en.json'
 
 type Resources = typeof en

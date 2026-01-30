@@ -1,0 +1,14 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { joinTeam } from '@/service/teamService'
+
+export const useJoinTeam = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: joinTeam,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team', 'me'] })
+    }
+  })
+}

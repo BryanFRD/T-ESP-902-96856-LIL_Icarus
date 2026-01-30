@@ -25,13 +25,14 @@ export interface SidebarProps {
 
 export interface InputFieldProps<T extends FieldValues> {
   label: string
-  type: 'email' | 'password' | 'text'
+  type: 'email' | 'password' | 'text' | 'number' | 'datetime-local'
   icon: LucideIcon
-  placeholder: string
+  placeholder?: string
   register: UseFormRegister<T>
   error?: string
   name: Path<T>
   autoComplete?: HTMLInputAutoCompleteAttribute
+  registerOptions?: Parameters<UseFormRegister<T>>[1]
 }
 
 export interface LoadingButtonProps {
