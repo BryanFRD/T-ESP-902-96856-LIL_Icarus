@@ -5,10 +5,10 @@ import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
-import Button from '@/components/ui/Button'
+import Button from '@/components/ui/button/Button.tsx'
 import { useUserContext } from '@/context/UserContext'
-import type { User } from '@/domain/commonTypes/userTypes'
-import { usePatchMe } from '@/hooks/auths/usePatchMe'
+import type { User } from '@/domain/types/User.ts'
+import { usePatchMe } from '@/hooks/auth/usePatchMe'
 import { getModifiedFields } from '@/utils/modifiedFields'
 
 import InputField from '../ui/InputField'
@@ -16,7 +16,7 @@ import InputField from '../ui/InputField'
 const ProfileForm = () => {
   const { t } = useTranslation()
   const { user } = useUserContext()
-  const { mutate: patchMe, isPending } = usePatchMe()
+  const { mutateAsync: patchMe, isPending } = usePatchMe()
   const {
     register,
     handleSubmit,
@@ -32,23 +32,15 @@ const ProfileForm = () => {
     }
   }, [user, reset])
 
-  const onSubmit = (data: Partial<User>) => {
+  const onSubmit = async (data: Partial<User>) => {
     const modifiedPayload = getModifiedFields<User>(data, dirtyFields)
 
     if (Object.keys(modifiedPayload).length > 0) {
-      toast.promise(
-        new Promise<void>((resolve, reject) => {
-          patchMe(modifiedPayload, {
-            onSuccess: () => resolve(),
-            onError: error => reject(error)
-          })
-        }),
-        {
-          loading: t('loading.savingChanges'),
-          success: t('success.profileUpdated'),
-          error: t('error.profileUpdateFailed')
-        }
-      )
+      await toast.promise(patchMe(modifiedPayload), {
+        loading: t('loading.savingChanges'),
+        success: t('success.profileUpdated'),
+        error: t('error.profileUpdateFailed')
+      })
     }
   }
 

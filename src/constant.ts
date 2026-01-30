@@ -1,13 +1,19 @@
-import { LayoutDashboardIcon, Shield, User2, UserLock } from 'lucide-react'
+import {
+  LayoutDashboardIcon,
+  Shield,
+  User2,
+  UserLock,
+  Users
+} from 'lucide-react'
 
-import { ROUTES, getRoutePath } from '@/routes/routesName.ts'
-
-import routes from './routes/routes'
-import type { MenuItem, RouteType } from './types/global'
+import routes from '@/router/routes'
+import { ROUTES, getRoutePath } from '@/router/routesName.ts'
+import type { MenuItem, RouteType } from '@/types/global'
 
 export const MENU_ITEMS: MenuItem[] = [
   { icon: LayoutDashboardIcon, label: 'Dashboard', href: '/dashboard' },
-  { icon: Shield, label: 'Audits', href: '/audits' }
+  { icon: Shield, label: 'Audits', href: '/audits' },
+  { icon: Users, label: 'Teams', href: getRoutePath(ROUTES.TEAMS) }
 ]
 
 export const PROFILE_MENU_ITEMS: MenuItem[] = [

@@ -1,11 +1,13 @@
+import { Lock, LockOpen } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 
 import LogoSidebar from '@/components/layout/sidebar/LogoSidebar'
 import LogoSidebarMobile from '@/components/layout/sidebar/LogoSidebarMobile'
 import SidebarToggle from '@/components/layout/sidebar/SideBarToggle'
 import SidebarFooterInfo from '@/components/layout/sidebar/SidebarFooterInfo'
-import Button from '@/components/ui/Button'
+import Button from '@/components/ui/button/Button.tsx'
 import { useUserContext } from '@/context/UserContext'
+import { useCheckAuditsAccess } from '@/hooks/audit/useCheckAuditsAccess.ts'
 import type { SidebarProps } from '@/types/global'
 
 const Sidebar = ({
@@ -17,6 +19,7 @@ const Sidebar = ({
 }: SidebarProps) => {
   const location = useLocation()
   const { user } = useUserContext()
+  const { data: auditsAccessData } = useCheckAuditsAccess()
 
   const isDesktopCollapsed = !isOpen
 
@@ -39,24 +42,43 @@ const Sidebar = ({
           />
 
           <nav className='flex-1 space-y-1 px-4 py-6'>
-            {menuItems.map(item => (
-              <Button
-                key={item.label}
-                variant={
-                  item.href === location.pathname ? 'navigationActive' : 'ghost'
-                }
-                as='link'
-                to={item.href}
-                size='lg'
-                fullWidth
-                className='justify-start'
-              >
-                {item.icon && <item.icon size={20} className='shrink-0' />}
-                {!isDesktopCollapsed && (
-                  <span className='text-sm'>{item.label}</span>
-                )}
-              </Button>
-            ))}
+            {menuItems.map(item => {
+              const isAuditItem =
+                item.href === '/audits' || item.label === 'Audits'
+
+              return (
+                <Button
+                  key={item.label}
+                  variant={
+                    item.href === location.pathname
+                      ? 'navigationActive'
+                      : 'ghost'
+                  }
+                  as='link'
+                  to={item.href}
+                  size='lg'
+                  fullWidth
+                  className='justify-start'
+                >
+                  {item.icon && <item.icon size={20} className='shrink-0' />}
+
+                  {!isDesktopCollapsed && (
+                    <>
+                      <span className='text-sm'>{item.label}</span>
+                      {isAuditItem && (
+                        <div className='ml-auto'>
+                          {auditsAccessData?.hasAccess ? (
+                            <LockOpen size={16} className='text-shadow-white' />
+                          ) : (
+                            <Lock size={16} className='text-shadow-white' />
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </Button>
+              )
+            })}
           </nav>
           <div className='flex px-4 py-2'>
             <SidebarToggle isOpen={isOpen} onToggle={onToggle} />

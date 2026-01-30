@@ -1,15 +1,15 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 
-import Button from '@/components/ui/Button'
-import LogoutButton from '@/components/ui/LogoutButton.tsx'
-import PreferencesToggle from '@/components/ui/PreferencesToggle'
+import LogoutButton from '@/components/layout/sidebar/LogoutButton.tsx'
+import PreferencesToggle from '@/components/ui/PreferencesToggle.tsx'
+import Button from '@/components/ui/button/Button.tsx'
 import { PROFILE_MENU_ITEMS } from '@/constant.ts'
-import type { User } from '@/domain/commonTypes/userTypes.ts'
-import { UserRole } from '@/domain/enums/roles.ts'
-import { useAvatar } from '@/hooks/upload/useAvatar'
-import useInteractionOutside from '@/hooks/useInteractionOutside'
-import useToggle from '@/hooks/useToggle.tsx'
+import { UserRole } from '@/domain/enum/RoleEnum.ts'
+import type { User } from '@/domain/types/User.ts'
+import useInteractionOutside from '@/hooks/common/useInteractionOutside.ts'
+import useToggle from '@/hooks/common/useToggle.ts'
+import { useAvatar } from '@/hooks/user/useAvatar.ts'
 
 const SidebarFooterInfo = ({
   user,
@@ -70,7 +70,7 @@ const SidebarFooterInfo = ({
                         {item.icon && (
                           <item.icon size={16} aria-hidden='true' />
                         )}
-                        <span className='text-sm font-medium text-gray-900 dark:text-gray-200'>
+                        <span className='text-sm font-medium text-shadow-white dark:text-gray-200'>
                           {item.label}
                         </span>
                       </>

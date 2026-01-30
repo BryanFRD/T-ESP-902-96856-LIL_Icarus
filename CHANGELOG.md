@@ -1,3 +1,31 @@
+## [1.28.1](https://git.icarus-cyber.fr/icarus/web/compare/v1.28.0...v1.28.1) (2026-01-30)
+
+
+### Bug Fixes
+
+* **reset-password:** add missing component ([da6878e](https://git.icarus-cyber.fr/icarus/web/commit/da6878e8099787610a72429a1d9d5a4a16220574))
+
+# [1.28.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.27.0...v1.28.0) (2026-01-30)
+
+
+### Features
+
+* **AP-34:** restructure domain imports, add audit ([d6b6aab](https://git.icarus-cyber.fr/icarus/web/commit/d6b6aab419a9d82090e4ca813a6a9ec4ae8d562d))
+
+# [1.27.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.26.0...v1.27.0) (2026-01-30)
+
+
+### Features
+
+* **AP-17:** create teams pages ([5fe8ed3](https://git.icarus-cyber.fr/icarus/web/commit/5fe8ed3aaec2c450cbff561c0f168d0457707aba))
+
+# [1.26.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.7...v1.26.0) (2026-01-30)
+
+
+### Features
+
+* **AP-109:** add reset password ([d22ca08](https://git.icarus-cyber.fr/icarus/web/commit/d22ca0886e62353aa9079f3dd8d9568f9e8313c6))
+
 ## [1.25.7](https://git.icarus-cyber.fr/icarus/web/compare/v1.25.6...v1.25.7) (2026-01-23)
 
 
