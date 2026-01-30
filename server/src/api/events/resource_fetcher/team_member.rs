@@ -1,4 +1,4 @@
-use crate::api::events::resource_fetcher::ResourceFetcher;
+use crate::api::events::resource_fetcher::{ResourceFetcher, parse_resource_id};
 use crate::api::teams::TeamRole;
 use crate::schema::teams_members::dsl::{
     role, team_id as tm_team_id, teams_members, user_id as tm_user_id,
@@ -34,17 +34,5 @@ impl ResourceFetcher for TeamMemberFetcher {
             "userId": user_id,
             "role": role_value
         }))
-    }
-}
-
-fn parse_resource_id<'a>(resource_id: &'a str, key: &str) -> &'a str {
-    if let Some(pos) = resource_id.find(&format!("{key}:")) {
-        let start = pos + key.len() + 1;
-        let end = resource_id[start..]
-            .find(',')
-            .map_or(resource_id.len(), |p| start + p);
-        &resource_id[start..end]
-    } else {
-        resource_id
     }
 }
