@@ -1,5 +1,5 @@
 use crate::vault::Secrets;
-use base64::{engine::general_purpose::STANDARD, Engine};
+use base64::{Engine, engine::general_purpose::STANDARD};
 use diesel::{
     PgConnection,
     r2d2::{ConnectionManager, Pool, PoolError, PooledConnection},
@@ -50,7 +50,10 @@ impl GlobalState {
             .decode(&secrets.event_encryption_key)
             .expect("EVENT_ENCRYPTION_KEY must be valid base64");
 
-        assert!(event_key_bytes.len() == 32, "EVENT_ENCRYPTION_KEY must be 32 bytes (256 bits)");
+        assert!(
+            event_key_bytes.len() == 32,
+            "EVENT_ENCRYPTION_KEY must be 32 bytes (256 bits)"
+        );
 
         Self {
             db_pool: Arc::new(pool),
@@ -101,7 +104,10 @@ impl GlobalState {
             .decode(&secrets.event_encryption_key)
             .expect("EVENT_ENCRYPTION_KEY must be valid base64");
 
-        assert!(event_key_bytes.len() == 32, "EVENT_ENCRYPTION_KEY must be 32 bytes (256 bits)");
+        assert!(
+            event_key_bytes.len() == 32,
+            "EVENT_ENCRYPTION_KEY must be 32 bytes (256 bits)"
+        );
 
         Self {
             db_pool,

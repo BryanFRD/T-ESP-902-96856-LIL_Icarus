@@ -23,6 +23,22 @@ diesel::table! {
 }
 
 diesel::table! {
+    audits_invitations (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        client_email -> Varchar,
+        token -> Varchar,
+        expires_at -> Timestamp,
+        is_canceled -> Bool,
+        is_used -> Bool,
+        used_at -> Nullable<Timestamp>,
+        created_by -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     companies (id) {
         id -> Varchar,
         team_id -> Varchar,
@@ -119,6 +135,8 @@ diesel::joinable!(audits -> companies (company_id));
 diesel::joinable!(audits -> teams (team_id));
 diesel::joinable!(audits_clients -> audits (audit_id));
 diesel::joinable!(audits_clients -> users (user_id));
+diesel::joinable!(audits_invitations -> audits (audit_id));
+diesel::joinable!(audits_invitations -> users (created_by));
 diesel::joinable!(companies -> teams (team_id));
 diesel::joinable!(events -> users (user_id));
 diesel::joinable!(password_reset_tokens -> users (user_id));
@@ -130,6 +148,7 @@ diesel::joinable!(teams_members -> users (user_id));
 diesel::allow_tables_to_appear_in_same_query!(
     audits,
     audits_clients,
+    audits_invitations,
     companies,
     events,
     password_reset_tokens,

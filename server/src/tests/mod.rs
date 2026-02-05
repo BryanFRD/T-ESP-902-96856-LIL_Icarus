@@ -1,5 +1,5 @@
-pub mod teams;
 pub mod auth;
+pub mod teams;
 pub mod users;
 
 #[cfg(test)]

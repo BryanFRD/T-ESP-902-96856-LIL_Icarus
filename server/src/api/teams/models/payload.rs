@@ -1,8 +1,11 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::api::{teams::{Team, CompanyReturn}, users::User};
 use crate::api::teams::TeamRole;
+use crate::api::{
+    teams::{CompanyReturn, Team},
+    users::User,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -38,7 +41,11 @@ pub struct TeamReturn {
 }
 
 impl TeamReturn {
-    pub fn new(team: Team, members: Vec<TeamMemberWithRole>, companies: Vec<CompanyReturn>) -> Self {
+    pub fn new(
+        team: Team,
+        members: Vec<TeamMemberWithRole>,
+        companies: Vec<CompanyReturn>,
+    ) -> Self {
         TeamReturn {
             id: team.id,
             name: team.name,

@@ -1,10 +1,16 @@
 #[cfg(test)]
 mod auth_integration_tests {
-    use crate::api::auth::{LoginPayload, RegisterPayload, ConfirmEmailPayload, ResetPasswordRequestPayload, ResetPasswordPayload};
+    use crate::api::auth::{
+        ConfirmEmailPayload, LoginPayload, RegisterPayload, ResetPasswordPayload,
+        ResetPasswordRequestPayload,
+    };
     use crate::api::users::UserRole;
     use crate::tests::helpers::{
         app::{create_test_router, create_test_state},
-        auth::{create_valid_email_token, create_expired_email_token, create_valid_reset_token, create_expired_reset_token},
+        auth::{
+            create_expired_email_token, create_expired_reset_token, create_valid_email_token,
+            create_valid_reset_token,
+        },
         db::setup_test_db,
         fixtures::insert_test_user,
     };
@@ -82,10 +88,7 @@ mod auth_integration_tests {
 
         // Assertions
         assert_eq!(response.status_code(), StatusCode::UNAUTHORIZED);
-        assert_eq!(
-            response.text(),
-            "\"error.user.auth.invalidCredentials\""
-        );
+        assert_eq!(response.text(), "\"error.user.auth.invalidCredentials\"");
     }
 
     #[tokio::test]
@@ -109,10 +112,7 @@ mod auth_integration_tests {
 
         // Assertions
         assert_eq!(response.status_code(), StatusCode::UNAUTHORIZED);
-        assert_eq!(
-            response.text(),
-            "\"error.user.auth.invalidCredentials\""
-        );
+        assert_eq!(response.text(), "\"error.user.auth.invalidCredentials\"");
     }
 
     #[tokio::test]
@@ -491,7 +491,10 @@ mod auth_integration_tests {
             reset_email: "test@example.com".to_string(),
         };
 
-        let response = server.post("/v1/auth/request-password-reset").json(&payload).await;
+        let response = server
+            .post("/v1/auth/request-password-reset")
+            .json(&payload)
+            .await;
 
         assert_eq!(response.status_code(), StatusCode::OK);
     }
@@ -510,7 +513,10 @@ mod auth_integration_tests {
             reset_email: "nonexistent@example.com".to_string(),
         };
 
-        let response = server.post("/v1/auth/request-password-reset").json(&payload).await;
+        let response = server
+            .post("/v1/auth/request-password-reset")
+            .json(&payload)
+            .await;
 
         // Devrait retourner 200 même si l'utilisateur n'existe pas (sécurité)
         assert_eq!(response.status_code(), StatusCode::OK);
@@ -679,7 +685,10 @@ mod auth_integration_tests {
             password: "password123".to_string(),
         };
 
-        let register_response = server.post("/v1/auth/register").json(&register_payload).await;
+        let register_response = server
+            .post("/v1/auth/register")
+            .json(&register_payload)
+            .await;
         assert_eq!(register_response.status_code(), StatusCode::OK);
 
         // Étape 2: Confirmation email (simuler avec un token créé)
@@ -693,7 +702,10 @@ mod auth_integration_tests {
 
         let confirm_payload = ConfirmEmailPayload { token };
 
-        let confirm_response = server.post("/v1/auth/confirm-email").json(&confirm_payload).await;
+        let confirm_response = server
+            .post("/v1/auth/confirm-email")
+            .json(&confirm_payload)
+            .await;
         assert_eq!(confirm_response.status_code(), StatusCode::CREATED);
 
         // Étape 3: Login avec le compte créé
@@ -734,7 +746,10 @@ mod auth_integration_tests {
             reset_email: "reset@example.com".to_string(),
         };
 
-        let request_response = server.post("/v1/auth/request-password-reset").json(&request_payload).await;
+        let request_response = server
+            .post("/v1/auth/request-password-reset")
+            .json(&request_payload)
+            .await;
         assert_eq!(request_response.status_code(), StatusCode::OK);
 
         // Étape 2: Reset le mot de passe avec un token (simuler avec un token créé)
@@ -745,7 +760,10 @@ mod auth_integration_tests {
             new_password: "newpassword123".to_string(),
         };
 
-        let reset_response = server.post("/v1/auth/reset-password").json(&reset_payload).await;
+        let reset_response = server
+            .post("/v1/auth/reset-password")
+            .json(&reset_payload)
+            .await;
         assert_eq!(reset_response.status_code(), StatusCode::OK);
 
         // Étape 3: Login avec le nouveau mot de passe
@@ -771,7 +789,7 @@ mod auth_integration_tests {
     // Tests de middleware
     // ============================================================================
 
-    use crate::api::auth::{admin_middleware, middleware, pentester_middleware, JwtClaims};
+    use crate::api::auth::{JwtClaims, admin_middleware, middleware, pentester_middleware};
     use axum::{Json, Router, middleware::from_fn, response::IntoResponse, routing::get};
 
     // Endpoints de test pour les middlewares
@@ -842,7 +860,9 @@ mod auth_integration_tests {
         let state = create_test_state(pool.clone(), database_url);
 
         // Set JWT_SECRET env var (required by middleware)
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let _user = insert_test_user(
             &pool,
@@ -887,7 +907,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool, database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -907,7 +929,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool, database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -931,15 +955,17 @@ mod auth_integration_tests {
     #[tokio::test]
     #[serial]
     async fn test_middleware_rejects_expired_jwt() {
-        use chrono::{Duration, Utc};
         use crate::tests::helpers::app::create_test_secrets;
+        use chrono::{Duration, Utc};
 
         // Setup
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url.clone());
 
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let user = insert_test_user(
             &pool,
@@ -988,7 +1014,9 @@ mod auth_integration_tests {
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
 
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let user = insert_test_user(
             &pool,
@@ -1038,7 +1066,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let _user = insert_test_user(
             &pool,
@@ -1065,10 +1095,7 @@ mod auth_integration_tests {
             .clone();
 
         // Test: Accéder à un endpoint admin
-        let response = server
-            .get("/v1/test/admin")
-            .add_cookie(auth_cookie)
-            .await;
+        let response = server.get("/v1/test/admin").add_cookie(auth_cookie).await;
 
         // Assertions
         assert_eq!(response.status_code(), StatusCode::OK);
@@ -1082,7 +1109,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let _user = insert_test_user(
             &pool,
@@ -1109,10 +1138,7 @@ mod auth_integration_tests {
             .clone();
 
         // Test: Accéder à un endpoint admin en tant que pentester
-        let response = server
-            .get("/v1/test/admin")
-            .add_cookie(auth_cookie)
-            .await;
+        let response = server.get("/v1/test/admin").add_cookie(auth_cookie).await;
 
         // Assertions
         assert_eq!(response.status_code(), StatusCode::FORBIDDEN);
@@ -1126,7 +1152,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let _user = insert_test_user(
             &pool,
@@ -1153,10 +1181,7 @@ mod auth_integration_tests {
             .clone();
 
         // Test: Accéder à un endpoint admin en tant que client
-        let response = server
-            .get("/v1/test/admin")
-            .add_cookie(auth_cookie)
-            .await;
+        let response = server.get("/v1/test/admin").add_cookie(auth_cookie).await;
 
         // Assertions
         assert_eq!(response.status_code(), StatusCode::FORBIDDEN);
@@ -1170,7 +1195,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool, database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -1194,7 +1221,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let _user = insert_test_user(
             &pool,
@@ -1238,7 +1267,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let _user = insert_test_user(
             &pool,
@@ -1282,7 +1313,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool.clone(), database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let _user = insert_test_user(
             &pool,
@@ -1326,7 +1359,9 @@ mod auth_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let database_url = "test_db".to_string();
         let state = create_test_state(pool, database_url);
-        unsafe { std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345"); }
+        unsafe {
+            std::env::set_var("JWT_SECRET", "test_jwt_secret_key_for_testing_only_12345");
+        }
 
         let app = create_middleware_test_router(&state);
         let server = TestServer::new(app).expect("Failed to create test server");

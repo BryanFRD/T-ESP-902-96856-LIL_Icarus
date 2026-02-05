@@ -1,7 +1,7 @@
 use axum::{
+    Json,
     extract::{Path, State},
     response::IntoResponse,
-    Json,
 };
 use http::StatusCode;
 use ulid::Ulid;
@@ -68,9 +68,11 @@ pub async fn create_audit(
         Err(AuditError::CompanyTeamMismatch) => {
             bad_request_error("error.audit.companyTeamMismatch")
         }
-        Err(AuditError::MustBeOwnerOrAdmin) => {
-            (StatusCode::FORBIDDEN, Json("error.audit.mustBeOwnerOrAdmin")).into_response()
-        }
+        Err(AuditError::MustBeOwnerOrAdmin) => (
+            StatusCode::FORBIDDEN,
+            Json("error.audit.mustBeOwnerOrAdmin"),
+        )
+            .into_response(),
         Err(AuditError::EndDateInPast) => bad_request_error("error.audit.endDateInPast"),
         Err(e) => internal_error("Failed to create audit", e),
     }
@@ -99,7 +101,11 @@ pub async fn update_audit(
         return bad_request_error(&format!("Validation error: {e}"));
     }
 
-    if payload.name.is_none() && payload.description.is_none() && payload.end_date.is_none() && !payload.clear_end_date {
+    if payload.name.is_none()
+        && payload.description.is_none()
+        && payload.end_date.is_none()
+        && !payload.clear_end_date
+    {
         return bad_request_error("error.audit.update.noFieldProvided");
     }
 
@@ -115,9 +121,11 @@ pub async fn update_audit(
         Err(AuditError::AuditArchived) => {
             (StatusCode::FORBIDDEN, Json("error.audit.archived")).into_response()
         }
-        Err(AuditError::MustBeOwnerOrAdmin) => {
-            (StatusCode::FORBIDDEN, Json("error.audit.mustBeOwnerOrAdmin")).into_response()
-        }
+        Err(AuditError::MustBeOwnerOrAdmin) => (
+            StatusCode::FORBIDDEN,
+            Json("error.audit.mustBeOwnerOrAdmin"),
+        )
+            .into_response(),
         Err(AuditError::EndDateInPast) => bad_request_error("error.audit.endDateInPast"),
         Err(e) => internal_error("Failed to update audit", e),
     }
@@ -150,9 +158,11 @@ pub async fn archive_audit(
         Err(AuditError::AuditArchived) => {
             (StatusCode::FORBIDDEN, Json("error.audit.alreadyArchived")).into_response()
         }
-        Err(AuditError::MustBeOwnerOrAdmin) => {
-            (StatusCode::FORBIDDEN, Json("error.audit.mustBeOwnerOrAdmin")).into_response()
-        }
+        Err(AuditError::MustBeOwnerOrAdmin) => (
+            StatusCode::FORBIDDEN,
+            Json("error.audit.mustBeOwnerOrAdmin"),
+        )
+            .into_response(),
         Err(e) => internal_error("Failed to archive audit", e),
     }
 }
@@ -186,9 +196,11 @@ pub async fn remove_client(
         Err(AuditError::AuditArchived) => {
             (StatusCode::FORBIDDEN, Json("error.audit.archived")).into_response()
         }
-        Err(AuditError::MustBeOwnerOrAdmin) => {
-            (StatusCode::FORBIDDEN, Json("error.audit.mustBeOwnerOrAdmin")).into_response()
-        }
+        Err(AuditError::MustBeOwnerOrAdmin) => (
+            StatusCode::FORBIDDEN,
+            Json("error.audit.mustBeOwnerOrAdmin"),
+        )
+            .into_response(),
         Err(e) => internal_error("Failed to remove client", e),
     }
 }

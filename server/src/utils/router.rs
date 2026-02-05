@@ -11,8 +11,8 @@ use tracing::Level;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::middlewares::{CsrfProtection, event_logging_middleware, metrics_middleware};
 use crate::api::{audits, auth, events, metrics, status, teams, users, ws};
+use crate::middlewares::{CsrfProtection, event_logging_middleware, metrics_middleware};
 use crate::state::GlobalState;
 use crate::utils::init::get_state;
 

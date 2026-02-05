@@ -23,8 +23,14 @@ mod status_integration_tests {
         assert_eq!(response.status_code(), StatusCode::OK);
 
         let body: serde_json::Value = response.json();
-        assert!(body.get("status").is_some(), "Status field should be present");
-        assert!(body.get("message").is_some(), "Message field should be present");
+        assert!(
+            body.get("status").is_some(),
+            "Status field should be present"
+        );
+        assert!(
+            body.get("message").is_some(),
+            "Message field should be present"
+        );
     }
 
     #[tokio::test]
@@ -73,7 +79,10 @@ mod status_integration_tests {
         let message = body.get("message").expect("Message field should exist");
 
         assert_eq!(status, "Up", "Status should be 'Up' in test environment");
-        assert!(!message.as_str().unwrap().is_empty(), "Message should not be empty");
+        assert!(
+            !message.as_str().unwrap().is_empty(),
+            "Message should not be empty"
+        );
     }
 
     #[tokio::test]

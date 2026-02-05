@@ -8,7 +8,9 @@ use diesel::{
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, FromSqlRow, AsExpression, ToSchema, PartialEq, Eq)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, FromSqlRow, AsExpression, ToSchema, PartialEq, Eq,
+)]
 #[diesel(sql_type = Text)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum TeamRole {

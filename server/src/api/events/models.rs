@@ -1,11 +1,11 @@
 use chrono::NaiveDateTime;
 use diesel::{
+    Identifiable, Insertable, Queryable, Selectable,
     backend::Backend,
     deserialize::{FromSql, FromSqlRow},
     expression::AsExpression,
     serialize::{Output, ToSql},
     sql_types::Text,
-    Identifiable, Insertable, Queryable, Selectable,
 };
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
@@ -101,7 +101,6 @@ impl Display for EventAction {
     }
 }
 
-
 #[derive(Serialize, Deserialize, Clone, Debug, AsExpression, FromSqlRow, PartialEq, ToSchema)]
 #[diesel(sql_type = Text)]
 #[schema(example = "User")]
@@ -164,10 +163,7 @@ impl Display for ResourceType {
     }
 }
 
-
-#[derive(
-    Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, ToSchema,
-)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, ToSchema)]
 #[diesel(table_name = crate::schema::events)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[serde(rename_all = "camelCase")]
@@ -188,7 +184,6 @@ pub struct Event {
     pub created_at: NaiveDateTime,
     pub expires_at: NaiveDateTime,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, Insertable)]
 #[diesel(table_name = crate::schema::events)]
@@ -279,7 +274,6 @@ impl NewEvent {
     }
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct EventChanges {
@@ -293,7 +287,6 @@ impl EventChanges {
         Self { before, after }
     }
 }
-
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -330,7 +323,6 @@ impl From<Event> for EventResponse {
         }
     }
 }
-
 
 #[derive(Debug, Clone, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]

@@ -30,7 +30,8 @@ pub fn create_valid_email_token(
         password_hash,
     );
 
-    let jwt_secret = std::env::var("JWT_SECRET").unwrap_or("test_jwt_secret_key_for_testing_only_12345".to_string());
+    let jwt_secret = std::env::var("JWT_SECRET")
+        .unwrap_or("test_jwt_secret_key_for_testing_only_12345".to_string());
 
     token
         .encrypt(jwt_secret.as_bytes())
@@ -60,7 +61,8 @@ pub fn create_expired_email_token(
         expires_at: expired_time,
     };
 
-    let jwt_secret = std::env::var("JWT_SECRET").unwrap_or("test_jwt_secret_key_for_testing_only_12345".to_string());
+    let jwt_secret = std::env::var("JWT_SECRET")
+        .unwrap_or("test_jwt_secret_key_for_testing_only_12345".to_string());
 
     token
         .encrypt(jwt_secret.as_bytes())

@@ -48,8 +48,6 @@ pub struct ResetPasswordPayload {
 
 #[derive(Deserialize, Serialize, Clone, Debug, ToSchema)]
 pub struct ConfirmEmailPayload {
-    #[schema(
-        example = "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789-_"
-    )]
+    #[schema(example = "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789-_")]
     pub token: String,
 }

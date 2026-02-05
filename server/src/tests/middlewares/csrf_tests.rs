@@ -6,14 +6,22 @@ fn test_csrf_cookie_local() {
         std::env::set_var("VAULT_ENV", "local");
     }
     let cookie = CsrfProtection::build_cookie("test_token");
-    assert_eq!(cookie.secure(), Some(false), "Local cookie should not be secure");
+    assert_eq!(
+        cookie.secure(),
+        Some(false),
+        "Local cookie should not be secure"
+    );
     assert_eq!(
         cookie.same_site(),
         Some(tower_cookies::cookie::SameSite::Lax),
         "Local cookie should use SameSite=Lax"
     );
     assert_eq!(cookie.http_only(), Some(true), "Cookie should be HttpOnly");
-    assert_eq!(cookie.domain(), None, "Cookie should not set explicit domain");
+    assert_eq!(
+        cookie.domain(),
+        None,
+        "Cookie should not set explicit domain"
+    );
 }
 
 #[test]
@@ -29,7 +37,11 @@ fn test_csrf_cookie_dev() {
         "Dev cookie should use SameSite=None for cross-origin"
     );
     assert_eq!(cookie.http_only(), Some(true), "Cookie should be HttpOnly");
-    assert_eq!(cookie.domain(), None, "Cookie should not set explicit domain");
+    assert_eq!(
+        cookie.domain(),
+        None,
+        "Cookie should not set explicit domain"
+    );
 }
 
 #[test]
@@ -45,7 +57,11 @@ fn test_csrf_cookie_prod() {
         "Prod cookie should use SameSite=Lax"
     );
     assert_eq!(cookie.http_only(), Some(true), "Cookie should be HttpOnly");
-    assert_eq!(cookie.domain(), None, "Cookie should not set explicit domain");
+    assert_eq!(
+        cookie.domain(),
+        None,
+        "Cookie should not set explicit domain"
+    );
 }
 
 #[test]

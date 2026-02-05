@@ -3,24 +3,22 @@ use super::{
 };
 use crate::{
     api::{
-        teams::{
-            companies::models::Company, does_team_exist, is_team_owner,
-        },
+        teams::{companies::models::Company, does_team_exist, is_team_owner},
         users::User,
     },
     middlewares::{audit_step_up_middleware, auth},
     state::GlobalState,
 };
 use axum::{
+    Router,
     middleware::{from_fn, from_fn_with_state},
     routing::{delete, get, patch, post},
-    Router,
 };
 use diesel::{
     ExpressionMethods, JoinOnDsl, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
 };
 
-use super::{endpoints, step_up};
+use super::{endpoints, invitations, step_up};
 
 /// Get routes for audits module
 pub fn get_routes(state: &GlobalState) -> Router {
@@ -34,10 +32,23 @@ pub fn get_routes(state: &GlobalState) -> Router {
             "/{audit_id}/clients/{user_id}",
             delete(endpoints::remove_client),
         )
-        .layer(from_fn_with_state(
-            state.clone(),
-            audit_step_up_middleware,
-        ))
+        .layer(from_fn_with_state(state.clone(), audit_step_up_middleware))
+        .layer(from_fn(auth::middleware));
+
+    // Routes for invitations (protected by auth but not step-up)
+    let invitation_routes = Router::new()
+        .route(
+            "/{audit_id}/invite",
+            post(invitations::endpoints::create_invitation),
+        )
+        .route(
+            "/{audit_id}/invite",
+            get(invitations::endpoints::list_invitations),
+        )
+        .route(
+            "/{audit_id}/invite/{invitation_id}",
+            delete(invitations::endpoints::cancel_invitation),
+        )
         .layer(from_fn(auth::middleware));
 
     // Routes for verification (not protected by step-up)
@@ -46,9 +57,22 @@ pub fn get_routes(state: &GlobalState) -> Router {
         .route("/check-access", get(step_up::endpoints::check_access))
         .layer(from_fn(auth::middleware));
 
-    // Merge the two routers
+    // Public/semi-public routes (no auth required for check, optional for accept)
+    let public_routes = Router::new()
+        .route(
+            "/invite/{token}/check",
+            get(invitations::endpoints::check_invitation),
+        )
+        .route(
+            "/invite/{token}/accept",
+            post(invitations::endpoints::accept_invitation),
+        );
+
+    // Merge all routers
     protected_routes
+        .merge(invitation_routes)
         .merge(verify_routes)
+        .merge(public_routes)
         .with_state(state.clone())
 }
 
@@ -74,10 +98,7 @@ pub fn get_audit(state: &GlobalState, audit_id: &str) -> Result<Audit, AuditErro
 ///
 /// # Errors
 /// Returns `AuditError` if database error
-pub fn auto_archive_if_needed(
-    state: &GlobalState,
-    audit: &mut Audit,
-) -> Result<bool, AuditError> {
+pub fn auto_archive_if_needed(state: &GlobalState, audit: &mut Audit) -> Result<bool, AuditError> {
     if audit.should_auto_archive() {
         use crate::schema::audits;
 
