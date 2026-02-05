@@ -23,7 +23,7 @@ pub fn redact_email(email: &str) -> String {
             return format!("x{domain}");
         }
 
-        format!("{}xxxx{}{domain}",chars[0], chars[chars.len() - 1])
+        format!("{}xxxx{}{domain}", chars[0], chars[chars.len() - 1])
     } else {
         redact_string(email)
     }
@@ -31,7 +31,14 @@ pub fn redact_email(email: &str) -> String {
 
 pub fn redact_json_value(value: &mut serde_json::Value, is_admin: bool) {
     let always_hidden_fields = ["password", "token", "secret", "api_key", "jwt"];
-    let redact_fields = ["email", "name", "username", "first_name", "last_name", "full_name"];
+    let redact_fields = [
+        "email",
+        "name",
+        "username",
+        "first_name",
+        "last_name",
+        "full_name",
+    ];
 
     match value {
         serde_json::Value::Object(obj) => {

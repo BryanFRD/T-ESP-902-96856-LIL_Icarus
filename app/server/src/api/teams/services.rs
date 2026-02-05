@@ -1,24 +1,22 @@
 use super::endpoints;
+use crate::api::auth;
 use crate::{
     api::teams::companies::endpoints as company_endpoints,
     api::teams::invitations::endpoints as invitation_endpoints,
-    state::GlobalState,
-    api::teams::{Company, CompanyReturn, Team, TeamError, TeamMember, TeamMemberWithRole, TeamReturn, TeamRole, UpdateTeam},
+    api::teams::{
+        Company, CompanyReturn, Team, TeamError, TeamMember, TeamMemberWithRole, TeamReturn,
+        TeamRole, UpdateTeam,
+    },
     api::users::{User, UserError, get_user_by_id},
+    state::GlobalState,
 };
-use crate::api::auth;
 use axum::{
     Router,
     middleware::from_fn,
     routing::{delete, get, patch, post},
 };
 use diesel::{
-    BelongingToDsl,
-    ExpressionMethods,
-    QueryDsl,
-    RunQueryDsl,
-    SelectableHelper,
-    dsl::update,
+    BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper, dsl::update,
 };
 use std::collections::HashMap;
 
@@ -26,14 +24,26 @@ pub fn get_routes(state: &GlobalState) -> axum::Router {
     Router::new()
         .route("/{id}", delete(endpoints::delete_team))
         .route("/{id}", patch(endpoints::update_team))
-        .route("/{team_id}/company", post(company_endpoints::create_company))
-        .route("/{team_id}/company/{company_id}", patch(company_endpoints::update_company))
-        .route("/{team_id}/company/{company_id}", delete(company_endpoints::delete_company))
+        .route(
+            "/{team_id}/company",
+            post(company_endpoints::create_company),
+        )
+        .route(
+            "/{team_id}/company/{company_id}",
+            patch(company_endpoints::update_company),
+        )
+        .route(
+            "/{team_id}/company/{company_id}",
+            delete(company_endpoints::delete_company),
+        )
         .route("/me", post(endpoints::create_team))
         .layer(from_fn(auth::pentester_middleware))
         .route("/me", get(endpoints::get_my_teams))
         .route("/{team_id}/company", get(company_endpoints::list_companies))
-        .route("/{team_id}/company/{company_id}", get(company_endpoints::get_company))
+        .route(
+            "/{team_id}/company/{company_id}",
+            get(company_endpoints::get_company),
+        )
         .layer(from_fn(auth::middleware))
         .route(
             "/{team_id}/invitations",
@@ -131,10 +141,13 @@ pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamRetu
 
     let mut members_map: HashMap<String, Vec<TeamMemberWithRole>> = HashMap::new();
     for (tm, user) in team_members {
-        members_map.entry(tm.team_id).or_default().push(TeamMemberWithRole {
-            team_role: tm.role,
-            user,
-        });
+        members_map
+            .entry(tm.team_id)
+            .or_default()
+            .push(TeamMemberWithRole {
+                team_role: tm.role,
+                user,
+            });
     }
 
     // Load companies for all teams
@@ -168,7 +181,9 @@ pub fn get_team_member(
     team_id: &str,
     user_id: &str,
 ) -> Result<Option<TeamMember>, TeamError> {
-    use crate::schema::teams_members::dsl::{team_id as tm_team_id, teams_members, user_id as tm_user_id};
+    use crate::schema::teams_members::dsl::{
+        team_id as tm_team_id, teams_members, user_id as tm_user_id,
+    };
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;
@@ -188,7 +203,9 @@ pub fn get_member_role(
     team_id: &str,
     user_id: &str,
 ) -> Result<Option<TeamRole>, TeamError> {
-    use crate::schema::teams_members::dsl::{role, team_id as tm_team_id, teams_members, user_id as tm_user_id};
+    use crate::schema::teams_members::dsl::{
+        role, team_id as tm_team_id, teams_members, user_id as tm_user_id,
+    };
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;
@@ -209,7 +226,9 @@ pub fn update_member_role(
     user_id: &str,
     new_role: TeamRole,
 ) -> Result<(), TeamError> {
-    use crate::schema::teams_members::dsl::{role, team_id as tm_team_id, teams_members, user_id as tm_user_id};
+    use crate::schema::teams_members::dsl::{
+        role, team_id as tm_team_id, teams_members, user_id as tm_user_id,
+    };
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;
@@ -230,7 +249,9 @@ pub fn remove_team_member(
     team_id: &str,
     user_id: &str,
 ) -> Result<(), TeamError> {
-    use crate::schema::teams_members::dsl::{team_id as tm_team_id, teams_members, user_id as tm_user_id};
+    use crate::schema::teams_members::dsl::{
+        team_id as tm_team_id, teams_members, user_id as tm_user_id,
+    };
     use diesel::prelude::*;
 
     let mut conn = state.get_db_conn()?;

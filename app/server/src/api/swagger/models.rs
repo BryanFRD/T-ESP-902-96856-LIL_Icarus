@@ -1,4 +1,8 @@
 use crate::api::audits;
+use crate::api::audits::invitations::{
+    AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn,
+    CheckInvitationResponse, CreateAuditInvitationPayload,
+};
 use crate::api::audits::step_up::endpoints::{CheckAccessResponse, VerifyAccessPayload};
 use crate::api::audits::{CreateAuditPayload, UpdateAuditPayload};
 use crate::api::auth;
@@ -29,6 +33,11 @@ use utoipa::OpenApi;
         audits::endpoints::remove_client,
         audits::step_up::endpoints::verify_access,
         audits::step_up::endpoints::check_access,
+        audits::invitations::endpoints::create_invitation,
+        audits::invitations::endpoints::list_invitations,
+        audits::invitations::endpoints::cancel_invitation,
+        audits::invitations::endpoints::check_invitation,
+        audits::invitations::endpoints::accept_invitation,
         auth::endpoints::login,
         auth::endpoints::register,
         auth::endpoints::confirm_email,
@@ -66,7 +75,7 @@ use utoipa::OpenApi;
         status::endpoints::get_status,
     ),
     components(
-        schemas(CreateAuditPayload, UpdateAuditPayload, VerifyAccessPayload, CheckAccessResponse, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload, Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType, CsrfResponse),
+        schemas(CreateAuditPayload, UpdateAuditPayload, VerifyAccessPayload, CheckAccessResponse, CreateAuditInvitationPayload, AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn, CheckInvitationResponse, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload, Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType, CsrfResponse),
     ),
     tags(
         (name = "Auth", description = "Authentication endpoints"),

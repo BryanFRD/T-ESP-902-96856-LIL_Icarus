@@ -6,8 +6,6 @@ use axum::{
 use http::StatusCode;
 use ulid::Ulid;
 
-use crate::helpers::{internal_error, bad_request_error, not_found_error};
-use crate::state::GlobalState;
 use crate::api::{
     auth::JwtClaims,
     teams::{
@@ -15,6 +13,8 @@ use crate::api::{
         models::{CreateTeam, Team, UpdateMemberRolePayload},
     },
 };
+use crate::helpers::{bad_request_error, internal_error, not_found_error};
+use crate::state::GlobalState;
 
 #[utoipa::path(
     post,
@@ -182,11 +182,7 @@ pub async fn remove_member(
     };
 
     if !can_manage {
-        return (
-            StatusCode::FORBIDDEN,
-            Json("error.user.auth.forbidden"),
-        )
-            .into_response();
+        return (StatusCode::FORBIDDEN, Json("error.user.auth.forbidden")).into_response();
     }
 
     let member = match super::get_team_member(&state, &team_id, &member_id) {
@@ -199,13 +195,14 @@ pub async fn remove_member(
         }
     };
 
-    if requester_id != member.user_id && let Ok(true) = super::is_team_owner(&state, &team_id, &member.user_id) {
+    if requester_id != member.user_id
+        && let Ok(true) = super::is_team_owner(&state, &team_id, &member.user_id)
+    {
         return (
             StatusCode::FORBIDDEN,
             Json("error.team.member.cannotRemoveOwner"),
         )
             .into_response();
-        
     }
 
     if let Err(e) = super::remove_team_member(&state, &team_id, &member.user_id) {
@@ -251,11 +248,7 @@ pub async fn update_member_role(
         let actor_role = match super::get_member_role(&state, &team_id, &requester_id) {
             Ok(Some(role)) => role,
             Ok(None) => {
-                return (
-                    StatusCode::FORBIDDEN,
-                    Json("error.user.auth.forbidden"),
-                )
-                    .into_response();
+                return (StatusCode::FORBIDDEN, Json("error.user.auth.forbidden")).into_response();
             }
             Err(e) => {
                 return internal_error("Failed to fetch requester role", e);
@@ -263,11 +256,7 @@ pub async fn update_member_role(
         };
 
         if actor_role != TeamRole::Owner {
-            return (
-                StatusCode::FORBIDDEN,
-                Json("error.user.auth.forbidden"),
-            )
-                .into_response();
+            return (StatusCode::FORBIDDEN, Json("error.user.auth.forbidden")).into_response();
         }
     }
 

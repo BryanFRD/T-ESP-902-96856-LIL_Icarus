@@ -32,7 +32,9 @@ pub fn log_event_sync(state: &GlobalState, new_event: &NewEvent) -> Result<Event
 }
 
 pub fn query_events(state: &GlobalState, filters: EventFilters) -> Result<Vec<Event>, EventError> {
-    use crate::schema::events::dsl::{events, user_id, resource_type, resource_id, action, created_at};
+    use crate::schema::events::dsl::{
+        action, created_at, events, resource_id, resource_type, user_id,
+    };
 
     let mut conn = state.get_db_conn()?;
     let mut query = events.into_boxed();
@@ -130,10 +132,9 @@ pub fn decrypt_and_redact_event(state: &GlobalState, mut event: Event, is_admin:
         }
     }
 
-    if !is_admin
-        && let Some(uid) = &event.user_id {
-            event.user_id = Some(redact_string(uid));
-        }
+    if !is_admin && let Some(uid) = &event.user_id {
+        event.user_id = Some(redact_string(uid));
+    }
 
     event
 }

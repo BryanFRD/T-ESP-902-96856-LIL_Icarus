@@ -219,7 +219,10 @@ fn test_infer_patch_team_member() {
     let (action, resource_type, resource_id) = result.unwrap();
     assert_eq!(action, EventAction::Update);
     assert_eq!(resource_type, ResourceType::TeamMember);
-    assert_eq!(resource_id, Some("team_id:team123,user_id:user456".to_string()));
+    assert_eq!(
+        resource_id,
+        Some("team_id:team123,user_id:user456".to_string())
+    );
 }
 
 #[test]
@@ -280,7 +283,10 @@ fn test_infer_delete_team_member() {
     let (action, resource_type, resource_id) = result.unwrap();
     assert_eq!(action, EventAction::Delete);
     assert_eq!(resource_type, ResourceType::TeamMember);
-    assert_eq!(resource_id, Some("team_id:team111,user_id:user222".to_string()));
+    assert_eq!(
+        resource_id,
+        Some("team_id:team111,user_id:user222".to_string())
+    );
 }
 
 #[test]
@@ -292,7 +298,10 @@ fn test_infer_delete_invitation() {
     let (action, resource_type, resource_id) = result.unwrap();
     assert_eq!(action, EventAction::InvitationCancel);
     assert_eq!(resource_type, ResourceType::Invitation);
-    assert_eq!(resource_id, Some("team_id:team333,token:token444".to_string()));
+    assert_eq!(
+        resource_id,
+        Some("team_id:team333,token:token444".to_string())
+    );
 }
 
 #[test]

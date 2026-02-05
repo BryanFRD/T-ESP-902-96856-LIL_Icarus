@@ -15,8 +15,7 @@ pub fn cleanup_expired_events(state: &GlobalState) -> Result<usize, diesel::resu
     })?;
 
     let now = Utc::now().naive_utc();
-    let deleted = diesel::delete(events.filter(expires_at.lt(now)))
-        .execute(&mut conn)?;
+    let deleted = diesel::delete(events.filter(expires_at.lt(now))).execute(&mut conn)?;
 
     if deleted > 0 {
         info!("Cleaned up {} expired events", deleted);
@@ -26,7 +25,7 @@ pub fn cleanup_expired_events(state: &GlobalState) -> Result<usize, diesel::resu
 }
 
 pub async fn start_cleanup_task(state: GlobalState) {
-    use tokio::time::{interval, Duration};
+    use tokio::time::{Duration, interval};
 
     let mut cleanup_interval = interval(Duration::from_secs(3600));
 

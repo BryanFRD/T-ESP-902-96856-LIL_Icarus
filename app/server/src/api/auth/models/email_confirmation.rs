@@ -2,7 +2,7 @@ use base64::Engine;
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use shared::encryption::{decrypt, encrypt, EncryptionError};
+use shared::encryption::{EncryptionError, decrypt, encrypt};
 use thiserror::Error;
 
 #[derive(Debug, Serialize, Deserialize)]

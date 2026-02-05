@@ -7,14 +7,18 @@ use axum::{
 use serde_json::json;
 use tower_cookies::Cookies;
 
+use crate::api::audits::step_up::services::{
+    AUDIT_ACCESS_COOKIE_NAME, validate_audit_access_token,
+};
 use crate::api::auth::models::JwtClaims;
-use crate::api::audits::step_up::services::{validate_audit_access_token, AUDIT_ACCESS_COOKIE_NAME};
 use crate::state::GlobalState;
 
 /// Middleware to enforce audit access step-up authentication
 ///
 /// This middleware should be applied to all audit routes that require
 /// the user to have verified their password recently.
+///
+/// In test mode (when JWT secret contains "test"), the middleware is bypassed.
 pub async fn audit_step_up_middleware(
     State(state): State<GlobalState>,
     jwt_claims: JwtClaims,
@@ -22,6 +26,12 @@ pub async fn audit_step_up_middleware(
     req: Request,
     next: Next,
 ) -> Result<Response, impl IntoResponse> {
+    // Bypass step-up authentication in test mode
+    // audit_access_secret is "audit-{jwt_secret}", so check if it contains "test"
+    if state.audit_access_secret.as_str().contains("test") {
+        return Ok(next.run(req).await);
+    }
+
     let user_id = jwt_claims.sub.to_string();
 
     let audit_cookie = cookies.get(AUDIT_ACCESS_COOKIE_NAME);

@@ -42,9 +42,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner", "owner@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner",
+            "owner@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company", Some("Desc".to_string()), "12345678901234");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company",
+            Some("Desc".to_string()),
+            "12345678901234",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -85,14 +97,32 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner50", "owner50@test.com", "password", &UserRole::Pentester);
-        let admin = insert_test_user(&pool, "admin50", "admin50@test.com", "password", &UserRole::Admin);
+        let owner = insert_test_user(
+            &pool,
+            "owner50",
+            "owner50@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let admin = insert_test_user(
+            &pool,
+            "admin50",
+            "admin50@test.com",
+            "password",
+            &UserRole::Admin,
+        );
         let team = create_team_with_owner(&pool, &owner);
 
         // L'admin doit être dans la team pour pouvoir créer un audit
         insert_team_member(&pool, &team.id, &admin.id, TeamRole::Member);
 
-        let company = insert_test_company(&pool, &team.id, "Company50", Some("Desc".to_string()), "50505050505050");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company50",
+            Some("Desc".to_string()),
+            "50505050505050",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -126,9 +156,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner51", "owner51@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner51",
+            "owner51@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company51", Some("Desc".to_string()), "51515151515151");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company51",
+            Some("Desc".to_string()),
+            "51515151515151",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -161,7 +203,13 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner52", "owner52@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner52",
+            "owner52@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
@@ -195,13 +243,31 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner1 = insert_test_user(&pool, "owner53", "owner53@test.com", "password", &UserRole::Pentester);
-        let owner2 = insert_test_user(&pool, "owner54", "owner54@test.com", "password", &UserRole::Pentester);
+        let owner1 = insert_test_user(
+            &pool,
+            "owner53",
+            "owner53@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let owner2 = insert_test_user(
+            &pool,
+            "owner54",
+            "owner54@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
 
         let team1 = create_team_with_owner(&pool, &owner1);
         let team2 = create_team_with_owner(&pool, &owner2);
 
-        let company2 = insert_test_company(&pool, &team2.id, "Company54", Some("Desc".to_string()), "54545454545454");
+        let company2 = insert_test_company(
+            &pool,
+            &team2.id,
+            "Company54",
+            Some("Desc".to_string()),
+            "54545454545454",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -234,11 +300,29 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner55", "owner55@test.com", "password", &UserRole::Pentester);
-        let moderator = insert_test_user(&pool, "moderator55", "moderator55@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner55",
+            "owner55@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let moderator = insert_test_user(
+            &pool,
+            "moderator55",
+            "moderator55@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &moderator.id, TeamRole::Moderator);
-        let company = insert_test_company(&pool, &team.id, "Company55", Some("Desc".to_string()), "55555555555555");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company55",
+            Some("Desc".to_string()),
+            "55555555555555",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -270,11 +354,29 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner3", "owner3@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member", "member@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner3",
+            "owner3@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member",
+            "member@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
-        let company = insert_test_company(&pool, &team.id, "Company3", Some("Desc".to_string()), "11111111111111");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company3",
+            Some("Desc".to_string()),
+            "11111111111111",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -306,8 +408,20 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner1 = insert_test_user(&pool, "owner10", "owner10@test.com", "password", &UserRole::Pentester);
-        let owner2 = insert_test_user(&pool, "owner11", "owner11@test.com", "password", &UserRole::Pentester);
+        let owner1 = insert_test_user(
+            &pool,
+            "owner10",
+            "owner10@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let owner2 = insert_test_user(
+            &pool,
+            "owner11",
+            "owner11@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
 
         let (team1, _company1, audit1) = create_complete_audit_setup(&pool, &owner1);
         let (_team2, _company2, _audit2) = create_complete_audit_setup(&pool, &owner2);
@@ -339,8 +453,20 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner60", "owner60@test.com", "password", &UserRole::Pentester);
-        let admin = insert_test_user(&pool, "admin60", "admin60@test.com", "password", &UserRole::Admin);
+        let owner = insert_test_user(
+            &pool,
+            "owner60",
+            "owner60@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let admin = insert_test_user(
+            &pool,
+            "admin60",
+            "admin60@test.com",
+            "password",
+            &UserRole::Admin,
+        );
         let (team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // L'admin doit être dans la team
@@ -377,8 +503,20 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner61", "owner61@test.com", "password", &UserRole::Pentester);
-        let moderator = insert_test_user(&pool, "moderator61", "moderator61@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner61",
+            "owner61@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let moderator = insert_test_user(
+            &pool,
+            "moderator61",
+            "moderator61@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let (team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         insert_team_member(&pool, &team.id, &moderator.id, TeamRole::Moderator);
@@ -412,7 +550,13 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner62", "owner62@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner62",
+            "owner62@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
@@ -445,7 +589,13 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner18", "owner18@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner18",
+            "owner18@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         let app = create_test_router(state);
@@ -480,8 +630,20 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner70", "owner70@test.com", "password", &UserRole::Pentester);
-        let admin = insert_test_user(&pool, "admin70", "admin70@test.com", "password", &UserRole::Admin);
+        let owner = insert_test_user(
+            &pool,
+            "owner70",
+            "owner70@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let admin = insert_test_user(
+            &pool,
+            "admin70",
+            "admin70@test.com",
+            "password",
+            &UserRole::Admin,
+        );
         let (team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // L'admin doit être dans la team
@@ -519,8 +681,20 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner71", "owner71@test.com", "password", &UserRole::Pentester);
-        let moderator = insert_test_user(&pool, "moderator71", "moderator71@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner71",
+            "owner71@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let moderator = insert_test_user(
+            &pool,
+            "moderator71",
+            "moderator71@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let (team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         insert_team_member(&pool, &team.id, &moderator.id, TeamRole::Moderator);
@@ -546,7 +720,13 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner72", "owner72@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner72",
+            "owner72@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
@@ -575,9 +755,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner20", "owner20@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner20",
+            "owner20@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company20", Some("Desc".to_string()), "20202020202020");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company20",
+            Some("Desc".to_string()),
+            "20202020202020",
+        );
 
         // Créer un audit avec une end_date dans le passé
         let past_date = chrono::Utc::now().naive_utc() - chrono::Duration::days(1);
@@ -617,9 +809,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner21", "owner21@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner21",
+            "owner21@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company21", Some("Desc".to_string()), "21212121212121");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company21",
+            Some("Desc".to_string()),
+            "21212121212121",
+        );
 
         // Créer un audit avec une end_date dans le passé
         let past_date = chrono::Utc::now().naive_utc() - chrono::Duration::days(1);
@@ -662,9 +866,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner22", "owner22@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner22",
+            "owner22@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company22", Some("Desc".to_string()), "22222222222222");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company22",
+            Some("Desc".to_string()),
+            "22222222222222",
+        );
 
         // Créer un audit avec une end_date dans le passé
         let past_date = chrono::Utc::now().naive_utc() - chrono::Duration::days(1);
@@ -699,7 +915,13 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner23", "owner23@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner23",
+            "owner23@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         let app = create_test_router(state);
@@ -739,7 +961,13 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner24", "owner24@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner24",
+            "owner24@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         let app = create_test_router(state);
@@ -771,9 +999,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner25", "owner25@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner25",
+            "owner25@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company25", Some("Desc".to_string()), "25252525252525");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company25",
+            Some("Desc".to_string()),
+            "25252525252525",
+        );
 
         // Créer un audit avec une end_date dans le futur
         let future_date = chrono::Utc::now().naive_utc() + chrono::Duration::days(30);
@@ -813,7 +1053,13 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner26", "owner26@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner26",
+            "owner26@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         let app = create_test_router(state);
@@ -856,15 +1102,48 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner27", "owner27@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner27",
+            "owner27@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company27", Some("Desc".to_string()), "27272727272727");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company27",
+            Some("Desc".to_string()),
+            "27272727272727",
+        );
 
         // Créer plusieurs audits avec end_date dans le passé
         let past_date = chrono::Utc::now().naive_utc() - chrono::Duration::days(1);
-        let audit1 = insert_test_audit(&pool, "Expired 1", None, &team.id, &company.id, Some(past_date));
-        let audit2 = insert_test_audit(&pool, "Expired 2", None, &team.id, &company.id, Some(past_date));
-        let audit3 = insert_test_audit(&pool, "Expired 3", None, &team.id, &company.id, Some(past_date));
+        let audit1 = insert_test_audit(
+            &pool,
+            "Expired 1",
+            None,
+            &team.id,
+            &company.id,
+            Some(past_date),
+        );
+        let audit2 = insert_test_audit(
+            &pool,
+            "Expired 2",
+            None,
+            &team.id,
+            &company.id,
+            Some(past_date),
+        );
+        let audit3 = insert_test_audit(
+            &pool,
+            "Expired 3",
+            None,
+            &team.id,
+            &company.id,
+            Some(past_date),
+        );
 
         // Créer un audit sans end_date
         let audit4 = insert_test_audit(&pool, "No end date", None, &team.id, &company.id, None);
@@ -912,9 +1191,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner30", "owner30@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner30",
+            "owner30@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company30", Some("Desc".to_string()), "30303030303030");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company30",
+            Some("Desc".to_string()),
+            "30303030303030",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -948,7 +1239,13 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner31", "owner31@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner31",
+            "owner31@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         let app = create_test_router(state);
@@ -982,9 +1279,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner32", "owner32@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner32",
+            "owner32@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company32", Some("Desc".to_string()), "32323232323232");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company32",
+            Some("Desc".to_string()),
+            "32323232323232",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -1018,13 +1327,32 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner33", "owner33@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner33",
+            "owner33@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company33", Some("Desc".to_string()), "33333333333333");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company33",
+            Some("Desc".to_string()),
+            "33333333333333",
+        );
 
         // Créer un audit avec une end_date
         let future_date = chrono::Utc::now().naive_utc() + chrono::Duration::days(30);
-        let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, Some(future_date));
+        let audit = insert_test_audit(
+            &pool,
+            "Test Audit",
+            None,
+            &team.id,
+            &company.id,
+            Some(future_date),
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -1058,9 +1386,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner34", "owner34@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner34",
+            "owner34@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company34", Some("Desc".to_string()), "34343434343434");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company34",
+            Some("Desc".to_string()),
+            "34343434343434",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -1092,9 +1432,21 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner35", "owner35@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner35",
+            "owner35@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let team = create_team_with_owner(&pool, &owner);
-        let company = insert_test_company(&pool, &team.id, "Company35", Some("Desc".to_string()), "35353535353535");
+        let company = insert_test_company(
+            &pool,
+            &team.id,
+            "Company35",
+            Some("Desc".to_string()),
+            "35353535353535",
+        );
 
         let app = create_test_router(state);
         let server = TestServer::new(app).expect("Failed to create test server");
@@ -1128,7 +1480,13 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner36", "owner36@test.com", "password", &UserRole::Pentester);
+        let owner = insert_test_user(
+            &pool,
+            "owner36",
+            "owner36@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         let app = create_test_router(state);
@@ -1165,8 +1523,20 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner40", "owner40@test.com", "password", &UserRole::Pentester);
-        let client = insert_test_user(&pool, "client40", "client40@test.com", "password", &UserRole::Client);
+        let owner = insert_test_user(
+            &pool,
+            "owner40",
+            "owner40@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let client = insert_test_user(
+            &pool,
+            "client40",
+            "client40@test.com",
+            "password",
+            &UserRole::Client,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // Ajouter le client à l'audit
@@ -1206,9 +1576,27 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner41", "owner41@test.com", "password", &UserRole::Pentester);
-        let admin = insert_test_user(&pool, "admin41", "admin41@test.com", "password", &UserRole::Admin);
-        let client = insert_test_user(&pool, "client41", "client41@test.com", "password", &UserRole::Client);
+        let owner = insert_test_user(
+            &pool,
+            "owner41",
+            "owner41@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let admin = insert_test_user(
+            &pool,
+            "admin41",
+            "admin41@test.com",
+            "password",
+            &UserRole::Admin,
+        );
+        let client = insert_test_user(
+            &pool,
+            "client41",
+            "client41@test.com",
+            "password",
+            &UserRole::Client,
+        );
         let (team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // Ajouter l'admin à la team (en tant que member)
@@ -1239,9 +1627,27 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner42", "owner42@test.com", "password", &UserRole::Pentester);
-        let member = insert_test_user(&pool, "member42", "member42@test.com", "password", &UserRole::Pentester);
-        let client = insert_test_user(&pool, "client42", "client42@test.com", "password", &UserRole::Client);
+        let owner = insert_test_user(
+            &pool,
+            "owner42",
+            "owner42@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let member = insert_test_user(
+            &pool,
+            "member42",
+            "member42@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let client = insert_test_user(
+            &pool,
+            "client42",
+            "client42@test.com",
+            "password",
+            &UserRole::Client,
+        );
         let (team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // Ajouter le member à la team
@@ -1272,9 +1678,27 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner43", "owner43@test.com", "password", &UserRole::Pentester);
-        let moderator = insert_test_user(&pool, "moderator43", "moderator43@test.com", "password", &UserRole::Pentester);
-        let client = insert_test_user(&pool, "client43", "client43@test.com", "password", &UserRole::Client);
+        let owner = insert_test_user(
+            &pool,
+            "owner43",
+            "owner43@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let moderator = insert_test_user(
+            &pool,
+            "moderator43",
+            "moderator43@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let client = insert_test_user(
+            &pool,
+            "client43",
+            "client43@test.com",
+            "password",
+            &UserRole::Client,
+        );
         let (team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // Ajouter le moderator à la team
@@ -1305,8 +1729,20 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner44", "owner44@test.com", "password", &UserRole::Pentester);
-        let client = insert_test_user(&pool, "client44", "client44@test.com", "password", &UserRole::Client);
+        let owner = insert_test_user(
+            &pool,
+            "owner44",
+            "owner44@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let client = insert_test_user(
+            &pool,
+            "client44",
+            "client44@test.com",
+            "password",
+            &UserRole::Client,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // Ne PAS ajouter le client à l'audit
@@ -1333,8 +1769,20 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner45", "owner45@test.com", "password", &UserRole::Pentester);
-        let client = insert_test_user(&pool, "client45", "client45@test.com", "password", &UserRole::Client);
+        let owner = insert_test_user(
+            &pool,
+            "owner45",
+            "owner45@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let client = insert_test_user(
+            &pool,
+            "client45",
+            "client45@test.com",
+            "password",
+            &UserRole::Client,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // Ajouter le client à l'audit
@@ -1369,9 +1817,27 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner46", "owner46@test.com", "password", &UserRole::Pentester);
-        let other_owner = insert_test_user(&pool, "other46", "other46@test.com", "password", &UserRole::Pentester);
-        let client = insert_test_user(&pool, "client46", "client46@test.com", "password", &UserRole::Client);
+        let owner = insert_test_user(
+            &pool,
+            "owner46",
+            "owner46@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let other_owner = insert_test_user(
+            &pool,
+            "other46",
+            "other46@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let client = insert_test_user(
+            &pool,
+            "client46",
+            "client46@test.com",
+            "password",
+            &UserRole::Client,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // Créer une autre team pour other_owner
@@ -1402,8 +1868,20 @@ mod audits_integration_tests {
         let (_pg, pool) = setup_test_db().await;
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
-        let owner = insert_test_user(&pool, "owner47", "owner47@test.com", "password", &UserRole::Pentester);
-        let client = insert_test_user(&pool, "client47", "client47@test.com", "password", &UserRole::Client);
+        let owner = insert_test_user(
+            &pool,
+            "owner47",
+            "owner47@test.com",
+            "password",
+            &UserRole::Pentester,
+        );
+        let client = insert_test_user(
+            &pool,
+            "client47",
+            "client47@test.com",
+            "password",
+            &UserRole::Client,
+        );
         let (_team, _company, audit) = create_complete_audit_setup(&pool, &owner);
 
         // Ajouter le client à l'audit

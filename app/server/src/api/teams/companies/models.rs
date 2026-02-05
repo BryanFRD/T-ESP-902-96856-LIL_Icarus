@@ -2,8 +2,16 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(
-    Debug, Clone, Serialize, Deserialize, diesel::Queryable, diesel::Identifiable,
-    diesel::Insertable, diesel::Selectable, PartialEq, ToSchema,
+    Debug,
+    Clone,
+    Serialize,
+    Deserialize,
+    diesel::Queryable,
+    diesel::Identifiable,
+    diesel::Insertable,
+    diesel::Selectable,
+    PartialEq,
+    ToSchema,
 )]
 #[diesel(table_name = crate::schema::companies)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -20,12 +28,7 @@ pub struct Company {
 
 impl Company {
     #[must_use]
-    pub fn new(
-        team_id: String,
-        name: String,
-        description: Option<String>,
-        siret: String,
-    ) -> Self {
+    pub fn new(team_id: String, name: String, description: Option<String>, siret: String) -> Self {
         let now = chrono::Utc::now().naive_utc();
         Self {
             id: ulid::Ulid::new().to_string(),

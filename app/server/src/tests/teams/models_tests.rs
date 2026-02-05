@@ -18,7 +18,11 @@ fn test_team_new_generates_ulid() {
     let team = Team::new("Test Team".to_string(), "Description".to_string());
 
     // ULID should be 26 characters
-    assert_eq!(team.id.len(), 26, "Team ID should be a valid ULID (26 characters)");
+    assert_eq!(
+        team.id.len(),
+        26,
+        "Team ID should be a valid ULID (26 characters)"
+    );
 }
 
 #[test]
@@ -54,7 +58,10 @@ fn test_team_new_with_empty_name() {
     let team = Team::new("".to_string(), "Description".to_string());
 
     assert_eq!(team.name, "");
-    assert!(!team.id.is_empty(), "Team should still be created with valid ID");
+    assert!(
+        !team.id.is_empty(),
+        "Team should still be created with valid ID"
+    );
 }
 
 #[test]
@@ -62,7 +69,10 @@ fn test_team_new_with_empty_description() {
     let team = Team::new("Team Name".to_string(), "".to_string());
 
     assert_eq!(team.description, "");
-    assert!(!team.id.is_empty(), "Team should still be created with valid ID");
+    assert!(
+        !team.id.is_empty(),
+        "Team should still be created with valid ID"
+    );
 }
 
 #[test]
@@ -82,5 +92,8 @@ fn test_team_new_with_special_characters() {
     );
 
     assert_eq!(team.name, "Team #1 @HQ 🚀");
-    assert_eq!(team.description, "Description with émojis and spëcial çharacters!");
+    assert_eq!(
+        team.description,
+        "Description with émojis and spëcial çharacters!"
+    );
 }

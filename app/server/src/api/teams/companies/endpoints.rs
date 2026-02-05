@@ -1,7 +1,7 @@
 use axum::{
+    Json,
     extract::{Path, State},
     response::IntoResponse,
-    Json,
 };
 use http::StatusCode;
 use tracing::error;
@@ -37,9 +37,7 @@ pub async fn create_company(
         payload,
         jwt_user.is_admin(),
     ) {
-        Ok(company) => {
-            (StatusCode::CREATED, Json(CompanyReturn::from(company))).into_response()
-        }
+        Ok(company) => (StatusCode::CREATED, Json(CompanyReturn::from(company))).into_response(),
         Err(CompanyError::NotAuthorized) => {
             (StatusCode::FORBIDDEN, Json("error.user.auth.forbidden")).into_response()
         }

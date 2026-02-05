@@ -84,10 +84,12 @@ fn normalize_path(path: &str) -> String {
         // Skip normalization for known static segments
         let is_likely_id = match i {
             // After /v1/teams, /v1/users, /v1/audits, etc., next segment is likely an ID
-            i if i > 0 && matches!(
-                segments.get(i - 1),
-                Some(&"teams" | &"users" | &"audits" | &"events")
-            ) => {
+            i if i > 0
+                && matches!(
+                    segments.get(i - 1),
+                    Some(&"teams" | &"users" | &"audits" | &"events")
+                ) =>
+            {
                 // If followed by a known sub-resource, it's an ID
                 segment.chars().any(|c| c.is_ascii_digit() || c == '-')
             }
@@ -117,10 +119,7 @@ mod tests {
             "/v1/teams/:id/invitations"
         );
         assert_eq!(normalize_path("/v1/users/789"), "/v1/users/:id");
-        assert_eq!(
-            normalize_path("/v1/audits/abc-123-def"),
-            "/v1/audits/:id"
-        );
+        assert_eq!(normalize_path("/v1/audits/abc-123-def"), "/v1/audits/:id");
         assert_eq!(normalize_path("/metrics"), "/metrics");
         assert_eq!(normalize_path("/v1/auth/login"), "/v1/auth/login");
     }

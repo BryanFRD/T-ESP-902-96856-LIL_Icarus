@@ -8,7 +8,9 @@ use validator::Validate;
 use crate::api::teams::companies::models::CompanyReturn;
 use crate::api::users::User;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Insertable, ToSchema)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Insertable, ToSchema,
+)]
 #[diesel(table_name = crate::schema::audits)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[serde(rename_all = "camelCase")]
@@ -103,7 +105,9 @@ pub struct CreateAuditPayload {
     #[schema(example = "01F8MECHZX3TBDSZ7XK4F5G9ZQ")]
     pub company_id: String,
 
-    #[serde(deserialize_with = "crate::utils::datetime_serde::deserialize_optional_naive_datetime")]
+    #[serde(
+        deserialize_with = "crate::utils::datetime_serde::deserialize_optional_naive_datetime"
+    )]
     pub end_date: Option<NaiveDateTime>,
 }
 
@@ -114,7 +118,9 @@ pub struct UpdateAuditPayload {
     pub name: Option<String>,
     pub description: Option<String>,
 
-    #[serde(deserialize_with = "crate::utils::datetime_serde::deserialize_optional_naive_datetime")]
+    #[serde(
+        deserialize_with = "crate::utils::datetime_serde::deserialize_optional_naive_datetime"
+    )]
     pub end_date: Option<NaiveDateTime>,
 
     /// Set to true to remove the `end_date` (set to NULL)

@@ -9,12 +9,11 @@ use tokio::fs;
 use tower_cookies::Cookies;
 use tracing::{error, info};
 
-use crate::helpers::{
-    create_auth_cookie,
-    internal_error, bad_request_error, conflict_error, not_found_error,
-    unauthorized_error
-};
 use super::{get_user_by_id_or_error, get_user_or_error};
+use crate::helpers::{
+    bad_request_error, conflict_error, create_auth_cookie, internal_error, not_found_error,
+    unauthorized_error,
+};
 
 use crate::api::{
     auth::JwtClaims,
@@ -23,8 +22,8 @@ use crate::api::{
 use crate::state::GlobalState;
 
 use super::{
-    User, check_update_conflicts, delete_user, get_user_by_id,
-    models::UpdatePayload, update_user_fields, validate_update_payload,
+    User, check_update_conflicts, delete_user, get_user_by_id, models::UpdatePayload,
+    update_user_fields, validate_update_payload,
 };
 
 #[utoipa::path(
@@ -85,7 +84,9 @@ pub async fn update_me(
         Err(e) => return e,
     };
 
-    if payload.new_password.is_some() && let Some(ref current_pw) = payload.password {
+    if payload.new_password.is_some()
+        && let Some(ref current_pw) = payload.password
+    {
         // Verify old password using migration-aware verification
         if !user.verify_password(current_pw) {
             return unauthorized_error();

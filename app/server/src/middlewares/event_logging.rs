@@ -109,10 +109,11 @@ pub async fn event_logging_middleware(
 
     if should_log && let Some((action, resource_type, resource_id)) = event_details {
         if let Some(ref uid) = user_id
-            && !user_exists(&state, uid) {
-                error!("Failed to log event: User {} not found", uid);
-                return response;
-            }
+            && !user_exists(&state, uid)
+        {
+            error!("Failed to log event: User {} not found", uid);
+            return response;
+        }
 
         let mut metadata = json!({
             "response_status": status_code,
@@ -289,11 +290,14 @@ fn user_exists(state: &GlobalState, user_id: &str) -> bool {
 
     match state.get_db_conn() {
         Ok(mut conn) => {
-            matches!(users
-                .filter(id.eq(user_id))
-                .select(id)
-                .first::<String>(&mut conn)
-                .optional(), Ok(Some(_)))
+            matches!(
+                users
+                    .filter(id.eq(user_id))
+                    .select(id)
+                    .first::<String>(&mut conn)
+                    .optional(),
+                Ok(Some(_))
+            )
         }
         Err(_) => false,
     }

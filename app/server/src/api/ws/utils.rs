@@ -1,9 +1,9 @@
 use serde_json::Value;
 use socketioxide::{
-    extract::{Data, SocketRef},
     SocketIo,
+    extract::{Data, SocketRef},
 };
-use tracing::{info, error};
+use tracing::{error, info};
 
 pub fn setup_ws(io: &SocketIo) {
     info!("Setting up Socket.IO namespace");
@@ -17,6 +17,5 @@ async fn on_connect(socket: SocketRef) {
         }
     });
 
-    socket.on_disconnect(|_: SocketRef| async move {
-    });
+    socket.on_disconnect(|_: SocketRef| async move {});
 }

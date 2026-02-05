@@ -1,5 +1,5 @@
+use crate::api::auth::RegisterPayload;
 use crate::api::users::{User, UserRole};
-use crate::api::auth::{hash_password, RegisterPayload};
 
 // Tests for User::new()
 #[test]
@@ -35,9 +35,25 @@ fn test_user_new_hashes_password() {
         password,
     );
 
-    let expected_hash = hash_password(password);
-    assert_eq!(user.password_hash, expected_hash);
-    assert_ne!(user.password_hash, password, "Password should be hashed, not stored in plain text");
+    // User::new() uses Argon2id hashing (version 2), which generates random salts
+    // so we can't compare hashes directly. Instead, verify the password works.
+    assert!(
+        user.verify_password(password),
+        "Password should be correctly hashed and verifiable"
+    );
+    assert_ne!(
+        user.password_hash, password,
+        "Password should be hashed, not stored in plain text"
+    );
+    assert!(
+        user.password_hash.starts_with("$argon2id$"),
+        "Password hash should use Argon2id format"
+    );
+    assert_eq!(
+        user.password_hash_version,
+        Some(2),
+        "Password hash version should be 2 for Argon2id"
+    );
 }
 
 #[test]
@@ -109,7 +125,10 @@ fn test_user_verify_password_correct() {
         password,
     );
 
-    assert!(user.verify_password(password), "Correct password should verify successfully");
+    assert!(
+        user.verify_password(password),
+        "Correct password should verify successfully"
+    );
 }
 
 #[test]
@@ -123,7 +142,10 @@ fn test_user_verify_password_incorrect() {
         "correct_password",
     );
 
-    assert!(!user.verify_password("wrong_password"), "Wrong password should fail verification");
+    assert!(
+        !user.verify_password("wrong_password"),
+        "Wrong password should fail verification"
+    );
 }
 
 #[test]
@@ -137,8 +159,14 @@ fn test_user_verify_password_case_sensitive() {
         "Password123",
     );
 
-    assert!(!user.verify_password("password123"), "Password verification should be case-sensitive");
-    assert!(!user.verify_password("PASSWORD123"), "Password verification should be case-sensitive");
+    assert!(
+        !user.verify_password("password123"),
+        "Password verification should be case-sensitive"
+    );
+    assert!(
+        !user.verify_password("PASSWORD123"),
+        "Password verification should be case-sensitive"
+    );
 }
 
 #[test]
@@ -152,7 +180,10 @@ fn test_user_verify_password_empty_string() {
         "nonempty",
     );
 
-    assert!(!user.verify_password(""), "Empty password should not match non-empty hash");
+    assert!(
+        !user.verify_password(""),
+        "Empty password should not match non-empty hash"
+    );
 }
 
 // Tests for From<RegisterPayload> for User
@@ -172,8 +203,15 @@ fn test_user_from_register_payload() {
     assert_eq!(user.first_name, payload.first_name);
     assert_eq!(user.last_name, payload.last_name);
     assert_eq!(user.email, payload.email);
-    assert_eq!(user.role, UserRole::Pentester, "Default role should be Pentester");
-    assert!(user.verify_password(&payload.password), "Password should be correctly hashed");
+    assert_eq!(
+        user.role,
+        UserRole::Pentester,
+        "Default role should be Pentester"
+    );
+    assert!(
+        user.verify_password(&payload.password),
+        "Password should be correctly hashed"
+    );
 }
 
 #[test]
@@ -188,7 +226,11 @@ fn test_user_from_register_payload_always_pentester() {
 
     let user = User::from(payload);
 
-    assert_eq!(user.role, UserRole::Pentester, "RegisterPayload conversion should always create Pentester role");
+    assert_eq!(
+        user.role,
+        UserRole::Pentester,
+        "RegisterPayload conversion should always create Pentester role"
+    );
 }
 
 // Tests for UserRole Display
@@ -221,13 +263,25 @@ fn test_user_role_from_string_client() {
 #[test]
 fn test_user_role_from_string_default_to_client() {
     let role1 = UserRole::from("unknown".to_string());
-    assert_eq!(role1, UserRole::Client, "Unknown role should default to Client");
+    assert_eq!(
+        role1,
+        UserRole::Client,
+        "Unknown role should default to Client"
+    );
 
     let role2 = UserRole::from("".to_string());
-    assert_eq!(role2, UserRole::Client, "Empty string should default to Client");
+    assert_eq!(
+        role2,
+        UserRole::Client,
+        "Empty string should default to Client"
+    );
 
     let role3 = UserRole::from("ADMIN".to_string());
-    assert_eq!(role3, UserRole::Client, "Case-sensitive: uppercase should default to Client");
+    assert_eq!(
+        role3,
+        UserRole::Client,
+        "Case-sensitive: uppercase should default to Client"
+    );
 }
 
 #[test]

@@ -1,6 +1,6 @@
 use crate::api::auth::models::EmailConfirmationToken;
-use chrono::{Duration, Utc};
 use base64::Engine;
+use chrono::{Duration, Utc};
 
 #[test]
 fn test_email_token_new() {
@@ -17,7 +17,10 @@ fn test_email_token_new() {
     assert_eq!(token.last_name, "Doe");
     assert_eq!(token.email, "john.doe@example.com");
     assert_eq!(token.password_hash, "hashed_password");
-    assert!(!token.is_expired(), "Newly created token should not be expired");
+    assert!(
+        !token.is_expired(),
+        "Newly created token should not be expired"
+    );
 }
 
 #[test]
@@ -34,8 +37,8 @@ fn test_email_token_encrypt_decrypt() {
     let encrypted = token.encrypt(key).expect("Should encrypt successfully");
     assert!(!encrypted.is_empty(), "Encrypted token should not be empty");
 
-    let decrypted = EmailConfirmationToken::decrypt(&encrypted, key)
-        .expect("Should decrypt successfully");
+    let decrypted =
+        EmailConfirmationToken::decrypt(&encrypted, key).expect("Should decrypt successfully");
 
     assert_eq!(decrypted.username, token.username);
     assert_eq!(decrypted.first_name, token.first_name);
@@ -65,7 +68,10 @@ fn test_email_token_is_expired() {
 
     token.expires_at = Utc::now() - Duration::minutes(1);
 
-    assert!(token.is_expired(), "Token with past expiry should be expired");
+    assert!(
+        token.is_expired(),
+        "Token with past expiry should be expired"
+    );
 }
 
 #[test]
@@ -78,7 +84,10 @@ fn test_email_token_not_expired() {
         "hash".to_string(),
     );
 
-    assert!(!token.is_expired(), "Freshly created token should not be expired");
+    assert!(
+        !token.is_expired(),
+        "Freshly created token should not be expired"
+    );
 }
 
 #[test]
@@ -145,8 +154,7 @@ fn test_email_token_special_characters() {
     );
 
     let encrypted = token.encrypt(key).expect("Should encrypt");
-    let decrypted = EmailConfirmationToken::decrypt(&encrypted, key)
-        .expect("Should decrypt");
+    let decrypted = EmailConfirmationToken::decrypt(&encrypted, key).expect("Should decrypt");
 
     assert_eq!(decrypted.username, "user@#$%");
     assert_eq!(decrypted.first_name, "Jöhn");
@@ -201,7 +209,10 @@ fn test_email_token_decrypt_exact_12_bytes() {
 
     let result = EmailConfirmationToken::decrypt(&token_12, key);
     // This should fail during decryption because there's no ciphertext
-    assert!(result.is_err(), "Token with only nonce (no ciphertext) should fail");
+    assert!(
+        result.is_err(),
+        "Token with only nonce (no ciphertext) should fail"
+    );
 }
 
 #[test]
@@ -213,5 +224,8 @@ fn test_email_token_decrypt_corrupted_ciphertext() {
     let corrupted_token = base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(&corrupted);
 
     let result = EmailConfirmationToken::decrypt(&corrupted_token, key);
-    assert!(result.is_err(), "Token with corrupted ciphertext should fail");
+    assert!(
+        result.is_err(),
+        "Token with corrupted ciphertext should fail"
+    );
 }

@@ -333,7 +333,7 @@ pub async fn confirm_email(
         email: token.email,
         role: crate::api::users::UserRole::Pentester,
         password_hash: token.password_hash,
-        password_hash_version: Some(2), // Email confirmation uses Argon2id
+        password_hash_version: Some(1), // Email confirmation uses SHA-256 for backward compatibility
         is_connected: false,
         avatar_url: None,
         created_at: chrono::Local::now().naive_utc(),

@@ -1,6 +1,9 @@
-use crate::api::{auth::JwtClaims, users::{User, UserRole}};
-use ulid::Ulid;
+use crate::api::{
+    auth::JwtClaims,
+    users::{User, UserRole},
+};
 use chrono::Utc;
+use ulid::Ulid;
 
 #[test]
 fn test_jwt_claims_encode_decode() {
@@ -39,9 +42,17 @@ fn test_jwt_claims_invalid_secret() {
     let encoded = claims.to_string(secret).expect("Should encode JWT");
     let decoded = JwtClaims::from_jwt(&encoded, wrong_secret);
 
-    assert_eq!(decoded.sub, Ulid::nil(), "Invalid JWT should return nil Ulid");
+    assert_eq!(
+        decoded.sub,
+        Ulid::nil(),
+        "Invalid JWT should return nil Ulid"
+    );
     assert_eq!(decoded.email, "", "Invalid JWT should return empty email");
-    assert_eq!(decoded.role, UserRole::Client, "Invalid JWT should return Client role");
+    assert_eq!(
+        decoded.role,
+        UserRole::Client,
+        "Invalid JWT should return Client role"
+    );
 }
 
 #[test]
@@ -71,7 +82,10 @@ fn test_jwt_claims_is_admin() {
     };
 
     assert!(admin_claims.is_admin(), "Admin role should return true");
-    assert!(!pentester_claims.is_admin(), "Pentester role should return false");
+    assert!(
+        !pentester_claims.is_admin(),
+        "Pentester role should return false"
+    );
     assert!(!client_claims.is_admin(), "Client role should return false");
 }
 
@@ -101,8 +115,14 @@ fn test_jwt_claims_is_pentester() {
         exp: 0,
     };
 
-    assert!(admin_claims.is_pentester(), "Admin should be considered pentester");
-    assert!(pentester_claims.is_pentester(), "Pentester should return true");
+    assert!(
+        admin_claims.is_pentester(),
+        "Admin should be considered pentester"
+    );
+    assert!(
+        pentester_claims.is_pentester(),
+        "Pentester should return true"
+    );
     assert!(!client_claims.is_pentester(), "Client should return false");
 }
 
@@ -117,7 +137,10 @@ fn test_jwt_claims_is_valid_not_expired() {
         exp: now + 3600,
     };
 
-    assert!(claims.is_valid(), "Token with valid iat and exp should be valid");
+    assert!(
+        claims.is_valid(),
+        "Token with valid iat and exp should be valid"
+    );
 }
 
 #[test]
@@ -145,7 +168,10 @@ fn test_jwt_claims_is_valid_not_yet_valid() {
         exp: now + 7200,
     };
 
-    assert!(!claims.is_valid(), "Token not yet valid (iat in future) should not be valid");
+    assert!(
+        !claims.is_valid(),
+        "Token not yet valid (iat in future) should not be valid"
+    );
 }
 
 #[test]
@@ -155,9 +181,17 @@ fn test_jwt_claims_malformed_token() {
 
     let decoded = JwtClaims::from_jwt(malformed, secret);
 
-    assert_eq!(decoded.sub, Ulid::nil(), "Malformed JWT should return nil Ulid");
+    assert_eq!(
+        decoded.sub,
+        Ulid::nil(),
+        "Malformed JWT should return nil Ulid"
+    );
     assert_eq!(decoded.email, "", "Malformed JWT should return empty email");
-    assert_eq!(decoded.role, UserRole::Client, "Malformed JWT should return Client role");
+    assert_eq!(
+        decoded.role,
+        UserRole::Client,
+        "Malformed JWT should return Client role"
+    );
     assert_eq!(decoded.iat, 0, "Malformed JWT should return 0 iat");
     assert_eq!(decoded.exp, 0, "Malformed JWT should return 0 exp");
 }
@@ -219,7 +253,11 @@ fn test_jwt_claims_from_user_invalid_ulid() {
 
     let claims = JwtClaims::from(user);
 
-    assert_eq!(claims.sub, Ulid::nil(), "Invalid ULID should default to nil");
+    assert_eq!(
+        claims.sub,
+        Ulid::nil(),
+        "Invalid ULID should default to nil"
+    );
 }
 
 #[test]
@@ -242,7 +280,11 @@ fn test_jwt_claims_from_user_admin_role() {
 
     let claims = JwtClaims::from(user);
 
-    assert_eq!(claims.role, UserRole::Admin, "Admin role should be preserved");
+    assert_eq!(
+        claims.role,
+        UserRole::Admin,
+        "Admin role should be preserved"
+    );
     assert!(claims.is_admin(), "Should be recognized as admin");
     assert!(claims.is_pentester(), "Admin should also be pentester");
 }
@@ -268,10 +310,16 @@ fn test_jwt_claims_from_user_expiry_one_day() {
     let claims = JwtClaims::from(user);
 
     let now = usize::try_from(chrono::Local::now().timestamp()).unwrap_or(0);
-    let one_day_from_now = usize::try_from((chrono::Local::now() + chrono::Duration::days(1)).timestamp()).unwrap_or(0);
+    let one_day_from_now =
+        usize::try_from((chrono::Local::now() + chrono::Duration::days(1)).timestamp())
+            .unwrap_or(0);
 
-    assert!(claims.exp >= one_day_from_now - 2 && claims.exp <= one_day_from_now + 2,
-        "Expiry should be approximately 1 day from now");
-    assert!(claims.iat >= now - 2 && claims.iat <= now + 2,
-        "iat should be approximately now");
+    assert!(
+        claims.exp >= one_day_from_now - 2 && claims.exp <= one_day_from_now + 2,
+        "Expiry should be approximately 1 day from now"
+    );
+    assert!(
+        claims.iat >= now - 2 && claims.iat <= now + 2,
+        "iat should be approximately now"
+    );
 }

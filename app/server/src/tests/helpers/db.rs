@@ -1,9 +1,9 @@
 #[cfg(test)]
-use diesel::r2d2::{self, ConnectionManager};
-#[cfg(test)]
 use diesel::PgConnection;
 #[cfg(test)]
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use diesel::r2d2::{self, ConnectionManager};
+#[cfg(test)]
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 #[cfg(test)]
 use std::sync::Arc;
 #[cfg(test)]
@@ -37,9 +37,7 @@ pub async fn setup_test_postgres() -> (ContainerAsync<Postgres>, String) {
 
     // Construire l'URL de connexion
     // testcontainers-modules utilise "postgres" comme user et password par défaut
-    let database_url = format!(
-        "postgres://postgres:postgres@127.0.0.1:{host_port}/postgres"
-    );
+    let database_url = format!("postgres://postgres:postgres@127.0.0.1:{host_port}/postgres");
 
     (container, database_url)
 }
@@ -69,8 +67,8 @@ pub fn run_migrations(pool: &DbPool) {
 /// Nettoie toutes les données de la base de données (pour les tests en CI qui partagent la même DB)
 #[cfg(test)]
 pub fn cleanup_database(pool: &DbPool) {
-    use diesel::sql_query;
     use diesel::RunQueryDsl;
+    use diesel::sql_query;
 
     let mut conn = pool.get().expect("Failed to get database connection");
 
@@ -97,8 +95,8 @@ pub async fn setup_test_db() -> (Option<ContainerAsync<Postgres>>, DbPool) {
 
     let (container, database_url, use_shared_db) = if use_ci_database {
         // Mode 1: CI avec service PostgreSQL de GitLab
-        let db_url = std::env::var("DATABASE_URL")
-            .expect("DATABASE_URL must be set when CI_DATABASE=true");
+        let db_url =
+            std::env::var("DATABASE_URL").expect("DATABASE_URL must be set when CI_DATABASE=true");
 
         // Attendre que PostgreSQL soit prêt
         wait_for_postgres(&db_url).await;
@@ -142,7 +140,7 @@ async fn wait_for_postgres(database_url: &str) {
                 return;
             }
             Err(e) => {
-                assert!(attempt != 30, "PostgreSQL not ready after 30 attemps: {e}"); 
+                assert!(attempt != 30, "PostgreSQL not ready after 30 attemps: {e}");
                 println!("Waiting for PostgreSQL... (attempt {attempt}/30)");
                 sleep(Duration::from_secs(1)).await;
             }

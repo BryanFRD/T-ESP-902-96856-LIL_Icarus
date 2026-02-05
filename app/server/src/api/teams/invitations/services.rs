@@ -1,8 +1,5 @@
-use crate::api::teams::{does_team_exist, is_team_owner_or_moderator, TeamMember, TeamRole};
-use crate::{
-    schema::teams_invitations,
-    state::GlobalState,
-};
+use crate::api::teams::{TeamMember, TeamRole, does_team_exist, is_team_owner_or_moderator};
+use crate::{schema::teams_invitations, state::GlobalState};
 
 use super::{InvitationError, TeamInvitation};
 
@@ -74,7 +71,7 @@ pub fn cancel_invitation(
     requester_user_id: &str,
     is_admin: bool,
 ) -> Result<(), InvitationError> {
-    use crate::schema::teams_invitations::dsl::{teams_invitations, id, team_id, is_canceled};
+    use crate::schema::teams_invitations::dsl::{id, is_canceled, team_id, teams_invitations};
     use diesel::prelude::*;
 
     if !does_team_exist(state, team_id_str)? {
@@ -118,13 +115,17 @@ pub fn consume_invitation_by_token(
         .first::<super::TeamInvitation>(&mut conn)
         .optional()?;
 
-    let Some(invitation) = invitation else { return Err(InvitationError::NotFound) };
+    let Some(invitation) = invitation else {
+        return Err(InvitationError::NotFound);
+    };
 
     if invitation.is_canceled {
         return Err(InvitationError::Canceled);
     }
 
-    if let Some(exp) = invitation.expires_at &&  chrono::Utc::now().naive_utc() > exp {
+    if let Some(exp) = invitation.expires_at
+        && chrono::Utc::now().naive_utc() > exp
+    {
         return Err(InvitationError::Expired);
     }
 
