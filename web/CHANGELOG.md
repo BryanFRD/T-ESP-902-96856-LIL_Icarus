@@ -1,3 +1,10 @@
+# [1.29.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.28.1...v1.29.0) (2026-01-30)
+
+
+### Features
+
+* **toast:** customize toaster UI ([3f80aef](https://git.icarus-cyber.fr/icarus/web/commit/3f80aefafae88e4cb3d68ba4cb5af25114dcfd12))
+
 ## [1.28.1](https://git.icarus-cyber.fr/icarus/web/compare/v1.28.0...v1.28.1) (2026-01-30)
 
 
