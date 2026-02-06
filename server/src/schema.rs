@@ -63,10 +63,21 @@ diesel::table! {
         user_agent -> Nullable<Varchar>,
         metadata -> Nullable<Jsonb>,
         changes -> Nullable<Jsonb>,
-        metadata_nonce -> Nullable<Bytea>,
-        changes_nonce -> Nullable<Bytea>,
         created_at -> Timestamp,
         expires_at -> Timestamp,
+        metadata_nonce -> Nullable<Bytea>,
+        changes_nonce -> Nullable<Bytea>,
+    }
+}
+
+diesel::table! {
+    kanban_columns (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        name -> Varchar,
+        position -> Int4,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
@@ -114,6 +125,67 @@ diesel::table! {
 }
 
 diesel::table! {
+    ticket_attachments (id) {
+        id -> Varchar,
+        ticket_id -> Varchar,
+        uploaded_by -> Varchar,
+        file_name -> Varchar,
+        file_path -> Varchar,
+        file_size -> Int8,
+        mime_type -> Varchar,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    ticket_comments (id) {
+        id -> Varchar,
+        ticket_id -> Varchar,
+        author_id -> Varchar,
+        content -> Text,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    ticket_labels (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        name -> Varchar,
+        color -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    tickets (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        column_id -> Varchar,
+        parent_id -> Nullable<Varchar>,
+        title -> Varchar,
+        description -> Nullable<Text>,
+        priority -> Varchar,
+        assignee_id -> Nullable<Varchar>,
+        position -> Int4,
+        due_date -> Nullable<Timestamp>,
+        created_by -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    tickets_labels (ticket_id, label_id) {
+        ticket_id -> Varchar,
+        label_id -> Varchar,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     users (id) {
         id -> Varchar,
         username -> Varchar,
@@ -122,12 +194,12 @@ diesel::table! {
         email -> Varchar,
         role -> Varchar,
         password_hash -> Varchar,
-        password_hash_version -> Nullable<Int2>,
         is_connected -> Bool,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         last_connected_at -> Timestamp,
         avatar_url -> Nullable<Varchar>,
+        password_hash_version -> Nullable<Int2>,
     }
 }
 
@@ -139,11 +211,21 @@ diesel::joinable!(audits_invitations -> audits (audit_id));
 diesel::joinable!(audits_invitations -> users (created_by));
 diesel::joinable!(companies -> teams (team_id));
 diesel::joinable!(events -> users (user_id));
+diesel::joinable!(kanban_columns -> audits (audit_id));
 diesel::joinable!(password_reset_tokens -> users (user_id));
 diesel::joinable!(teams_invitations -> teams (team_id));
 diesel::joinable!(teams_invitations -> users (created_by));
 diesel::joinable!(teams_members -> teams (team_id));
 diesel::joinable!(teams_members -> users (user_id));
+diesel::joinable!(ticket_attachments -> tickets (ticket_id));
+diesel::joinable!(ticket_attachments -> users (uploaded_by));
+diesel::joinable!(ticket_comments -> tickets (ticket_id));
+diesel::joinable!(ticket_comments -> users (author_id));
+diesel::joinable!(ticket_labels -> audits (audit_id));
+diesel::joinable!(tickets -> audits (audit_id));
+diesel::joinable!(tickets -> kanban_columns (column_id));
+diesel::joinable!(tickets_labels -> ticket_labels (label_id));
+diesel::joinable!(tickets_labels -> tickets (ticket_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     audits,
@@ -151,9 +233,15 @@ diesel::allow_tables_to_appear_in_same_query!(
     audits_invitations,
     companies,
     events,
+    kanban_columns,
     password_reset_tokens,
     teams,
     teams_invitations,
     teams_members,
+    ticket_attachments,
+    ticket_comments,
+    ticket_labels,
+    tickets,
+    tickets_labels,
     users,
 );

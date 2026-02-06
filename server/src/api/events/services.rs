@@ -27,6 +27,7 @@ pub fn log_event_sync(state: &GlobalState, new_event: &NewEvent) -> Result<Event
 
     diesel::insert_into(events::table)
         .values(new_event)
+        .returning(Event::as_select())
         .get_result::<Event>(&mut conn)
         .map_err(EventError::from)
 }

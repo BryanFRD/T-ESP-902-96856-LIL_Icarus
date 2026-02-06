@@ -4,6 +4,21 @@ use crate::api::audits::invitations::{
     CheckInvitationResponse, CreateAuditInvitationPayload,
 };
 use crate::api::audits::step_up::endpoints::{CheckAccessResponse, VerifyAccessPayload};
+use crate::api::audits::tickets;
+use crate::api::audits::tickets::attachments::models::AttachmentResponse;
+use crate::api::audits::tickets::columns::models::{
+    ColumnResponse, CreateColumnPayload, ReorderColumnsPayload, UpdateColumnPayload,
+};
+use crate::api::audits::tickets::comments::models::{
+    CommentResponse, CreateCommentPayload, UpdateCommentPayload,
+};
+use crate::api::audits::tickets::labels::models::{
+    CreateLabelPayload, LabelResponse, UpdateLabelPayload,
+};
+use crate::api::audits::tickets::models::{
+    BoardColumn, BoardResponse, CreateTicketPayload, MoveTicketPayload, TicketPriority,
+    TicketResponse, TicketSummary, TicketUser, UpdateTicketPayload,
+};
 use crate::api::audits::{CreateAuditPayload, UpdateAuditPayload};
 use crate::api::auth;
 use crate::api::auth::{ConfirmEmailPayload, LoginPayload, RegisterPayload};
@@ -38,6 +53,40 @@ use utoipa::OpenApi;
         audits::invitations::endpoints::cancel_invitation,
         audits::invitations::endpoints::check_invitation,
         audits::invitations::endpoints::accept_invitation,
+        // Kanban Board
+        tickets::endpoints::get_board,
+        // Kanban Columns
+        tickets::columns::endpoints::list_columns,
+        tickets::columns::endpoints::create_column,
+        tickets::columns::endpoints::update_column,
+        tickets::columns::endpoints::delete_column,
+        tickets::columns::endpoints::reorder_columns,
+        // Tickets
+        tickets::endpoints::list_tickets,
+        tickets::endpoints::create_ticket,
+        tickets::endpoints::get_ticket,
+        tickets::endpoints::update_ticket,
+        tickets::endpoints::delete_ticket,
+        tickets::endpoints::move_ticket,
+        tickets::endpoints::list_subtasks,
+        // Labels
+        tickets::labels::endpoints::list_labels,
+        tickets::labels::endpoints::create_label,
+        tickets::labels::endpoints::update_label,
+        tickets::labels::endpoints::delete_label,
+        tickets::labels::endpoints::attach_label,
+        tickets::labels::endpoints::detach_label,
+        // Comments
+        tickets::comments::endpoints::list_comments,
+        tickets::comments::endpoints::create_comment,
+        tickets::comments::endpoints::update_comment,
+        tickets::comments::endpoints::delete_comment,
+        // Attachments
+        tickets::attachments::endpoints::list_attachments,
+        tickets::attachments::endpoints::upload_attachment,
+        tickets::attachments::endpoints::download_attachment,
+        tickets::attachments::endpoints::delete_attachment,
+        // Auth
         auth::endpoints::login,
         auth::endpoints::register,
         auth::endpoints::confirm_email,
@@ -76,6 +125,9 @@ use utoipa::OpenApi;
     ),
     components(
         schemas(CreateAuditPayload, UpdateAuditPayload, VerifyAccessPayload, CheckAccessResponse, CreateAuditInvitationPayload, AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn, CheckInvitationResponse, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload, Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType, CsrfResponse),
+        schemas(
+            CreateAuditPayload, UpdateAuditPayload, VerifyAccessPayload, CheckAccessResponse, CreateAuditInvitationPayload, AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn, CheckInvitationResponse, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload, Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType, CsrfResponse, ColumnResponse, CreateColumnPayload, UpdateColumnPayload, ReorderColumnsPayload, CreateTicketPayload, UpdateTicketPayload, MoveTicketPayload, TicketPriority, TicketResponse, TicketSummary, TicketUser, BoardColumn, BoardResponse, LabelResponse, CreateLabelPayload, UpdateLabelPayload, CommentResponse, CreateCommentPayload, UpdateCommentPayload, AttachmentResponse,
+        ),
     ),
     tags(
         (name = "Auth", description = "Authentication endpoints"),
@@ -84,6 +136,11 @@ use utoipa::OpenApi;
         (name = "Admin", description = "Admin management endpoints"),
         (name = "Status", description = "Application status endpoints"),
         (name = "Teams", description = "Team management endpoints"),
+        (name = "Tickets", description = "Kanban ticket management endpoints"),
+        (name = "Kanban Columns", description = "Kanban column management endpoints"),
+        (name = "Ticket Labels", description = "Ticket label management endpoints"),
+        (name = "Ticket Comments", description = "Ticket comment management endpoints"),
+        (name = "Ticket Attachments", description = "Ticket attachment management endpoints"),
     ),
     security(
         ("cookieAuth" = [])
