@@ -27,10 +27,10 @@ const CompaniesList = ({
           <Building2 className='h-8 w-8 text-gray-400 dark:text-gray-500' />
         </div>
         <h3 className='mb-2 text-lg font-medium text-gray-900 dark:text-white'>
-          {t('team.noCompanies')}
+          {t('team:noCompanies')}
         </h3>
         <p className='text-sm text-gray-500 dark:text-gray-400'>
-          {t('team.noCompaniesDescription')}
+          {t('team:noCompaniesDescription')}
         </p>
       </div>
     )

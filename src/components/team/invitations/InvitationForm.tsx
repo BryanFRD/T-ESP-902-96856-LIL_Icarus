@@ -65,9 +65,9 @@ const InvitationForm = ({
         )
       }),
       {
-        loading: t('loading.creatingInvitation'),
-        success: t('success.invitationCreated'),
-        error: t('error.invitationCreationFailed')
+        loading: t('messages:loading.creatingInvitation'),
+        success: t('messages:success.invitationCreated'),
+        error: t('messages:error.invitationCreationFailed')
       }
     )
   }
@@ -80,17 +80,17 @@ const InvitationForm = ({
         transition={{ delay: 0.1 }}
       >
         <InputField
-          label={t('team.maxUses')}
+          label={t('team:maxUses')}
           type='number'
           name='maxUses'
           icon={Users}
-          placeholder={t('team.maxUsesPlaceholder')}
+          placeholder={t('team:maxUsesPlaceholder')}
           register={register}
           error={errors.maxUses?.message}
           registerOptions={{ valueAsNumber: true }}
         />
         <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
-          {t('team.maxUsesHint')}
+          {t('team:maxUsesHint')}
         </p>
       </motion.div>
 
@@ -100,7 +100,7 @@ const InvitationForm = ({
         transition={{ delay: 0.2 }}
       >
         <InputField
-          label={t('team.expiresAt')}
+          label={t('team:expiresAt')}
           type='datetime-local'
           name='expiresAt'
           icon={Calendar}
@@ -108,7 +108,7 @@ const InvitationForm = ({
           error={errors.expiresAt?.message}
         />
         <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
-          {t('team.expiresAtHint')}
+          {t('team:expiresAtHint')}
         </p>
       </motion.div>
 
@@ -120,11 +120,11 @@ const InvitationForm = ({
       >
         {onCancel && (
           <Button type='button' variant='secondary' onClick={onCancel}>
-            {t('actions.cancel')}
+            {t('common:actions.cancel')}
           </Button>
         )}
         <Button type='submit' isLoading={isPending}>
-          {t('team.createInvitation')}
+          {t('team:createInvitation')}
         </Button>
       </motion.div>
     </form>

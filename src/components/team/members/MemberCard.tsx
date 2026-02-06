@@ -55,7 +55,7 @@ const MemberCard = ({
   const displayName =
     member.firstName && member.lastName
       ? `${member.firstName} ${member.lastName}`
-      : member.username || member.email || t('team.unknownMember')
+      : member.username || member.email || t('team:unknownMember')
 
   return (
     <motion.div
@@ -93,7 +93,7 @@ const MemberCard = ({
           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${roleColor}`}
         >
           <RoleIcon className='h-3 w-3' />
-          {t(`teams.roles.${member.teamRole.toLowerCase()}`)}
+          {t(`memberRoles.${member.teamRole.toLowerCase()}`)}
         </span>
 
         {canManage && member.teamRole !== MemberRole.OWNER && (
@@ -102,7 +102,7 @@ const MemberCard = ({
               variant='ghost'
               size='sm'
               onClick={() => setShowMenu(!showMenu)}
-              aria-label={t('actions.more')}
+              aria-label={t('common:actions.more')}
             >
               <MoreVertical className='h-4 w-4' />
             </Button>
@@ -118,7 +118,7 @@ const MemberCard = ({
                   className='flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
                 >
                   <Shield className='h-4 w-4' />
-                  {t('team.changeRole')}
+                  {t('team:changeRole')}
                 </button>
                 <button
                   type='button'
@@ -129,7 +129,7 @@ const MemberCard = ({
                   className='flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-gray-700'
                 >
                   <UserMinus className='h-4 w-4' />
-                  {t('team.removeMember')}
+                  {t('team:removeMember')}
                 </button>
               </div>
             )}

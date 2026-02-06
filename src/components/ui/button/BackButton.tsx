@@ -38,7 +38,7 @@ const BackButton = ({ label, to, className, onClick }: BackButtonProps) => {
           : '',
         className
       )}
-      aria-label={label || t('common.back')}
+      aria-label={label || t('common:actions.back')}
     >
       <div
         className={twMerge(

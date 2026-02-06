@@ -1,0 +1,68 @@
+{
+  "access": {
+    "message": "Pour accéder à cet audit, veuillez entrer votre mot de passe ci-dessous.",
+    "submit": "Débloquer l'accès",
+    "title": "Accès sécurisé à l'audit"
+  },
+  "accessGranted": "Accès accordé",
+  "company": {
+    "invalid": "Entreprise invalide"
+  },
+  "create": {
+    "auditLabel": "Nom de l'audit",
+    "auditPlaceholder": "Entrez le nom de l'audit",
+    "companyLabel": "Entreprise",
+    "companyPlaceholder": "Sélectionnez une entreprise",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Entrez une description pour l'audit",
+    "endDateLabel": "Date de fin",
+    "endDatePlaceholder": "Sélectionnez une date de fin",
+    "submit": "Créer l'audit",
+    "teamLabel": "Équipe",
+    "teamPlaceholder": "Sélectionnez une équipe"
+  },
+  "createAudit": "Créer un audit",
+  "createAuditFormTitle": "Détails du nouvel audit",
+  "created": "Audit créé avec succès.",
+  "creating": "Création de l'audit...",
+  "date": {
+    "invalid": "Date invalide"
+  },
+  "description": {
+    "max": "La description doit contenir au maximum 500 caractères"
+  },
+  "details": {
+    "company": "Entreprise",
+    "description": "Description",
+    "endDate": "Date de fin",
+    "noDescription": "Aucune description fournie",
+    "notFound": "Audit introuvable",
+    "status": "Statut"
+  },
+  "endDate": "Date de fin",
+  "list": {
+    "emptyDescription": "Créez votre premier audit pour commencer à suivre les évaluations de sécurité.",
+    "emptyTitle": "Aucun audit trouvé",
+    "error": "Échec du chargement des audits. Veuillez réessayer plus tard."
+  },
+  "name": {
+    "max": "Le nom doit contenir au maximum 100 caractères",
+    "min": "Le nom doit contenir au minimum 3 caractères"
+  },
+  "password": {
+    "label": "Mot de passe",
+    "placeholder": "Entrez votre mot de passe",
+    "required": "Le mot de passe est requis"
+  },
+  "status": {
+    "active": "Audit actif",
+    "archived": "Audit archivé",
+    "expired": "Audit expiré"
+  },
+  "subtitle": "Gérez et consultez vos audits de sécurité ici.",
+  "team": {
+    "invalid": "Équipe invalide"
+  },
+  "title": "Mes audits",
+  "verifying": "Vérification en cours..."
+}

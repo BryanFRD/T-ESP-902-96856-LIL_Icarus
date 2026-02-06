@@ -27,14 +27,14 @@ const ChangePasswordForm = () => {
 
   const onSubmit = async (data: ChangePasswordFormData) => {
     if (data.newPassword !== data.confirmPassword) {
-      toast.error(t('error.passwordsDoNotMatch'))
+      toast.error(t('messages:error.passwordsDoNotMatch'))
       return
     }
 
     await toast.promise(changePassword(data), {
-      loading: t('loading.changingPassword'),
-      success: t('success.passwordChanged'),
-      error: t('error.passwordChangeFailed')
+      loading: t('messages:loading.changingPassword'),
+      success: t('messages:success.passwordChanged'),
+      error: t('messages:error.passwordChangeFailed')
     })
 
     reset()
@@ -48,10 +48,10 @@ const ChangePasswordForm = () => {
         transition={{ delay: 0.1 }}
       >
         <h2 className='mb-2 text-2xl font-bold text-gray-800 dark:text-white'>
-          {t('changePasswordForm.title')}
+          {t('auth:password.changetitle')}
         </h2>
         <p className='mb-6 text-gray-500 dark:text-gray-400'>
-          {t('changePasswordForm.description')}
+          {t('auth:password.changedescription')}
         </p>
       </motion.div>
 
@@ -62,11 +62,11 @@ const ChangePasswordForm = () => {
           transition={{ delay: 0.2 }}
         >
           <InputField
-            label={t('inputField.currentPassword')}
+            label={t('auth:fields.currentPassword')}
             type='password'
             name='password'
             icon={KeyRound}
-            placeholder={t('inputField.currentPasswordPlaceholder')}
+            placeholder={t('auth:fields.currentPasswordPlaceholder')}
             register={register}
             error={errors.password?.message}
           />
@@ -78,11 +78,11 @@ const ChangePasswordForm = () => {
           transition={{ delay: 0.3 }}
         >
           <InputField
-            label={t('inputField.newPassword')}
+            label={t('auth:fields.newPassword')}
             type='password'
             name='newPassword'
             icon={KeyRound}
-            placeholder={t('inputField.newPasswordPlaceholder')}
+            placeholder={t('auth:fields.newPasswordPlaceholder')}
             register={register}
             error={errors.newPassword?.message}
           />
@@ -94,11 +94,11 @@ const ChangePasswordForm = () => {
           transition={{ delay: 0.4 }}
         >
           <InputField
-            label={t('inputField.confirmPassword')}
+            label={t('auth:fields.confirmPassword')}
             type='password'
             name='confirmPassword'
             icon={KeyRound}
-            placeholder={t('inputField.confirmPasswordPlaceholder')}
+            placeholder={t('auth:fields.confirmPasswordPlaceholder')}
             register={register}
             error={errors.confirmPassword?.message}
           />
@@ -113,10 +113,10 @@ const ChangePasswordForm = () => {
           <Button
             type='submit'
             isLoading={isPending}
-            loadingText={t('inputField.changingPassword')}
+            loadingText={t('auth:actions.changingPassword')}
             className='w-full md:w-auto'
           >
-            {t('inputField.changePassword')}
+            {t('auth:actions.changePassword')}
           </Button>
         </motion.div>
       </form>

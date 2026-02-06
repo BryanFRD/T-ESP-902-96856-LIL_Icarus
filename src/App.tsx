@@ -1,3 +1,4 @@
+import { t } from 'i18next'
 import { X } from 'lucide-react'
 import { ToastBar, Toaster, toast } from 'react-hot-toast'
 
@@ -49,17 +50,17 @@ function App() {
             }
           }}
         >
-          {t => (
-            <ToastBar toast={t}>
+          {toastInstance => (
+            <ToastBar toast={toastInstance}>
               {({ icon, message }) => (
                 <div className='flex w-full items-center gap-2'>
                   {icon}
                   <div className='flex-1 text-sm font-medium'>{message}</div>
-                  {t.type !== 'loading' && (
+                  {toastInstance.type !== 'loading' && (
                     <button
-                      onClick={() => toast.dismiss(t.id)}
+                      onClick={() => toast.dismiss(toastInstance.id)}
                       className='rounded-full p-1 text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-600'
-                      aria-label='Fermer'
+                      aria-label={t('common:actions.close')}
                     >
                       <X size={18} />
                     </button>

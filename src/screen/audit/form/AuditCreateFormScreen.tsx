@@ -11,7 +11,7 @@ const AuditCreateFormScreen = () => {
       <div className={'mb-8 flex items-center gap-4'}>
         <BackButton />
         <h1 className='text-2xl font-bold'>
-          {t('audit.createAuditFormTitle')}
+          {t('audit:createAuditFormTitle')}
         </h1>
       </div>
       <AuditCreateForm />

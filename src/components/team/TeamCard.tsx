@@ -45,7 +45,7 @@ const TeamCard = ({ team, index = 0 }: TeamCardProps) => {
         {team.members && (
           <div className='flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
             <Users className='size-4' />
-            <span>{t('team.members', { count: team.members.length })}</span>
+            <span>{t('team:members', { count: team.members.length })}</span>
           </div>
         )}
       </Link>

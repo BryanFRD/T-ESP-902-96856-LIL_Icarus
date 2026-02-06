@@ -40,20 +40,20 @@ export const processErrors = (
     for (const error of errors) {
       if (error.code === 'file-too-large') {
         newErrors.push(
-          t('file_upload.errors.too_large', {
+          t('ui:fileUpload.errors.too_large', {
             fileName: file.name,
             size: formatFileSize(maxSize * 1024 * 1024)
           })
         )
       } else if (error.code === 'file-invalid-type') {
         newErrors.push(
-          t('file_upload.errors.invalid_type', {
+          t('ui:fileUpload.errors.invalid_type', {
             fileName: file.name,
             allowedTypes
           })
         )
       } else if (error.code === 'too-many-files') {
-        newErrors.push(t('file_upload.errors.too_many_files', { maxFiles }))
+        newErrors.push(t('ui:fileUpload.errors.too_many_files', { maxFiles }))
       }
     }
   }

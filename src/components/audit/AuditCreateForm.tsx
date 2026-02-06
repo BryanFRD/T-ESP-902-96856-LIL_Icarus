@@ -84,9 +84,9 @@ const CreateAuditForm = () => {
   async function onSubmit(data: CreateAuditSchemaType) {
     toast
       .promise(createAudit(data), {
-        loading: t('audit.creating'),
-        success: t('audit.created'),
-        error: t('error.auditCreationFailed')
+        loading: t('audit:creating'),
+        success: t('audit:created'),
+        error: t('messages:error.auditCreationFailed')
       })
       .finally(() => navigate(getRoutePath(ROUTES.AUDITS)))
   }
@@ -96,9 +96,9 @@ const CreateAuditForm = () => {
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
         <div className='md:col-span-2'>
           <InputField
-            label={t('audit.create.auditLabel')}
+            label={t('audit:create.auditLabel')}
             type='text'
-            placeholder={t('audit.create.auditPlaceholder')}
+            placeholder={t('audit:create.auditPlaceholder')}
             icon={Users}
             register={register}
             name='name'
@@ -108,10 +108,10 @@ const CreateAuditForm = () => {
 
         <div className='md:col-span-2'>
           <InputField
-            label={t('audit.create.descriptionLabel')}
+            label={t('audit:create.descriptionLabel')}
             type='text'
             icon={Users}
-            placeholder={t('audit.create.descriptionPlaceholder')}
+            placeholder={t('audit:create.descriptionPlaceholder')}
             register={register}
             name='description'
             error={errors.description?.message}
@@ -123,7 +123,7 @@ const CreateAuditForm = () => {
           control={control}
           render={({ field }) => (
             <Select
-              label={t('audit.create.teamLabel')}
+              label={t('audit:create.teamLabel')}
               options={teamsOpt}
               value={teamsOpt.find(opt => opt.value === field.value) ?? null}
               onChange={val => {
@@ -131,7 +131,7 @@ const CreateAuditForm = () => {
                 field.onChange(selectedOption?.value ?? '')
                 setValue('companyId', '')
               }}
-              placeholder={t('audit.create.teamPlaceholder')}
+              placeholder={t('audit:create.teamPlaceholder')}
               isLoading={isTeamLoading}
               isSearchable={true}
               icon={Users}
@@ -145,7 +145,7 @@ const CreateAuditForm = () => {
           control={control}
           render={({ field }) => (
             <Select
-              label={t('audit.create.companyLabel')}
+              label={t('audit:create.companyLabel')}
               options={companiesOpt}
               value={
                 companiesOpt.find(opt => opt.value === field.value) ?? null
@@ -154,7 +154,7 @@ const CreateAuditForm = () => {
                 const selectedOption = val as SelectOption | null
                 field.onChange(selectedOption?.value ?? '')
               }}
-              placeholder={t('audit.create.companyPlaceholder')}
+              placeholder={t('audit:create.companyPlaceholder')}
               disabled={!selectedTeamId}
               isSearchable={true}
               icon={Building2}
@@ -170,12 +170,12 @@ const CreateAuditForm = () => {
             render={({ field }) => (
               <DatePicker
                 includeTime={true}
-                label={t('audit.create.endDateLabel')}
+                label={t('audit:create.endDateLabel')}
                 value={field.value ? new Date(field.value) : null}
                 onChange={date => {
                   field.onChange(date ? date.toISOString() : '')
                 }}
-                placeholder={t('audit.create.endDatePlaceholder')}
+                placeholder={t('audit:create.endDatePlaceholder')}
                 minDate={new Date()}
                 error={errors.endDate?.message}
               />
@@ -190,7 +190,7 @@ const CreateAuditForm = () => {
           className='w-full md:w-auto'
           disabled={isSubmitting || isPending}
         >
-          {t('audit.create.submit')}
+          {t('audit:create.submit')}
         </Button>
       </div>
     </form>

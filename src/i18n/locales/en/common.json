@@ -1,0 +1,45 @@
+{
+  "actions": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "done": "Done",
+    "edit": "Edit",
+    "goLogin": "Go to Login",
+    "more": "More actions",
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save"
+  },
+  "days": {
+    "fri": "Fri",
+    "mon": "Mon",
+    "sat": "Sat",
+    "sun": "Sun",
+    "thu": "Thu",
+    "tue": "Tue",
+    "wed": "Wed"
+  },
+  "language": "Language",
+  "languages": {
+    "english": "English",
+    "french": "French"
+  },
+  "loading": "Loading...",
+  "memberRoles": {
+    "owner": "Owner",
+    "moderator": "Moderator",
+    "member": "Member",
+    "client": "Client"
+  },
+  "selectDate": "Select a date",
+  "theme": "Theme",
+  "time": {
+    "label": "Time",
+    "nextMonth": "Next month",
+    "nextYear": "Next year",
+    "previousMonth": "Previous month",
+    "previousYear": "Previous year"
+  }
+}

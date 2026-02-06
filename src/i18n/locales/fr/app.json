@@ -1,0 +1,19 @@
+{
+  "branding": {
+    "advancedPenetration": "Test d'intrusion avancé",
+    "advancedReporting": "Rapports avancés",
+    "advancedReportingDesc": "Analyses détaillées et recommandations exploitables",
+    "enterpriseSecurity": "Sécurité d'entreprise",
+    "enterpriseSecurityDesc": "Chiffrement de niveau bancaire et conformité",
+    "realtimeScanning": "Analyse en temps réel",
+    "realtimeScanningDesc": "Surveillance continue et détection instantanée des menaces",
+    "secureInfra": "Sécurisez votre infrastructure avec des évaluations complètes et une détection des vulnérabilités en temps réel.",
+    "securityExpert": "Expert en sécurité",
+    "securityQuote": "La sécurité n'est pas un produit, mais un processus. Icarus rend ce processus fluide et efficace.",
+    "testingPlatform": "Plateforme de test"
+  },
+  "description": "Plateforme de test d'intrusion",
+  "logoAlt": "Logo Icarus",
+  "name": "Icarus",
+  "welcomeBack": "Bon retour parmi nous !"
+}

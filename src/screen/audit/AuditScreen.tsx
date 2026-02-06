@@ -28,7 +28,7 @@ const AuditScreen = () => {
         <div className='pointer-events-none relative h-full w-full p-8 opacity-50 blur-sm filter select-none'>
           <div className='mb-8 flex items-center justify-between'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
-              {t('audit.title')}
+              {t('audit:title')}
             </h1>
           </div>
           <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
@@ -49,10 +49,10 @@ const AuditScreen = () => {
       <div className='mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
           <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
-            {t('audit.title')}
+            {t('audit:title')}
           </h1>
           <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
-            {t('audit.subtitle')}
+            {t('audit:subtitle')}
           </p>
         </div>
 
@@ -63,7 +63,7 @@ const AuditScreen = () => {
           className='shrink-0'
         >
           <Plus className='mr-2 h-4 w-4' />
-          {t('audit.createAudit')}
+          {t('audit:createAudit')}
         </Button>
       </div>
 

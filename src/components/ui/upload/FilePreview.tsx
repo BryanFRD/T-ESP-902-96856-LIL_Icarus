@@ -31,7 +31,7 @@ export const AvatarPreview = ({
             return (
               <img
                 src={preview}
-                alt='file_upload.avatar.preview'
+                alt={t('ui:fileUpload.avatar.preview')}
                 className='h-full w-full object-cover'
               />
             )
@@ -39,7 +39,7 @@ export const AvatarPreview = ({
             return (
               <img
                 src={defaultPictureUrl}
-                alt='file_upload.avatar.default'
+                alt={t('ui:fileUpload.avatar.default')}
                 className='h-full w-full object-cover'
               />
             )
@@ -163,7 +163,7 @@ export const DefaultFiles = ({
   return (
     <div className='mt-4 space-y-3'>
       <h4 className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-        {t('file_upload.selected_files')} ({files.length})
+        {t('ui:fileUpload.selected_files')} ({files.length})
       </h4>
       <div className='space-y-2'>
         {files.map((file, index) => {

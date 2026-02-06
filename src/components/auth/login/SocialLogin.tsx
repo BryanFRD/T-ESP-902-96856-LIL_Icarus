@@ -20,7 +20,7 @@ const SocialLogin = () => {
         <div className='relative flex justify-center text-sm'>
           {/* Light background and text with dark variants */}
           <span className='bg-white px-4 text-gray-500 transition-all duration-300 dark:bg-gray-900 dark:text-gray-400'>
-            {t('social.orContinueWith')}
+            {t('auth:social.orContinueWith')}
           </span>
         </div>
       </div>
@@ -28,12 +28,12 @@ const SocialLogin = () => {
       <div className='grid grid-cols-2 gap-4'>
         <SocialButton
           icon={<SocialIcon network={'google'} />}
-          label={t('social.google')}
+          label={t('auth:social.google')}
           onClick={() => openExternal('https://google.com')}
         />
         <SocialButton
           icon={<SocialIcon network={'github'} />}
-          label={t('social.github')}
+          label={t('auth:social.github')}
           onClick={() => openExternal('https://github.com')}
         />
       </div>

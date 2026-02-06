@@ -24,12 +24,12 @@ const ProfileScreen = () => {
   const { dateLongTimeNative, dateLong } = useDateFormatter()
 
   function displayCreatedAt() {
-    if (!user?.createdAt) return t('profileScreen.noCreationDate')
+    if (!user?.createdAt) return t('auth:profile.noCreationDate')
     return dateLong(user.createdAt)
   }
 
   function displayLastUpdated() {
-    if (!user?.updatedAt) return t('profileScreen.noUpdateDate')
+    if (!user?.updatedAt) return t('auth:profile.noUpdateDate')
     return dateLongTimeNative(user.updatedAt)
   }
 
@@ -55,13 +55,13 @@ const ProfileScreen = () => {
 
               <div className='w-full'>
                 <h3 className='mb-3 text-lg font-semibold text-gray-800 dark:text-gray-200'>
-                  {t('profileScreen.profileDetails')}
+                  {t('auth:profile.details')}
                 </h3>
 
                 <div className='space-y-4'>
                   <div>
                     <p className='text-sm text-gray-500 dark:text-gray-400'>
-                      {t('profileScreen.createdOn')}
+                      {t('auth:profile.createdOn')}
                     </p>
                     <p className='font-medium text-gray-700 dark:text-gray-300'>
                       {displayCreatedAt()}
@@ -70,7 +70,7 @@ const ProfileScreen = () => {
 
                   <div>
                     <p className='text-sm text-gray-500 dark:text-gray-400'>
-                      {t('profileScreen.lastUpdated')}
+                      {t('auth:profile.lastUpdated')}
                     </p>
                     <p className='font-medium text-gray-700 dark:text-gray-300'>
                       {displayLastUpdated()}

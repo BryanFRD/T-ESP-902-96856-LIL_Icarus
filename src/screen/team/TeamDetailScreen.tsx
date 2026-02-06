@@ -94,9 +94,9 @@ const TeamDetailScreen = () => {
         })
       }),
       {
-        loading: t('loading.deletingTeam'),
-        success: t('success.teamDeleted'),
-        error: t('error.teamDeletionFailed')
+        loading: t('messages:loading.deletingTeam'),
+        success: t('messages:success.teamDeleted'),
+        error: t('messages:error.teamDeletionFailed')
       }
     )
   }
@@ -115,9 +115,9 @@ const TeamDetailScreen = () => {
         )
       }),
       {
-        loading: t('loading.removingMember'),
-        success: t('success.memberRemoved'),
-        error: t('error.memberRemovalFailed')
+        loading: t('messages:loading.removingMember'),
+        success: t('messages:success.memberRemoved'),
+        error: t('messages:error.memberRemovalFailed')
       }
     )
   }
@@ -146,9 +146,9 @@ const TeamDetailScreen = () => {
         )
       }),
       {
-        loading: t('loading.deletingCompany'),
-        success: t('success.companyDeleted'),
-        error: t('error.companyDeletionFailed')
+        loading: t('messages:loading.deletingCompany'),
+        success: t('messages:success.companyDeleted'),
+        error: t('messages:error.companyDeletionFailed')
       }
     )
   }
@@ -167,9 +167,9 @@ const TeamDetailScreen = () => {
         )
       }),
       {
-        loading: t('loading.cancellingInvitation'),
-        success: t('success.invitationCancelled'),
-        error: t('error.invitationCancellationFailed')
+        loading: t('messages:loading.cancellingInvitation'),
+        success: t('messages:success.invitationCancelled'),
+        error: t('messages:error.invitationCancellationFailed')
       }
     )
   }
@@ -190,13 +190,13 @@ const TeamDetailScreen = () => {
             <Users className='h-10 w-10 text-gray-400 dark:text-gray-500' />
           </div>
           <h3 className='mb-2 text-xl font-medium text-gray-900 dark:text-white'>
-            {t('team.teamNotFound')}
+            {t('team:teamNotFound')}
           </h3>
           <p className='mb-6 text-gray-500 dark:text-gray-400'>
-            {t('team.teamNotFoundDescription')}
+            {t('team:teamNotFoundDescription')}
           </p>
           <Button as='link' to={getRoutePath(ROUTES.TEAMS)}>
-            {t('team.backToTeams')}
+            {t('team:backToTeams')}
           </Button>
         </div>
       </div>
@@ -266,7 +266,7 @@ const TeamDetailScreen = () => {
             }}
             icon={{ type: Plus, position: 'left' }}
           >
-            {t('team.addCompany')}
+            {t('team:addCompany')}
           </Button>
         )
       case 'invitations':
@@ -279,7 +279,7 @@ const TeamDetailScreen = () => {
             }}
             icon={{ type: Plus, position: 'left' }}
           >
-            {t('team.createInvitation')}
+            {t('team:createInvitation')}
           </Button>
         )
       default:
@@ -299,7 +299,7 @@ const TeamDetailScreen = () => {
         className='mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
       >
         <ArrowLeft className='h-4 w-4' />
-        {t('team.backToTeams')}
+        {t('team:backToTeams')}
       </Link>
 
       <div className='mb-8 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800'>
@@ -326,7 +326,7 @@ const TeamDetailScreen = () => {
                 variant='ghost'
                 size='sm'
                 onClick={() => setShowMenu(!showMenu)}
-                aria-label={t('actions.more')}
+                aria-label={t('common:actions.more')}
               >
                 <MoreVertical className='h-5 w-5' />
               </Button>
@@ -342,7 +342,7 @@ const TeamDetailScreen = () => {
                     className='flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
                   >
                     <Pencil className='h-4 w-4' />
-                    {t('actions.edit')}
+                    {t('common:actions.edit')}
                   </button>
                   <button
                     type='button'
@@ -353,7 +353,7 @@ const TeamDetailScreen = () => {
                     className='flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-gray-700'
                   >
                     <Trash2 className='h-4 w-4' />
-                    {t('actions.delete')}
+                    {t('common:actions.delete')}
                   </button>
                 </div>
               )}
@@ -374,7 +374,7 @@ const TeamDetailScreen = () => {
       <Modal
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
-        title={t('team.editTeam')}
+        title={t('team:editTeam')}
         size='md'
       >
         <TeamForm
@@ -388,7 +388,7 @@ const TeamDetailScreen = () => {
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        title={t('team.deleteTeam')}
+        title={t('team:deleteTeam')}
         size='sm'
         footer={
           <div className='flex justify-end gap-3'>
@@ -397,7 +397,7 @@ const TeamDetailScreen = () => {
               variant='secondary'
               onClick={() => setShowDeleteModal(false)}
             >
-              {t('actions.cancel')}
+              {t('common:actions.cancel')}
             </Button>
             <Button
               type='button'
@@ -405,13 +405,13 @@ const TeamDetailScreen = () => {
               onClick={handleDeleteTeam}
               isLoading={isDeletingTeam}
             >
-              {t('actions.delete')}
+              {t('common:actions.delete')}
             </Button>
           </div>
         }
       >
         <p className='text-gray-600 dark:text-gray-400'>
-          {t('team.deleteTeamConfirmation', { name: team.name })}
+          {t('team:deleteTeamConfirmation', { name: team.name })}
         </p>
       </Modal>
 
@@ -423,7 +423,7 @@ const TeamDetailScreen = () => {
           setEditingCompany(null)
         }}
         title={
-          editingCompany ? t('team.editCompany') : t('team.addCompanyTitle')
+          editingCompany ? t('team:editCompany') : t('team:addCompanyTitle')
         }
         size='md'
       >
@@ -448,13 +448,13 @@ const TeamDetailScreen = () => {
           setShowInvitationModal(false)
           setCreatedInvitation(null)
         }}
-        title={t('team.createInvitationTitle')}
+        title={t('team:createInvitationTitle')}
         size='md'
       >
         {createdInvitation ? (
           <div className='space-y-4'>
             <p className='text-gray-600 dark:text-gray-400'>
-              {t('team.invitationCreatedSuccess')}
+              {t('team:invitationCreatedSuccess')}
             </p>
             <InvitationLinkCopy invitation={createdInvitation} />
             <div className='flex justify-end pt-4'>
@@ -465,7 +465,7 @@ const TeamDetailScreen = () => {
                   setCreatedInvitation(null)
                 }}
               >
-                {t('actions.done')}
+                {t('common:actions.done')}
               </Button>
             </div>
           </div>

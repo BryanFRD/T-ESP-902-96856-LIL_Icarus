@@ -64,14 +64,14 @@ const ImageCropModal = ({
   const modalFooter = (
     <div className='flex justify-end space-x-3'>
       <Button variant='outline' onClick={onClose}>
-        {t('common.cancel')}
+        {t('common:actions.cancel')}
       </Button>
       <Button
         onClick={handleCropComplete}
         isLoading={isProcessing}
         disabled={!completedCrop}
       >
-        {t('image_crop.apply')}
+        {t('ui:imageCrop.apply')}
       </Button>
     </div>
   )
@@ -80,7 +80,7 @@ const ImageCropModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={t('image_crop.title')}
+      title={t('ui:imageCrop.title')}
       size='xl'
       footer={modalFooter}
       className='max-w-3xl'
@@ -109,13 +109,13 @@ const ImageCropModal = ({
           onClick={() => setRotate(prev => prev + 90)}
         >
           <RotateCw className='mr-2 h-4 w-4' />
-          {t('image_crop.rotate')}
+          {t('ui:imageCrop.rotate')}
         </Button>
       </div>
 
       <div className='mb-4 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20'>
         <p className='text-sm text-blue-700 dark:text-blue-300'>
-          {t('image_crop.instructions')}
+          {t('ui:imageCrop.instructions')}
         </p>
       </div>
 
@@ -131,7 +131,7 @@ const ImageCropModal = ({
           <img
             ref={imgRef}
             src={imageSrc}
-            alt={t('image_crop.preview_alt')}
+            alt={t('ui:imageCrop.preview_alt')}
             style={{
               transform: `scale(${scale}) rotate(${rotate}deg)`,
               maxWidth: '100%',
@@ -147,7 +147,7 @@ const ImageCropModal = ({
       {completedCrop && (
         <div className='mt-6'>
           <h4 className='mb-2 text-sm font-medium text-gray-700 dark:text-gray-300'>
-            {t('image_crop.preview')}
+            {t('ui:imageCrop.preview')}
           </h4>
           <div className='flex justify-center'>
             <div className='h-20 w-20 overflow-hidden rounded-full border-2 border-gray-200 dark:border-gray-600'>

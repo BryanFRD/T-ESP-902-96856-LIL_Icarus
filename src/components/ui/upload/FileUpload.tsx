@@ -86,7 +86,7 @@ const variants: Record<string, FileUploadVariant> = {
     ],
     multiple: true,
     layout: 'compact',
-    placeholder: t('file_upload.chat.placeholder'),
+    placeholder: t('ui:fileUpload.chat.placeholder'),
     icon: <Paperclip className='h-4 w-4' />
   },
   document: {
@@ -100,7 +100,7 @@ const variants: Record<string, FileUploadVariant> = {
     ],
     multiple: true,
     layout: 'full',
-    placeholder: t('file_upload.document.placeholder'),
+    placeholder: t('ui:fileUpload.document.placeholder'),
     icon: <FileText className='h-8 w-8' />
   },
   gallery: {
@@ -109,7 +109,7 @@ const variants: Record<string, FileUploadVariant> = {
     allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
     multiple: true,
     layout: 'grid',
-    placeholder: t('file_upload.gallery.placeholder'),
+    placeholder: t('ui:fileUpload.gallery.placeholder'),
     icon: <ImageIcon className='h-8 w-8' />
   },
   any: {
@@ -118,7 +118,7 @@ const variants: Record<string, FileUploadVariant> = {
     allowedTypes: [],
     multiple: true,
     layout: 'full',
-    placeholder: t('file_upload.any.placeholder'),
+    placeholder: t('ui:fileUpload.any.placeholder'),
     icon: <Upload className='h-8 w-8' />
   }
 }
@@ -149,7 +149,7 @@ const FileUpload = ({
         <div
           {...getRootProps()}
           className='inline-block cursor-pointer'
-          aria-label={t('file_upload.change_avatar')}
+          aria-label={t('ui:fileUpload.change_avatar')}
         >
           <input {...getInputProps()} />
           <AvatarPreview
@@ -211,8 +211,8 @@ const FileUpload = ({
                   )}
                 >
                   {isDragReject
-                    ? t('file_upload.invalid_file')
-                    : t('file_upload.drop_files')}
+                    ? t('ui:fileUpload.invalid_file')
+                    : t('ui:fileUpload.drop_files')}
                 </p>
               )
             })()
@@ -225,14 +225,15 @@ const FileUpload = ({
                 )}
               >
                 {!config.multiple && files.length >= 1
-                  ? t('file_upload.file_selected')
+                  ? t('ui:fileUpload.file_selected')
                   : t(config.placeholder)}
               </p>
               {config.layout !== 'compact' && config.layout !== 'circle' && (
                 <p className='text-sm text-gray-500 dark:text-gray-400'>
                   {config.multiple &&
-                    `${t('file_upload.max_files')} ${config.maxFiles} • `}
-                  {t('file_upload.max_size')} {config.maxSize}MB
+                    `${t('ui:fileUpload.max_files')} ${config.maxFiles} • `}
+                  {t('ui:fileUpload.max_size')} {config.maxSize}
+                  {t('ui:fileUpload.unit.mb')}
                 </p>
               )}
             </>

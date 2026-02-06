@@ -1,0 +1,68 @@
+{
+  "access": {
+    "message": "To access this audit, please enter your password below.",
+    "submit": "Grant Access",
+    "title": "Audit security access"
+  },
+  "accessGranted": "Access granted",
+  "company": {
+    "invalid": "Invalid company"
+  },
+  "create": {
+    "auditLabel": "Audit name",
+    "auditPlaceholder": "Enter the audit name",
+    "companyLabel": "Company",
+    "companyPlaceholder": "Select a company",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Enter a description for the audit",
+    "endDateLabel": "End date",
+    "endDatePlaceholder": "Select an end date",
+    "submit": "Create audit",
+    "teamLabel": "Team",
+    "teamPlaceholder": "Select a team"
+  },
+  "createAudit": "Create an audit",
+  "createAuditFormTitle": "New Audit Details",
+  "created": "Audit created successfully.",
+  "creating": "Creating audit...",
+  "date": {
+    "invalid": "Invalid date"
+  },
+  "description": {
+    "max": "Description must be at most 500 characters"
+  },
+  "details": {
+    "company": "Company",
+    "description": "Description",
+    "endDate": "End Date",
+    "noDescription": "No description provided",
+    "notFound": "Audit not found",
+    "status": "Status"
+  },
+  "endDate": "End Date",
+  "list": {
+    "emptyDescription": "Create your first audit to start tracking security assessments.",
+    "emptyTitle": "No audits found",
+    "error": "Failed to load audits. Please try again later."
+  },
+  "name": {
+    "max": "Name must be at most 100 characters",
+    "min": "Name must be at least 3 characters"
+  },
+  "password": {
+    "label": "Password",
+    "placeholder": "Enter your password",
+    "required": "Password is required"
+  },
+  "status": {
+    "active": "Active Audit",
+    "archived": "Archived Audit",
+    "expired": "Expired Audit"
+  },
+  "subtitle": "Manage and view your security audits here.",
+  "team": {
+    "invalid": "Invalid team"
+  },
+  "title": "My audits",
+  "verifying": "Verifying..."
+}

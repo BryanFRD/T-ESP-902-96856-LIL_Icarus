@@ -47,10 +47,10 @@ const JoinTeamScreen = () => {
               <Loader2 className='h-10 w-10 animate-spin text-orange-500' />
             </div>
             <h2 className='mb-2 text-xl font-bold text-gray-900 dark:text-white'>
-              {t('team.joiningTeam')}
+              {t('team:joiningTeam')}
             </h2>
             <p className='text-gray-500 dark:text-gray-400'>
-              {t('team.joiningTeamDescription')}
+              {t('team:joiningTeamDescription')}
             </p>
           </>
         )}
@@ -61,13 +61,13 @@ const JoinTeamScreen = () => {
               <CheckCircle className='h-10 w-10 text-green-500' />
             </div>
             <h2 className='mb-2 text-xl font-bold text-gray-900 dark:text-white'>
-              {t('team.joinedTeamSuccess')}
+              {t('team:joinedTeamSuccess')}
             </h2>
             <p className='mb-6 text-gray-500 dark:text-gray-400'>
-              {t('team.joinedTeamSuccessDescription')}
+              {t('team:joinedTeamSuccessDescription')}
             </p>
             <Button onClick={handleGoToTeams} fullWidth>
-              {t('team.backToTeams')}
+              {t('team:backToTeams')}
             </Button>
           </>
         )}
@@ -78,15 +78,15 @@ const JoinTeamScreen = () => {
               <AlertCircle className='h-10 w-10 text-red-500' />
             </div>
             <h2 className='mb-2 text-xl font-bold text-gray-900 dark:text-white'>
-              {t('team.joinTeamError')}
+              {t('team:joinTeamError')}
             </h2>
             <p className='mb-6 text-gray-500 dark:text-gray-400'>
               {hasInvalidToken
-                ? t('team.invalidInvitationToken')
-                : t('team.joinTeamErrorDescription')}
+                ? t('team:invalidInvitationToken')
+                : t('team:joinTeamErrorDescription')}
             </p>
             <Button variant='secondary' onClick={handleGoToTeams} fullWidth>
-              {t('team.backToTeams')}
+              {t('team:backToTeams')}
             </Button>
           </>
         )}

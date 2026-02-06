@@ -1,3 +1,17 @@
+## [1.30.1](https://git.icarus-cyber.fr/icarus/web/compare/v1.30.0...v1.30.1) (2026-02-06)
+
+
+### Bug Fixes
+
+* **i18n:** update member roles and improve translation keys in common and team JSON files ([a8f6741](https://git.icarus-cyber.fr/icarus/web/commit/a8f674111c0f9c2da3a9386a50c062ee10f57662))
+
+# [1.30.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.29.0...v1.30.0) (2026-02-06)
+
+
+### Features
+
+* **AP-111:** restructure translations and add i18next-cli ([8d16aa8](https://git.icarus-cyber.fr/icarus/web/commit/8d16aa8c4290e1a810e87b2ec8d99de0a4db6404))
+
 # [1.29.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.28.1...v1.29.0) (2026-01-30)
 
 

@@ -33,8 +33,8 @@ const AuditCard = ({ audit }: AuditCardProps) => {
           }`}
         >
           {audit.isArchived
-            ? t('audit.status.archived')
-            : t('audit.status.active')}
+            ? t('audit:status.archived')
+            : t('audit:status.active')}
         </span>
       </div>
 
@@ -56,7 +56,7 @@ const AuditCard = ({ audit }: AuditCardProps) => {
 
       <div className='mt-auto flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800'>
         <div className='flex items-center gap-4 text-xs text-gray-500'>
-          <div className='flex items-center gap-1.5' title={t('audit.endDate')}>
+          <div className='flex items-center gap-1.5' title={t('audit:endDate')}>
             <Calendar size={14} />
             <span>
               {format(new Date(audit.endDate), 'dd MMM yyyy', { locale: fr })}
