@@ -23,7 +23,7 @@ const ConfirmEmailScreen = () => {
   useEffect(() => {
     if (isNull(token) || !validToken(token)) {
       setStatus('error')
-      setErrorMessage(t('error.invalidToken'))
+      setErrorMessage(t('messages:error.invalidToken'))
       return
     }
 
@@ -54,10 +54,10 @@ const ConfirmEmailScreen = () => {
                   <Loader2 className='text-primary-600 dark:text-primary-400 h-16 w-16 animate-spin' />
                 </div>
                 <h1 className='mb-2 text-2xl font-bold text-gray-900 dark:text-white'>
-                  {t('confirmEmail.verifying')}
+                  {t('auth:email.confirmverifying')}
                 </h1>
                 <p className='text-sm text-gray-600 dark:text-gray-400'>
-                  {t('confirmEmail.pleaseWait')}
+                  {t('auth:email.confirmpleaseWait')}
                 </p>
               </>
             )}
@@ -68,10 +68,10 @@ const ConfirmEmailScreen = () => {
                   <CheckCircle className='h-16 w-16 text-green-600 dark:text-green-400' />
                 </div>
                 <h1 className='mb-2 text-2xl font-bold text-gray-900 dark:text-white'>
-                  {t('confirmEmail.success')}
+                  {t('auth:email.confirmsuccess')}
                 </h1>
                 <p className='mb-2 text-sm text-gray-600 dark:text-gray-400'>
-                  {t('confirmEmail.successMessage')}
+                  {t('auth:email.confirmsuccessMessage')}
                 </p>
               </>
             )}
@@ -82,10 +82,10 @@ const ConfirmEmailScreen = () => {
                   <XCircle className='h-16 w-16 text-red-600 dark:text-red-400' />
                 </div>
                 <h1 className='mb-2 text-2xl font-bold text-gray-900 dark:text-white'>
-                  {t('confirmEmail.error')}
+                  {t('auth:email.confirmerror')}
                 </h1>
                 <p className='mb-2 text-sm text-gray-600 dark:text-gray-400'>
-                  {errorMessage || t('confirmEmail.errorMessage')}
+                  {errorMessage || t('auth:email.confirmerrorMessage')}
                 </p>
               </>
             )}

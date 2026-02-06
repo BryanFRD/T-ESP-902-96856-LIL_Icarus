@@ -12,7 +12,7 @@ const ThemeToggle = () => {
       onClick={toggleTheme}
       className='relative flex w-full items-center justify-between gap-2 px-4 py-3 transition-colors duration-300 hover:cursor-pointer hover:bg-gray-200/50 dark:hover:bg-gray-800/50'
     >
-      <span>{t('theme')}</span>
+      <span>{t('common:theme')}</span>
       <DarkModeIcon className='h-6' isDark={theme === 'dark'} />
     </button>
   )

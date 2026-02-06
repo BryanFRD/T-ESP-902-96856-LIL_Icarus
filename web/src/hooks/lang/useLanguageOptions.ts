@@ -5,8 +5,8 @@ import type { Language } from '@/types/global.ts'
 export const useLanguageOptions = () => {
   const { t } = useTranslation()
   return [
-    { code: 'en', label: t('languages.english') },
-    { code: 'fr', label: t('languages.french') }
+    { code: 'en', label: t('common:languages.english') },
+    { code: 'fr', label: t('common:languages.french') }
   ] as { code: Language; label: string }[]
 }
 

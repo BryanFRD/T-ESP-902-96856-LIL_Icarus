@@ -10,7 +10,7 @@ const RouteHead = () => {
 
   useEffect(() => {
     const currentRoute = routes.find(route => route.path === location.pathname)
-    document.title = t(currentRoute?.routeKey ?? 'app.name')
+    document.title = t(currentRoute?.routeKey ?? 'app:name')
   }, [location.pathname, t])
 
   return <></>

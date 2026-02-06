@@ -12,11 +12,11 @@ const LoginHeader = () => {
       </div>
 
       <h1 className='dark:from-blue text-3xl font-bold text-gray-900 transition-all duration-300 dark:text-white'>
-        {t('welcomeBack')}
+        {t('app:welcomeBack')}
       </h1>
 
       <p className='mt-2 text-gray-900 transition-all duration-300 dark:text-gray-400'>
-        {t('signInToDashboard')}
+        {t('auth:signIn.title')}
       </p>
     </div>
   )

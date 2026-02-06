@@ -13,42 +13,42 @@ const BrandingSide = () => {
       <div className='relative z-10'>
         <div className='mb-8 flex items-center gap-3'>
           <Logo fill={'#ff6900'} className='h-16 w-16' />
-          <h1 className='text-3xl font-bold'>{t('app.name')}</h1>
+          <h1 className='text-3xl font-bold'>{t('app:name')}</h1>
         </div>
         <h2 className='mb-4 text-4xl leading-tight font-bold'>
-          {t('branding.advancedPenetration')}
+          {t('app:branding.advancedPenetration')}
           <br />
-          {t('branding.testingPlatform')}
+          {t('app:branding.testingPlatform')}
         </h2>
         <p className='text-lg text-blue-900 transition-all duration-300 dark:text-blue-100'>
-          {t('branding.secureInfra')}
+          {t('app:branding.secureInfra')}
         </p>
       </div>
 
       <div className='relative z-10 space-y-6'>
         <FeatureItem
           icon={Zap}
-          title={t('branding.realtimeScanning')}
-          description={t('branding.realtimeScanningDesc')}
+          title={t('app:branding.realtimeScanning')}
+          description={t('app:branding.realtimeScanningDesc')}
         />
         <FeatureItem
           icon={Lock}
-          title={t('branding.enterpriseSecurity')}
-          description={t('branding.enterpriseSecurityDesc')}
+          title={t('app:branding.enterpriseSecurity')}
+          description={t('app:branding.enterpriseSecurityDesc')}
         />
         <FeatureItem
           icon={Shield}
-          title={t('branding.advancedReporting')}
-          description={t('branding.advancedReportingDesc')}
+          title={t('app:branding.advancedReporting')}
+          description={t('app:branding.advancedReportingDesc')}
         />
       </div>
 
       <div className='relative z-10'>
         <blockquote className='text-lg text-gray-800 italic transition-all duration-300 dark:text-white/90'>
-          {t('branding.securityQuote')}
+          {t('app:branding.securityQuote')}
         </blockquote>
         <cite className='mt-2 block text-sm text-blue-700 transition-all duration-300 dark:text-blue-200'>
-          — {t('branding.securityExpert')}
+          — {t('app:branding.securityExpert')}
         </cite>
       </div>
     </div>

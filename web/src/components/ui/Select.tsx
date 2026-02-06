@@ -40,7 +40,7 @@ export type SelectProps = {
 
 const Select = ({
   label,
-  placeholder = t('select.placeholder'),
+  placeholder = t('ui:select.placeholder'),
   options = [],
   value,
   onChange,
@@ -53,7 +53,7 @@ const Select = ({
   error,
   icon: Icon,
   className,
-  noOptionsMessage = t('select.noOptions')
+  noOptionsMessage = t('ui:select.noOptions')
 }: SelectProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -226,7 +226,7 @@ const Select = ({
     if (loading && asyncOptions.length === 0) {
       return (
         <div className='px-4 py-3 text-center text-sm text-gray-500 italic'>
-          Chargement...
+          {t('common:loading')}
         </div>
       )
     }
@@ -248,7 +248,7 @@ const Select = ({
             className='flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left text-sm font-medium text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-gray-100 dark:hover:bg-gray-800 dark:focus:bg-gray-800'
           >
             <Checkbox checked={isAllSelected} onCheckedChange={() => {}} />
-            <span>{t('select.selectAll', 'Tout sélectionner')}</span>
+            <span>{t('ui:select.selectAll', 'Tout sélectionner')}</span>
           </button>
         )}
 
@@ -357,7 +357,7 @@ const Select = ({
                     ref={searchInputRef}
                     type='text'
                     className='w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100'
-                    placeholder={t('select.search')}
+                    placeholder={t('ui:select.search')}
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                     onClick={e => e.stopPropagation()}

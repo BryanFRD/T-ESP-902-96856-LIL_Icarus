@@ -12,12 +12,12 @@ const RegisterHeader = () => {
       </div>
 
       <h1 className='dark:from-blue text-3xl font-bold text-gray-900 transition-all duration-300 dark:text-white'>
-        {t('createAccount')}
+        {t('auth:signUp.createAccount')}
       </h1>
 
       {/* Subtitle with light and dark text colors */}
       <p className='mt-2 text-gray-900 transition-all duration-300 dark:text-gray-400'>
-        {t('registerToContinue')}
+        {t('auth:signUp.subtitle')}
       </p>
     </div>
   )

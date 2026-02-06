@@ -26,7 +26,7 @@ const LanguageSelector = () => {
         onClick={toggleDropdown}
         className='flex w-full cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-300 transition-all duration-300 hover:bg-gray-800/50 hover:text-white'
       >
-        <span>{t('language')}</span>
+        <span>{t('common:language')}</span>
         <span className='ml-3 flex items-center gap-2'>
           <ReactCountryFlag
             countryCode={currentLanguage === 'en' ? 'US' : 'FR'}

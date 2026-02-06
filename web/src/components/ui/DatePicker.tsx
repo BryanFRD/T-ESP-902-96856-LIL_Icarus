@@ -60,13 +60,13 @@ const DatePicker = ({
 
   const daysOfWeek = useMemo(
     () => [
-      t('common.days.mon'),
-      t('common.days.tue'),
-      t('common.days.wed'),
-      t('common.days.thu'),
-      t('common.days.fri'),
-      t('common.days.sat'),
-      t('common.days.sun')
+      t('common:days.mon'),
+      t('common:days.tue'),
+      t('common:days.wed'),
+      t('common:days.thu'),
+      t('common:days.fri'),
+      t('common:days.sat'),
+      t('common:days.sun')
     ],
     [t]
   )
@@ -228,7 +228,7 @@ const DatePicker = ({
     return 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
   }
 
-  const finalPlaceholder = placeholder || t('common.selectDate')
+  const finalPlaceholder = placeholder || t('common:selectDate')
 
   const displayFormat = includeTime ? 'dd MMMM yyyy HH:mm' : 'dd MMMM yyyy'
 
@@ -286,7 +286,7 @@ const DatePicker = ({
                 type='button'
                 onClick={handlePreviousYear}
                 className='flex h-8 w-8 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                aria-label={t('common.previousYear')}
+                aria-label={t('common:time.previousYear')}
               >
                 <ChevronLeft className='h-4 w-4' />
                 <ChevronLeft className='-ml-3 h-4 w-4' />
@@ -296,7 +296,7 @@ const DatePicker = ({
                 type='button'
                 onClick={handlePreviousMonth}
                 className='flex h-8 w-8 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                aria-label={t('common.previousMonth')}
+                aria-label={t('common:time.previousMonth')}
               >
                 <ChevronLeft className='h-4 w-4' />
               </button>
@@ -309,7 +309,7 @@ const DatePicker = ({
                 type='button'
                 onClick={handleNextMonth}
                 className='flex h-8 w-8 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                aria-label={t('common.nextMonth')}
+                aria-label={t('common:time.nextMonth')}
               >
                 <ChevronRight className='h-4 w-4' />
               </button>
@@ -318,7 +318,7 @@ const DatePicker = ({
                 type='button'
                 onClick={handleNextYear}
                 className='flex h-8 w-8 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                aria-label={t('common.nextYear')}
+                aria-label={t('common:time.nextYear')}
               >
                 <ChevronRight className='h-4 w-4' />
                 <ChevronRight className='-ml-3 h-4 w-4' />
@@ -376,7 +376,7 @@ const DatePicker = ({
                 <div className='flex items-center justify-between gap-2'>
                   <div className='flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
                     <Clock className='h-4 w-4' />
-                    <span>{t('common.time', 'Heure')}</span>
+                    <span>{t('common:time.label', 'Heure')}</span>
                   </div>
                   <div className='flex items-center gap-1'>
                     <input

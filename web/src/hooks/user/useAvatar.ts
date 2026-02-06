@@ -26,7 +26,7 @@ export const useAvatar = () => {
     if (files.length === 0 || !user) return
     const file = files[0]
     if (!file.type.startsWith('image/')) {
-      toast.error(t('error.invalidImageType'))
+      toast.error(t('messages:error.invalidImageType'))
       return
     }
     setSelectedImage({ file, src: URL.createObjectURL(file) })
@@ -39,8 +39,8 @@ export const useAvatar = () => {
     setLocalAvatarUrl(previewUrl)
     setFileUploadKey(Date.now())
     await toast.promise(uploadAvatar({ avatar: croppedFile }), {
-      loading: t('loading.uploadingAvatar'),
-      success: t('success.avatarUploaded'),
+      loading: t('messages:loading.uploadingAvatar'),
+      success: t('messages:success.avatarUploaded'),
       error: (err: ApiError) => t(err.errorKey)
     })
     if (selectedImage?.src) URL.revokeObjectURL(selectedImage.src)

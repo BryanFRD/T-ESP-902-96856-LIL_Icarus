@@ -66,9 +66,9 @@ const MemberRoleModal = ({
         )
       }),
       {
-        loading: t('loading.savingChanges'),
-        success: t('success.memberRoleUpdated'),
-        error: t('error.memberRoleUpdateFailed')
+        loading: t('messages:loading.savingChanges'),
+        success: t('messages:success.memberRoleUpdated'),
+        error: t('messages:error.memberRoleUpdateFailed')
       }
     )
   }
@@ -78,17 +78,17 @@ const MemberRoleModal = ({
   const displayName =
     member.firstName && member.lastName
       ? `${member.firstName} ${member.lastName}`
-      : member.username || member.email || t('team.unknownMember')
+      : member.username || member.email || t('team:unknownMember')
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={t('team.changeRoleTitle')}
+      title={t('team:changeRoleTitle')}
       footer={
         <div className='flex justify-end gap-3'>
           <Button type='button' variant='secondary' onClick={onClose}>
-            {t('actions.cancel')}
+            {t('common:actions.cancel')}
           </Button>
           <Button
             type='button'
@@ -96,14 +96,14 @@ const MemberRoleModal = ({
             isLoading={isPending}
             disabled={!selectedRole || selectedRole === member.teamRole}
           >
-            {t('actions.save')}
+            {t('common:actions.save')}
           </Button>
         </div>
       }
     >
       <div className='space-y-4'>
         <p className='text-sm text-gray-600 dark:text-gray-400'>
-          {t('team.changeRoleDescription', { name: displayName })}
+          {t('team:changeRoleDescription', { name: displayName })}
         </p>
 
         <div className='space-y-2'>

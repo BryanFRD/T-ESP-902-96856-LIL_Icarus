@@ -19,7 +19,7 @@ const InvitationLinkCopy = ({ invitation }: InvitationLinkCopyProps) => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(inviteLink)
     setCopied(true)
-    toast.success(t('team.invitationLinkCopied'))
+    toast.success(t('team:invitationLinkCopied'))
 
     setTimeout(() => {
       setCopied(false)
@@ -30,7 +30,7 @@ const InvitationLinkCopy = ({ invitation }: InvitationLinkCopyProps) => {
     <div className='space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800'>
       <div className='flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300'>
         <Link className='size-4' />
-        {t('team.invitationLink')}
+        {t('team:invitationLink')}
       </div>
 
       <div className='flex items-center gap-2'>
@@ -55,7 +55,7 @@ const InvitationLinkCopy = ({ invitation }: InvitationLinkCopyProps) => {
       </div>
 
       <p className='text-xs text-gray-500 dark:text-gray-400'>
-        {t('team.invitationLinkHint')}
+        {t('team:invitationLinkHint')}
       </p>
     </div>
   )

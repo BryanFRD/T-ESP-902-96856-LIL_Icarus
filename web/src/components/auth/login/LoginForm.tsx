@@ -39,8 +39,8 @@ const LoginForm = () => {
     setApiError(null)
     try {
       await toast.promise(login(data), {
-        loading: t('loading.login'),
-        success: () => t('success.login'),
+        loading: t('messages:loading.login'),
+        success: () => t('messages:success.login'),
         error: (err: ApiError) => t(err.errorKey)
       })
     } finally {
@@ -57,22 +57,22 @@ const LoginForm = () => {
         className='flex flex-col space-y-6 rounded-lg border border-gray-200 bg-white p-8 transition-all duration-300 dark:border-none dark:bg-gray-900'
       >
         <InputField
-          label={t('inputField.email')}
+          label={t('auth:fields.email')}
           type='email'
           name='email'
           icon={Mail}
-          placeholder={t('inputField.emailPlaceholder')}
+          placeholder={t('auth:fields.emailPlaceholder')}
           register={register}
           error={errors.email?.message}
           autoComplete='email'
         />
 
         <InputField
-          label={t('inputField.password')}
+          label={t('auth:fields.password')}
           type='password'
           name='password'
           icon={Lock}
-          placeholder={t('inputField.passwordPlaceholder')}
+          placeholder={t('auth:fields.passwordPlaceholder')}
           register={register}
           error={errors.password?.message}
           autoComplete='current-password'
@@ -92,27 +92,27 @@ const LoginForm = () => {
           className={'self-end'}
           withBorder={false}
         >
-          {t('inputField.forgotPassword')}
+          {t('auth:forgotPassword')}
         </Button>
 
         <Button
           type='submit'
           isLoading={isLoading}
-          loadingText={t('inputField.signingIn')}
+          loadingText={t('auth:signingIn')}
           className='w-full bg-orange-600 text-white hover:bg-orange-700 dark:bg-orange-500 dark:text-white dark:hover:bg-orange-600'
         >
-          {t('inputField.signIn')}
+          {t('auth:signInHere')}
         </Button>
       </form>
 
       <div className='mt-8 text-center'>
         <p className='flex items-center justify-center gap-1 text-gray-600 transition-all duration-300 dark:text-gray-400'>
-          {t('inputField.noAccount')}
+          {t('auth:noAccount')}
           <Link
             to='/register'
             className='font-semibold text-orange-600 transition-colors hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300'
           >
-            {t('inputField.signUpHere')}
+            {t('auth:signUpHere')}
           </Link>
         </p>
       </div>

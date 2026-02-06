@@ -39,8 +39,8 @@ const AuditAccessModal = ({ isOpen }: AuditAccessModalProps) => {
 
   async function onSubmit(data: VerifyAuditAccessSchemaType) {
     await toast.promise(verifyAccess(data.password), {
-      loading: t('audit.verifying'),
-      success: t('audit.accessGranted'),
+      loading: t('audit:verifying'),
+      success: t('audit:accessGranted'),
       error: (err: ApiError) => t(err.errorKey || 'audit.password.invalid')
     })
   }
@@ -48,24 +48,24 @@ const AuditAccessModal = ({ isOpen }: AuditAccessModalProps) => {
   return (
     <Modal
       size='md'
-      title={t('audit.access.title')}
+      title={t('audit:access.title')}
       isOpen={isOpen}
       onClose={handleClose}
-      closeButtonLabel={t('common.cancel')}
+      closeButtonLabel={t('common:actions.cancel')}
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
         className='flex flex-col gap-6 p-2'
       >
         <div className='text-center text-gray-600 dark:text-gray-300'>
-          <p>{t('audit.access.message')}</p>
+          <p>{t('audit:access.message')}</p>
         </div>
 
         <InputField
-          label={t('audit.password.label')}
+          label={t('audit:password.label')}
           type='password'
           icon={Lock}
-          placeholder={t('audit.password.placeholder')}
+          placeholder={t('audit:password.placeholder')}
           register={register}
           name='password'
           error={errors.password?.message}
@@ -73,10 +73,10 @@ const AuditAccessModal = ({ isOpen }: AuditAccessModalProps) => {
 
         <div className='mt-2 flex justify-end gap-2'>
           <Button type='button' variant='ghost' onClick={handleClose}>
-            {t('common.cancel')}
+            {t('common:actions.cancel')}
           </Button>
           <Button type='submit' variant='primary' disabled={isSubmitting}>
-            {t('audit.access.submit')}
+            {t('audit:access.submit')}
           </Button>
         </div>
       </form>

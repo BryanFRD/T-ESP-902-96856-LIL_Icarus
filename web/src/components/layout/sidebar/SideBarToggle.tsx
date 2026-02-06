@@ -15,7 +15,7 @@ const SidebarToggle = ({
     <Button
       onClick={onToggle}
       className={`justify-start ${className}`}
-      aria-label={isOpen ? t('sidebar.closeMenu') : t('sidebar.openMenu')}
+      aria-label={isOpen ? t('ui:sidebar.closeMenu') : t('ui:sidebar.openMenu')}
       variant='ghost'
       size='lg'
       fullWidth
@@ -23,7 +23,7 @@ const SidebarToggle = ({
       <SidebarToggleIcon isOpen={isOpen} size={20} />
       {isOpen && (
         <span className='text-sm whitespace-nowrap'>
-          {t('sidebar.closeMenu')}
+          {t('ui:sidebar.closeMenu')}
         </span>
       )}
     </Button>

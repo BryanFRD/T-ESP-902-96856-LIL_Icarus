@@ -41,17 +41,17 @@ const RegisterStepForm = () => {
   const steps = [
     {
       number: 1,
-      title: t('register.step.personal'),
+      title: t('auth:signUp.step.personal'),
       icon: User
     },
     {
       number: 2,
-      title: t('register.step.account'),
+      title: t('auth:signUp.step.account'),
       icon: Mail
     },
     {
       number: 3,
-      title: t('register.step.security'),
+      title: t('auth:signUp.step.security'),
       icon: Lock
     }
   ]
@@ -88,8 +88,8 @@ const RegisterStepForm = () => {
           password: data.password
         }),
         {
-          loading: t('loading.register'),
-          success: () => t('success.register'),
+          loading: t('messages:loading.register'),
+          success: () => t('messages:success.register'),
           error: (err: ApiError) => t(err.errorKey)
         }
       )
@@ -113,22 +113,22 @@ const RegisterStepForm = () => {
         {currentStep === 1 && (
           <div className='animate-in fade-in slide-in-from-right-4 space-y-6 duration-300'>
             <InputField
-              label={t('inputField.firstName')}
+              label={t('auth:fields.firstName')}
               type='text'
               name='firstName'
               icon={User}
-              placeholder={t('inputField.firstNamePlaceholder')}
+              placeholder={t('auth:fields.firstNamePlaceholder')}
               register={register}
               error={errors.firstName?.message}
               autoComplete='given-name'
             />
 
             <InputField
-              label={t('inputField.lastName')}
+              label={t('auth:fields.lastName')}
               type='text'
               name='lastName'
               icon={User}
-              placeholder={t('inputField.lastNamePlaceholder')}
+              placeholder={t('auth:fields.lastNamePlaceholder')}
               register={register}
               error={errors.lastName?.message}
               autoComplete='family-name'
@@ -139,22 +139,22 @@ const RegisterStepForm = () => {
         {currentStep === 2 && (
           <div className='animate-in fade-in slide-in-from-right-4 space-y-6 duration-300'>
             <InputField
-              label={t('inputField.username')}
+              label={t('auth:fields.username')}
               type='text'
               name='username'
               icon={User}
-              placeholder={t('inputField.usernamePlaceholder')}
+              placeholder={t('auth:fields.usernamePlaceholder')}
               register={register}
               error={errors.username?.message}
               autoComplete='username'
             />
 
             <InputField
-              label={t('inputField.email')}
+              label={t('auth:fields.email')}
               type='email'
               name='email'
               icon={Mail}
-              placeholder={t('inputField.emailPlaceholder')}
+              placeholder={t('auth:fields.emailPlaceholder')}
               register={register}
               error={errors.email?.message}
               autoComplete='email'
@@ -165,22 +165,22 @@ const RegisterStepForm = () => {
         {currentStep === 3 && (
           <div className='animate-in fade-in slide-in-from-right-4 space-y-6 duration-300'>
             <InputField
-              label={t('inputField.password')}
+              label={t('auth:fields.password')}
               type='password'
               name='password'
               icon={Lock}
-              placeholder={t('inputField.passwordPlaceholder')}
+              placeholder={t('auth:fields.passwordPlaceholder')}
               register={register}
               error={errors.password?.message}
               autoComplete='new-password'
             />
 
             <InputField
-              label={t('inputField.confirmPassword')}
+              label={t('auth:fields.confirmPassword')}
               type='password'
               name='confirmPassword'
               icon={Lock}
-              placeholder={t('inputField.confirmPasswordPlaceholder')}
+              placeholder={t('auth:fields.confirmPasswordPlaceholder')}
               register={register}
               error={errors.confirmPassword?.message}
               autoComplete='new-password'
@@ -198,7 +198,7 @@ const RegisterStepForm = () => {
               size='sm'
               className='px-6'
             >
-              {t('actions.previous')}
+              {t('common:actions.previous')}
             </Button>
           ) : (
             <div />
@@ -213,18 +213,18 @@ const RegisterStepForm = () => {
               size='sm'
               className='px-6'
             >
-              {t('actions.next')}
+              {t('common:actions.next')}
             </Button>
           ) : (
             <Button
               type='submit'
               variant='primary'
               isLoading={isLoading}
-              loadingText={t('inputField.signingUp')}
+              loadingText={t('auth:signingUp')}
               size='sm'
               className='px-6'
             >
-              {t('inputField.signUp')}
+              {t('auth:signUp')}
             </Button>
           )}
         </div>
@@ -232,12 +232,12 @@ const RegisterStepForm = () => {
 
       <div className='mt-8 text-center'>
         <p className='flex items-center justify-center gap-1 text-gray-600 transition-all duration-300 dark:text-gray-400'>
-          {t('inputField.haveAccount')}
+          {t('auth:haveAccount')}
           <Link
             to='/'
             className='font-semibold text-orange-600 transition-colors hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300'
           >
-            {t('inputField.signInHere')}
+            {t('auth:signInHere')}
           </Link>
         </p>
       </div>

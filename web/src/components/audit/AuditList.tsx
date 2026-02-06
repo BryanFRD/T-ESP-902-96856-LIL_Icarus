@@ -27,7 +27,7 @@ const AuditList = () => {
     return (
       <div className='flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-red-200 bg-red-50 text-center dark:border-red-900/50 dark:bg-red-900/20'>
         <p className='text-red-600 dark:text-red-400'>
-          {t('audit.list.error')}
+          {t('audit:list.error')}
         </p>
       </div>
     )
@@ -40,13 +40,10 @@ const AuditList = () => {
           <SearchX className='h-8 w-8 text-gray-400' />
         </div>
         <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
-          {t('audit.list.emptyTitle', 'Aucun audit trouvé')}
+          {t('audit:list.emptyTitle', 'Aucun audit trouvé')}
         </h3>
         <p className='mb-6 max-w-sm text-sm text-gray-500'>
-          {t(
-            'audit.list.emptyDescription',
-            'Commencez par créer votre premier audit pour analyser vos projets.'
-          )}
+          {t('audit:list.emptyDescription')}
         </p>
         <Button
           as='link'
@@ -54,7 +51,7 @@ const AuditList = () => {
           variant='primary'
         >
           <Plus className='mr-2 h-4 w-4' />
-          {t('audit.createAudit')}
+          {t('audit:createAudit')}
         </Button>
       </div>
     )

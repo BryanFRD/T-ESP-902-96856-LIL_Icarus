@@ -24,17 +24,17 @@ const TeamsScreen = () => {
       <div className='mb-8 flex items-center justify-between'>
         <div>
           <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
-            {t('team.title')}
+            {t('team:title')}
           </h1>
           <p className='mt-1 text-gray-500 dark:text-gray-400'>
-            {t('team.subtitle')}
+            {t('team:subtitle')}
           </p>
         </div>
         <Button
           onClick={() => setShowCreateModal(true)}
           icon={{ type: Plus, position: 'left' }}
         >
-          {t('team.createTeam')}
+          {t('team:createTeam')}
         </Button>
       </div>
 
@@ -54,16 +54,16 @@ const TeamsScreen = () => {
             <Users className='h-10 w-10 text-gray-400 dark:text-gray-500' />
           </div>
           <h3 className='mb-2 text-xl font-medium text-gray-900 dark:text-white'>
-            {t('team.noTeams')}
+            {t('team:noTeams')}
           </h3>
           <p className='mb-6 max-w-sm text-gray-500 dark:text-gray-400'>
-            {t('team.noTeamsDescription')}
+            {t('team:noTeamsDescription')}
           </p>
           <Button
             onClick={() => setShowCreateModal(true)}
             icon={{ type: Plus, position: 'left' }}
           >
-            {t('team.createFirstTeam')}
+            {t('team:createFirstTeam')}
           </Button>
         </div>
       )}
@@ -71,7 +71,7 @@ const TeamsScreen = () => {
       <Modal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title={t('team.createTeamTitle')}
+        title={t('team:createTeamTitle')}
         size='md'
       >
         <TeamForm

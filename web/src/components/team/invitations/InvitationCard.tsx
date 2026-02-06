@@ -33,20 +33,20 @@ const InvitationCard = ({
   const copyInviteLink = () => {
     const link = `${window.location.origin}/teams/join/${invitation.token}`
     navigator.clipboard.writeText(link)
-    toast.success(t('team.invitationLinkCopied'))
+    toast.success(t('team:invitationLinkCopied'))
   }
 
   const getStatusText = () => {
     if (invitation.isCanceled)
-      return t('team.invitationCanceledAt', {
+      return t('team:invitationCanceledAt', {
         date: dateLong(invitation.updatedAt)
       })
-    if (isFullyUsed) return t('team.invitationFullyUsed')
-    if (isExpired) return t('team.invitationExpired')
+    if (isFullyUsed) return t('team:invitationFullyUsed')
+    if (isExpired) return t('team:invitationExpired')
     if (invitation.expiresAt) {
-      return t('team.expiresAtDate', { date: dateLong(invitation.expiresAt) })
+      return t('team:expiresAtDate', { date: dateLong(invitation.expiresAt) })
     }
-    return t('team.noExpiration')
+    return t('team:noExpiration')
   }
 
   return (
@@ -91,7 +91,7 @@ const InvitationCard = ({
               )}
             >
               <Users className='size-3.5' />
-              {t('team.usageCount', {
+              {t('team:usageCount', {
                 used: invitation.usedCount,
                 max: invitation.maxUses
               })}
@@ -117,7 +117,7 @@ const InvitationCard = ({
               variant='ghost'
               size='sm'
               onClick={copyInviteLink}
-              aria-label={t('team.copyInvitationLink')}
+              aria-label={t('team:copyInvitationLink')}
             >
               <Copy className='size-4' />
             </Button>
@@ -128,7 +128,7 @@ const InvitationCard = ({
               variant='ghost'
               size='sm'
               onClick={() => onCancel?.(invitation)}
-              aria-label={t('team.cancelInvitation')}
+              aria-label={t('team:cancelInvitation')}
               className='text-red-500 hover:text-red-600 dark:text-red-400'
             >
               <Trash2 className='size-4' />

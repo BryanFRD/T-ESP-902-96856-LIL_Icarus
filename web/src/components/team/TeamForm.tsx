@@ -64,9 +64,9 @@ const TeamForm = ({ team, onSuccess, onCancel }: TeamFormProps) => {
           )
         }),
         {
-          loading: t('loading.savingChanges'),
-          success: t('success.teamUpdated'),
-          error: t('error.teamUpdateFailed')
+          loading: t('messages:loading.savingChanges'),
+          success: t('messages:success.teamUpdated'),
+          error: t('messages:error.teamUpdateFailed')
         }
       )
     } else {
@@ -82,9 +82,9 @@ const TeamForm = ({ team, onSuccess, onCancel }: TeamFormProps) => {
           })
         }),
         {
-          loading: t('loading.creatingTeam'),
-          success: t('success.teamCreated'),
-          error: t('error.teamCreationFailed')
+          loading: t('messages:loading.creatingTeam'),
+          success: t('messages:success.teamCreated'),
+          error: t('messages:error.teamCreationFailed')
         }
       )
     }
@@ -98,11 +98,11 @@ const TeamForm = ({ team, onSuccess, onCancel }: TeamFormProps) => {
         transition={{ delay: 0.1 }}
       >
         <InputField
-          label={t('team.teamName')}
+          label={t('team:teamName')}
           type='text'
           name='name'
           icon={Users}
-          placeholder={t('team.teamNamePlaceholder')}
+          placeholder={t('team:teamNamePlaceholder')}
           register={register}
           error={errors.name?.message}
         />
@@ -116,7 +116,7 @@ const TeamForm = ({ team, onSuccess, onCancel }: TeamFormProps) => {
         <div className='space-y-2'>
           <label className='flex items-center gap-2 text-sm font-medium text-gray-700 transition-all duration-300 dark:text-gray-200'>
             <FileText className='size-4' />
-            {t('team.description')}
+            {t('team:description')}
           </label>
           <textarea
             {...register('description')}
@@ -125,7 +125,7 @@ const TeamForm = ({ team, onSuccess, onCancel }: TeamFormProps) => {
                 ? 'border-red-300 focus:border-red-500 dark:border-red-500'
                 : 'border-gray-200 focus:border-blue-500 dark:border-gray-700 dark:focus:border-blue-400'
             } text-gray-900 placeholder-gray-400 dark:text-gray-100 dark:placeholder-gray-500`}
-            placeholder={t('team.descriptionPlaceholder')}
+            placeholder={t('team:descriptionPlaceholder')}
             rows={3}
           />
           {errors.description && (
@@ -144,11 +144,11 @@ const TeamForm = ({ team, onSuccess, onCancel }: TeamFormProps) => {
       >
         {onCancel && (
           <Button type='button' variant='secondary' onClick={onCancel}>
-            {t('actions.cancel')}
+            {t('common:actions.cancel')}
           </Button>
         )}
         <Button type='submit' isLoading={isPending}>
-          {isEditing ? t('actions.save') : t('team.createTeam')}
+          {isEditing ? t('common:actions.save') : t('team:createTeam')}
         </Button>
       </motion.div>
     </form>

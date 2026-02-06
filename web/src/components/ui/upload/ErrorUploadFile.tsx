@@ -24,7 +24,7 @@ export const ErrorUploadFile = ({
           <h4
             className={`font-medium text-red-800 dark:text-red-200 ${compact ? 'text-sm' : 'mb-1'}`}
           >
-            {t('file_upload.validation_errors')}
+            {t('ui:fileUpload.validation_errors')}
           </h4>
           <ul
             className={`space-y-1 text-red-700 dark:text-red-300 ${compact ? 'mt-1 text-xs' : 'text-sm'}`}

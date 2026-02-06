@@ -27,10 +27,10 @@ const MembersList = ({
           <Users className='size-8 text-gray-400 dark:text-gray-500' />
         </div>
         <h3 className='mb-2 text-lg font-medium text-gray-900 dark:text-white'>
-          {t('team.noMembers')}
+          {t('team:noMembers')}
         </h3>
         <p className='text-sm text-gray-500 dark:text-gray-400'>
-          {t('team.noMembersDescription')}
+          {t('team:noMembersDescription')}
         </p>
       </div>
     )

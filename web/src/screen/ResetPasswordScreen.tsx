@@ -42,7 +42,7 @@ const ResetPasswordScreen = () => {
 
   const onSubmit = async (data: FormValues) => {
     if (!tokenIsValid) {
-      toast.error(t('error.validToken'))
+      toast.error(t('messages:error.validToken'))
       return
     }
 
@@ -56,8 +56,8 @@ const ResetPasswordScreen = () => {
           }
         ),
         {
-          loading: t('loading.resetPassword'),
-          success: t('success.resetPassword'),
+          loading: t('messages:loading.resetPassword'),
+          success: t('messages:success.resetPassword'),
           error: (err: ApiError) => t(err.errorKey)
         }
       )
@@ -72,21 +72,21 @@ const ResetPasswordScreen = () => {
         <div className='rounded-lg bg-white p-8 shadow-md dark:bg-gray-800'>
           <header className='mb-8 text-center'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
-              {t('newPassword.title')}
+              {t('auth:password.resettitle')}
             </h1>
             <p className='mt-2 text-sm text-gray-600 dark:text-gray-400'>
-              {t('newPassword.subtitle')}
+              {t('auth:password.resetsubtitle')}
             </p>
           </header>
 
           {tokenIsValid ? (
             <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
               <InputField
-                label={t('newPassword.label')}
+                label={t('auth:password.resetlabel')}
                 type='password'
                 name='newPassword'
                 icon={KeyRound}
-                placeholder={t('newPassword.newPasswordPlaceholder')}
+                placeholder={t('auth:password.resetnewPasswordPlaceholder')}
                 register={register}
                 error={errors.newPassword?.message}
                 autoComplete='new-password'
@@ -97,10 +97,10 @@ const ResetPasswordScreen = () => {
                   type='submit'
                   variant='primary'
                   isLoading={isLoading}
-                  loadingText={t('loading.resetPassword')}
+                  loadingText={t('messages:loading.resetPassword')}
                   className='w-full'
                 >
-                  {t('newPassword.submit')}
+                  {t('auth:password.resetsubmit')}
                 </Button>
 
                 <Button
@@ -109,7 +109,7 @@ const ResetPasswordScreen = () => {
                   onClick={() => navigate(getRoutePath(ROUTES.LOGIN))}
                   className='w-full'
                 >
-                  {t('actions.cancel')}
+                  {t('common:actions.cancel')}
                 </Button>
               </div>
             </form>
@@ -117,7 +117,7 @@ const ResetPasswordScreen = () => {
             <div className='text-center'>
               <div className='mb-6 rounded-md bg-red-50 p-4 dark:bg-red-900/20'>
                 <p className='text-sm font-medium text-red-700 dark:text-red-300'>
-                  {t('error.validToken')}
+                  {t('messages:error.validToken')}
                 </p>
               </div>
 
@@ -127,7 +127,7 @@ const ResetPasswordScreen = () => {
                 variant='primary'
                 className='w-full'
               >
-                {t('actions.goLogin')}
+                {t('common:actions.goLogin')}
               </Button>
             </div>
           )}

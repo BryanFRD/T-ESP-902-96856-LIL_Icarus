@@ -19,9 +19,9 @@ const TeamTabs = ({ activeTab, onTabChange }: TeamTabsProps) => {
   const { t } = useTranslation()
 
   const tabs: Tab[] = [
-    { id: 'members', label: t('team.tabs.members'), icon: Users },
-    { id: 'companies', label: t('team.tabs.companies'), icon: Building2 },
-    { id: 'invitations', label: t('team.tabs.invitations'), icon: Mail }
+    { id: 'members', label: t('team:tabs.members'), icon: Users },
+    { id: 'companies', label: t('team:tabs.companies'), icon: Building2 },
+    { id: 'invitations', label: t('team:tabs.invitations'), icon: Mail }
   ]
 
   return (

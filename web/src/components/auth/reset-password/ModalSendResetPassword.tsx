@@ -30,8 +30,8 @@ const ModalSendResetPassword = ({
         onClose()
       }),
       {
-        loading: t('loading.sendResetPassword'),
-        success: t('resetPassword.emailSent'),
+        loading: t('messages:loading.sendResetPassword'),
+        success: t('auth:password.forgotemailSent'),
         error: (err: ApiError) => t(err.errorKey)
       }
     )
@@ -40,29 +40,29 @@ const ModalSendResetPassword = ({
   return (
     <Modal
       size={'xl'}
-      title={t('resetPassword.title')}
+      title={t('auth:password.forgottitle')}
       isOpen={isOpen}
       onClose={onClose}
-      closeButtonLabel={t('resetPassword.onClose')}
+      closeButtonLabel={t('auth:password.forgotonClose')}
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
         className={'flex flex-col gap-6 p-2'}
       >
         <p className='text-gray-700 dark:text-gray-300'>
-          {t('resetPassword.message')}
+          {t('auth:password.forgotmessage')}
         </p>
         <InputField
-          label={t('resetPassword.label')}
+          label={t('auth:password.forgotlabel')}
           type={'email'}
           icon={LucideMail}
-          placeholder={t('resetPassword.placeholder')}
+          placeholder={t('auth:password.forgotplaceholder')}
           register={register}
           name={'resetEmail'}
         />
         <div className='mt-4 flex justify-end'>
           <Button type='submit' variant='primary'>
-            {t('resetPassword.sendButton')}
+            {t('auth:password.forgotsendButton')}
           </Button>
         </div>
       </form>

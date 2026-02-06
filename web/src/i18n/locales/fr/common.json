@@ -1,0 +1,45 @@
+{
+  "actions": {
+    "back": "Retour",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "delete": "Supprimer",
+    "done": "Terminé",
+    "edit": "Modifier",
+    "goLogin": "Aller à la connexion",
+    "more": "Plus d'actions",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "save": "Enregistrer"
+  },
+  "days": {
+    "fri": "Ven",
+    "mon": "Lun",
+    "sat": "Sam",
+    "sun": "Dim",
+    "thu": "Jeu",
+    "tue": "Mar",
+    "wed": "Mer"
+  },
+  "language": "Langue",
+  "languages": {
+    "english": "Anglais",
+    "french": "Français"
+  },
+  "loading": "Chargement...",
+  "memberRoles": {
+    "owner": "Propriétaire",
+    "moderator": "Modérateur",
+    "member": "Membre",
+    "client": "Client"
+  },
+  "selectDate": "Sélectionner une date",
+  "theme": "Thème",
+  "time": {
+    "label": "Heure",
+    "nextMonth": "Mois suivant",
+    "nextYear": "Année suivante",
+    "previousMonth": "Mois précédent",
+    "previousYear": "Année précédente"
+  }
+}

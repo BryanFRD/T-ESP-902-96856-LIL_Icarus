@@ -84,9 +84,9 @@ const CompanyForm = ({
           )
         }),
         {
-          loading: t('loading.savingChanges'),
-          success: t('success.companyUpdated'),
-          error: t('error.companyUpdateFailed')
+          loading: t('messages:loading.savingChanges'),
+          success: t('messages:success.companyUpdated'),
+          error: t('messages:error.companyUpdateFailed')
         }
       )
     } else {
@@ -105,9 +105,9 @@ const CompanyForm = ({
           )
         }),
         {
-          loading: t('loading.creatingCompany'),
-          success: t('success.companyCreated'),
-          error: t('error.companyCreationFailed')
+          loading: t('messages:loading.creatingCompany'),
+          success: t('messages:success.companyCreated'),
+          error: t('messages:error.companyCreationFailed')
         }
       )
     }
@@ -121,11 +121,11 @@ const CompanyForm = ({
         transition={{ delay: 0.1 }}
       >
         <InputField
-          label={t('team.companyName')}
+          label={t('team:companyName')}
           type='text'
           name='name'
           icon={Building2}
-          placeholder={t('team.companyNamePlaceholder')}
+          placeholder={t('team:companyNamePlaceholder')}
           register={register}
           error={errors.name?.message}
         />
@@ -137,16 +137,16 @@ const CompanyForm = ({
         transition={{ delay: 0.2 }}
       >
         <InputField
-          label={t('team.siret')}
+          label={t('team:siret')}
           type='text'
           name='siret'
           icon={Hash}
-          placeholder={t('team.siretPlaceholder')}
+          placeholder={t('team:siretPlaceholder')}
           register={register}
           error={errors.siret?.message}
         />
         <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
-          {t('team.siretHint')}
+          {t('team:siretHint')}
         </p>
       </motion.div>
 
@@ -158,7 +158,7 @@ const CompanyForm = ({
         <div className='space-y-2'>
           <label className='flex items-center gap-2 text-sm font-medium text-gray-700 transition-all duration-300 dark:text-gray-200'>
             <FileText className='h-4 w-4' />
-            {t('team.description')}
+            {t('team:description')}
           </label>
           <textarea
             {...register('description')}
@@ -167,7 +167,7 @@ const CompanyForm = ({
                 ? 'border-red-300 focus:border-red-500 dark:border-red-500'
                 : 'border-gray-200 focus:border-blue-500 dark:border-gray-700 dark:focus:border-blue-400'
             } text-gray-900 placeholder-gray-400 dark:text-gray-100 dark:placeholder-gray-500`}
-            placeholder={t('team.companyDescriptionPlaceholder')}
+            placeholder={t('team:companyDescriptionPlaceholder')}
             rows={3}
           />
           {errors.description && (
@@ -186,11 +186,11 @@ const CompanyForm = ({
       >
         {onCancel && (
           <Button type='button' variant='secondary' onClick={onCancel}>
-            {t('actions.cancel')}
+            {t('common:actions.cancel')}
           </Button>
         )}
         <Button type='submit' isLoading={isPending}>
-          {isEditing ? t('actions.save') : t('team.createCompany')}
+          {isEditing ? t('common:actions.save') : t('team:createCompany')}
         </Button>
       </motion.div>
     </form>

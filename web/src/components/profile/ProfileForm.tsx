@@ -37,9 +37,9 @@ const ProfileForm = () => {
 
     if (Object.keys(modifiedPayload).length > 0) {
       await toast.promise(patchMe(modifiedPayload), {
-        loading: t('loading.savingChanges'),
-        success: t('success.profileUpdated'),
-        error: t('error.profileUpdateFailed')
+        loading: t('messages:loading.savingChanges'),
+        success: t('messages:success.profileUpdated'),
+        error: t('messages:error.profileUpdateFailed')
       })
     }
   }
@@ -52,10 +52,10 @@ const ProfileForm = () => {
         transition={{ delay: 0.1 }}
       >
         <h2 className='mb-2 text-2xl font-bold text-gray-800 dark:text-white'>
-          {t('profileForm.title')}
+          {t('auth:profile.title')}
         </h2>
         <p className='mb-6 text-gray-500 dark:text-gray-400'>
-          {t('profileForm.description')}
+          {t('auth:profile.description')}
         </p>
       </motion.div>
 
@@ -67,11 +67,11 @@ const ProfileForm = () => {
             transition={{ delay: 0.2 }}
           >
             <InputField
-              label={t('inputField.firstName')}
+              label={t('auth:fields.firstName')}
               type='text'
               name='firstName'
               icon={UserIcon}
-              placeholder={t('inputField.firstNamePlaceholder')}
+              placeholder={t('auth:fields.firstNamePlaceholder')}
               register={register}
               error={errors.firstName?.message}
             />
@@ -83,11 +83,11 @@ const ProfileForm = () => {
             transition={{ delay: 0.3 }}
           >
             <InputField
-              label={t('inputField.lastName')}
+              label={t('auth:fields.lastName')}
               type='text'
               name='lastName'
               icon={UserIcon}
-              placeholder={t('inputField.lastNamePlaceholder')}
+              placeholder={t('auth:fields.lastNamePlaceholder')}
               register={register}
               error={errors.lastName?.message}
             />
@@ -100,11 +100,11 @@ const ProfileForm = () => {
           transition={{ delay: 0.4 }}
         >
           <InputField
-            label={t('inputField.username')}
+            label={t('auth:fields.username')}
             type='text'
             name='username'
             icon={UserIcon}
-            placeholder={t('inputField.usernamePlaceholder')}
+            placeholder={t('auth:fields.usernamePlaceholder')}
             register={register}
             error={errors.username?.message}
           />
@@ -116,11 +116,11 @@ const ProfileForm = () => {
           transition={{ delay: 0.5 }}
         >
           <InputField
-            label={t('inputField.email')}
+            label={t('auth:fields.email')}
             type='email'
             name='email'
             icon={Mail}
-            placeholder={t('inputField.emailPlaceholder')}
+            placeholder={t('auth:fields.emailPlaceholder')}
             register={register}
             error={errors.email?.message}
           />
@@ -135,10 +135,10 @@ const ProfileForm = () => {
           <Button
             type='submit'
             isLoading={isPending}
-            loadingText={t('inputField.savingChanges')}
+            loadingText={t('auth:actions.savingChanges')}
             className='w-full md:w-auto'
           >
-            {t('inputField.saveChanges')}
+            {t('auth:actions.saveChanges')}
           </Button>
         </motion.div>
       </form>
