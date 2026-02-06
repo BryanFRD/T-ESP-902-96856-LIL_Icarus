@@ -23,6 +23,9 @@ use super::{AuditError, AuditResponse, CreateAuditPayload, UpdateAuditPayload};
         (status = 200, description = "Audits retrieved successfully", body = Vec<AuditResponse>),
         (status = 401, description = "Unauthorized"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn list_my_audits(
     State(state): State<GlobalState>,
@@ -45,6 +48,9 @@ pub async fn list_my_audits(
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden - must be team owner or admin"),
         (status = 404, description = "Team or company not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn create_audit(
@@ -89,6 +95,9 @@ pub async fn create_audit(
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden - audit archived or insufficient permissions"),
         (status = 404, description = "Audit not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn update_audit(
@@ -141,6 +150,9 @@ pub async fn update_audit(
         (status = 403, description = "Forbidden - audit already archived or insufficient permissions"),
         (status = 404, description = "Audit not found"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn archive_audit(
     State(state): State<GlobalState>,
@@ -176,6 +188,9 @@ pub async fn archive_audit(
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden - audit archived or insufficient permissions"),
         (status = 404, description = "Audit or client not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn remove_client(

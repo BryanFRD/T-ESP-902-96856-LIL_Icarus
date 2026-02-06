@@ -37,6 +37,9 @@ pub struct CheckAccessResponse {
         (status = 200, description = "Access granted, cookie set"),
         (status = 401, description = "Invalid password or unauthorized"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn verify_access(
     State(state): State<GlobalState>,
@@ -109,6 +112,9 @@ pub async fn verify_access(
     tag = "Audits",
     responses(
         (status = 200, description = "Access status", body = CheckAccessResponse),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn check_access(

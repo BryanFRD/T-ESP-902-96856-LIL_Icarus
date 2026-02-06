@@ -4,8 +4,5 @@ mod models;
 mod services;
 
 pub use error::UserError;
-pub use models::{User, UserRole};
-
-#[cfg(test)]
-pub use models::UpdatePayload;
+pub use models::{AvatarForm, UpdatePayload, User, UserRole};
 pub use services::*;

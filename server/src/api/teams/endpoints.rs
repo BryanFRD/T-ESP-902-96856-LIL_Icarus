@@ -26,6 +26,9 @@ use crate::state::GlobalState;
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn create_team(
     State(state): State<GlobalState>,
@@ -51,6 +54,9 @@ pub async fn create_team(
         (status = 200, description = "Teams retrieved successfully", body = Vec<TeamReturn>),
         (status = 401, description = "Unauthorized"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn get_my_teams(
     State(state): State<GlobalState>,
@@ -71,6 +77,9 @@ pub async fn get_my_teams(
         (status = 200, description = "Updated Team successfully"),
         (status = 404, description = "Team not found"),
         (status = 401, description = "Unauthorized"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn update_team(
@@ -118,6 +127,9 @@ pub async fn update_team(
         (status = 404, description = "Team not found"),
         (status = 403, description = "Forbidden"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn delete_team(
     State(state): State<GlobalState>,
@@ -159,6 +171,9 @@ pub async fn delete_team(
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden"),
         (status = 404, description = "Team member not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn remove_member(
@@ -222,6 +237,9 @@ pub async fn remove_member(
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden"),
         (status = 404, description = "Team member not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn update_member_role(

@@ -22,6 +22,9 @@ use super::{CreateInvitationPayload, InvitationError, InvitationReturn};
         (status = 403, description = "Forbidden"),
         (status = 404, description = "Team not found"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn create_invitation(
     State(state): State<GlobalState>,
@@ -64,6 +67,9 @@ pub async fn create_invitation(
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden"),
         (status = 404, description = "Team not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn list_invitations(
@@ -109,6 +115,9 @@ pub async fn list_invitations(
         (status = 403, description = "Forbidden"),
         (status = 404, description = "Invitation not found"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn delete_invitation(
     State(state): State<GlobalState>,
@@ -150,6 +159,9 @@ pub async fn delete_invitation(
         (status = 410, description = "Invitation expired"),
         (status = 409, description = "Invitation exhausted"),
         (status = 400, description = "Invitation canceled"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn consume_invitation(

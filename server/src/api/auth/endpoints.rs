@@ -190,6 +190,7 @@ pub async fn logout(cookies: Cookies) -> impl IntoResponse {
 #[utoipa::path(
     post,
     path = "/v1/auth/request-password-reset",
+    request_body = ResetPasswordRequestPayload,
     responses(
         (status = 200, description = "Reset password demand sent"),
         (status = 500, description = "Failed to send password reset demand")
@@ -241,6 +242,7 @@ pub async fn request_password_reset(
 #[utoipa::path(
     post,
     path = "/v1/auth/reset-password",
+    request_body = ResetPasswordPayload,
     responses(
         (status = 200, description = "Reset password demand sent"),
         (status = 500, description = "Failed to send password reset demand")

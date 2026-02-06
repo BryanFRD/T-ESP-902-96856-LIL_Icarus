@@ -8,7 +8,7 @@ use serde::Deserialize;
 use utoipa::ToSchema;
 
 use crate::api::auth::models::JwtClaims;
-use crate::api::events::{EventFilters, EventResponse};
+use crate::api::events::{EventAction, EventFilters, EventResponse, ResourceType};
 use crate::helpers::{internal_error, not_found_error};
 use crate::state::GlobalState;
 
@@ -18,9 +18,9 @@ use crate::state::GlobalState;
     tag = "Events",
     params(
         ("user_id" = Option<String>, Query, description = "Filter by user ID"),
-        ("resource_type" = Option<String>, Query, description = "Filter by resource type"),
+        ("resource_type" = Option<ResourceType>, Query, description = "Filter by resource type"),
         ("resource_id" = Option<String>, Query, description = "Filter by resource ID"),
-        ("action" = Option<String>, Query, description = "Filter by action"),
+        ("action" = Option<EventAction>, Query, description = "Filter by action"),
         ("date_from" = Option<String>, Query, description = "Filter from date (ISO 8601)"),
         ("date_to" = Option<String>, Query, description = "Filter to date (ISO 8601)"),
         ("limit" = Option<i64>, Query, description = "Limit results (default: 100, max: 1000)"),
@@ -30,6 +30,9 @@ use crate::state::GlobalState;
     responses(
         (status = 200, description = "Events retrieved successfully", body = Vec<EventResponse>),
         (status = 401, description = "Unauthorized"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn list_events(
@@ -74,6 +77,9 @@ fn default_anonymized_query() -> bool {
         (status = 200, description = "Event retrieved successfully", body = EventResponse),
         (status = 404, description = "Event not found"),
         (status = 401, description = "Unauthorized"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn get_event(
