@@ -150,6 +150,17 @@ pub fn conflict_error(message: &str) -> Response {
     (StatusCode::CONFLICT, Json(message)).into_response()
 }
 
+/// Creates a standard forbidden error response
+///
+/// # Arguments
+/// * `message` - The error message key
+///
+/// # Returns
+/// A `Response` with 403 status code
+pub fn forbidden_error(message: &str) -> Response {
+    (StatusCode::FORBIDDEN, Json(message)).into_response()
+}
+
 /// Creates a standard bad request error response
 ///
 /// # Arguments

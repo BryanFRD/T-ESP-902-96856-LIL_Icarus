@@ -1,4 +1,4 @@
-use crate::api::auth::RegisterPayload;
+use crate::api::auth::{RegisterPayload, hash_password};
 use crate::api::users::{User, UserRole};
 
 // Tests for User::new()
@@ -41,6 +41,8 @@ fn test_user_new_hashes_password() {
         user.verify_password(password),
         "Password should be correctly hashed and verifiable"
     );
+    let expected_hash = hash_password(password);
+    assert_eq!(user.password_hash, expected_hash);
     assert_ne!(
         user.password_hash, password,
         "Password should be hashed, not stored in plain text"

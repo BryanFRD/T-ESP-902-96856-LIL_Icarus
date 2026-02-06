@@ -1,3 +1,4 @@
+use super::tickets;
 use super::{
     Audit, AuditClient, AuditError, AuditResponse, CreateAuditPayload, UpdateAuditPayload,
 };
@@ -67,12 +68,15 @@ pub fn get_routes(state: &GlobalState) -> Router {
             "/invite/{token}/accept",
             post(invitations::endpoints::accept_invitation),
         );
+    // Ticket routes (nested under /audits)
+    let ticket_routes = tickets::services::get_routes(state);
 
     // Merge all routers
     protected_routes
         .merge(invitation_routes)
         .merge(verify_routes)
         .merge(public_routes)
+        .merge(ticket_routes)
         .with_state(state.clone())
 }
 
@@ -298,6 +302,10 @@ pub fn create_audit(
     diesel::insert_into(audits::table)
         .values(&new_audit)
         .execute(&mut conn)?;
+
+    // Seed default kanban columns for the new audit
+    tickets::columns::services::seed_default_columns(&mut conn, &new_audit.id)
+        .map_err(|_| AuditError::Database(diesel::result::Error::RollbackTransaction))?;
 
     let company = companies::table
         .filter(companies::id.eq(&payload.company_id))
