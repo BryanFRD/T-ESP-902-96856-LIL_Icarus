@@ -19,9 +19,12 @@ use crate::api::audits::tickets::models::{
     BoardColumn, BoardResponse, CreateTicketPayload, MoveTicketPayload, TicketPriority,
     TicketResponse, TicketSummary, TicketUser, UpdateTicketPayload,
 };
-use crate::api::audits::{CreateAuditPayload, UpdateAuditPayload};
+use crate::api::audits::{AuditResponse, ClientUser, CreateAuditPayload, UpdateAuditPayload};
 use crate::api::auth;
-use crate::api::auth::{ConfirmEmailPayload, LoginPayload, RegisterPayload};
+use crate::api::auth::{
+    ConfirmEmailPayload, LoginPayload, RegisterPayload, ResetPasswordPayload,
+    ResetPasswordRequestPayload,
+};
 use crate::api::csrf;
 use crate::api::csrf::CsrfResponse;
 use crate::api::events;
@@ -29,13 +32,15 @@ use crate::api::events::{
     Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType,
 };
 use crate::api::status;
+use crate::api::status::{Status, StatusEnum};
 use crate::api::teams;
 use crate::api::teams::models::UpdateMemberRolePayload;
 use crate::api::teams::{
     CompanyReturn, CreateCompanyPayload, CreateInvitationPayload, CreateTeam, InvitationReturn,
-    TeamMemberWithRole, TeamRole, UpdateCompanyPayload,
+    TeamMemberWithRole, TeamReturn, TeamRole, UpdateCompanyPayload, UpdateTeam,
 };
 use crate::api::users;
+use crate::api::users::{AvatarForm, UpdatePayload, User, UserRole};
 use utoipa::OpenApi;
 
 #[derive(OpenApi)]
@@ -124,9 +129,20 @@ use utoipa::OpenApi;
         status::endpoints::get_status,
     ),
     components(
-        schemas(CreateAuditPayload, UpdateAuditPayload, VerifyAccessPayload, CheckAccessResponse, CreateAuditInvitationPayload, AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn, CheckInvitationResponse, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload, Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType, CsrfResponse),
         schemas(
-            CreateAuditPayload, UpdateAuditPayload, VerifyAccessPayload, CheckAccessResponse, CreateAuditInvitationPayload, AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn, CheckInvitationResponse, ConfirmEmailPayload, LoginPayload, RegisterPayload, CreateTeam, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload, Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType, CsrfResponse, ColumnResponse, CreateColumnPayload, UpdateColumnPayload, ReorderColumnsPayload, CreateTicketPayload, UpdateTicketPayload, MoveTicketPayload, TicketPriority, TicketResponse, TicketSummary, TicketUser, BoardColumn, BoardResponse, LabelResponse, CreateLabelPayload, UpdateLabelPayload, CommentResponse, CreateCommentPayload, UpdateCommentPayload, AttachmentResponse,
+            CreateAuditPayload, UpdateAuditPayload, AuditResponse, ClientUser, VerifyAccessPayload, CheckAccessResponse,
+            CreateAuditInvitationPayload, AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn, CheckInvitationResponse,
+            ConfirmEmailPayload, LoginPayload, RegisterPayload, ResetPasswordRequestPayload, ResetPasswordPayload,
+            CreateTeam, UpdateTeam, TeamReturn, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole,
+            CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload,
+            User, UserRole, UpdatePayload, AvatarForm,
+            Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType,
+            Status, StatusEnum, CsrfResponse,
+            ColumnResponse, CreateColumnPayload, UpdateColumnPayload, ReorderColumnsPayload,
+            CreateTicketPayload, UpdateTicketPayload, MoveTicketPayload, TicketPriority, TicketResponse, TicketSummary, TicketUser, BoardColumn, BoardResponse,
+            LabelResponse, CreateLabelPayload, UpdateLabelPayload,
+            CommentResponse, CreateCommentPayload, UpdateCommentPayload,
+            AttachmentResponse,
         ),
     ),
     tags(
@@ -136,6 +152,7 @@ use utoipa::OpenApi;
         (name = "Admin", description = "Admin management endpoints"),
         (name = "Status", description = "Application status endpoints"),
         (name = "Teams", description = "Team management endpoints"),
+        (name = "Audits", description = "Audit management endpoints"),
         (name = "Tickets", description = "Kanban ticket management endpoints"),
         (name = "Kanban Columns", description = "Kanban column management endpoints"),
         (name = "Ticket Labels", description = "Ticket label management endpoints"),

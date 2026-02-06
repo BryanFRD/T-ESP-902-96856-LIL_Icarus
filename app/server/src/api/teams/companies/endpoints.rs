@@ -23,6 +23,9 @@ use super::{CompanyError, CompanyReturn, CreateCompanyPayload, UpdateCompanyPayl
         (status = 404, description = "Team not found"),
         (status = 409, description = "Company with this SIRET already exists in the team"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn create_company(
     State(state): State<GlobalState>,
@@ -68,6 +71,9 @@ pub async fn create_company(
         (status = 403, description = "Forbidden - not a team member"),
         (status = 404, description = "Team not found"),
     ),
+    security(
+        ("cookieAuth" = [])
+    ),
 )]
 pub async fn list_companies(
     State(state): State<GlobalState>,
@@ -106,6 +112,9 @@ pub async fn list_companies(
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden - not a team member"),
         (status = 404, description = "Team or company not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn get_company(
@@ -146,6 +155,9 @@ pub async fn get_company(
         (status = 403, description = "Forbidden"),
         (status = 404, description = "Team or company not found"),
         (status = 409, description = "Company with this SIRET already exists in the team"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn update_company(
@@ -195,6 +207,9 @@ pub async fn update_company(
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden"),
         (status = 404, description = "Team or company not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
     ),
 )]
 pub async fn delete_company(
