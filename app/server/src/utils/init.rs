@@ -19,5 +19,6 @@ pub async fn get_state() -> GlobalState {
             panic!("Failed to get secrets");
         }
     };
+
     GlobalState::new(secrets)
 }

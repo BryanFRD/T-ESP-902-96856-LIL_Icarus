@@ -1,12 +1,13 @@
 use crate::vault::Secrets;
-use base64::{Engine, engine::general_purpose::STANDARD};
+use base64::{engine::general_purpose::STANDARD, Engine};
 use diesel::{
-    PgConnection,
     r2d2::{ConnectionManager, Pool, PoolError, PooledConnection},
+    PgConnection,
 };
-use rand::{SeedableRng, rngs::StdRng};
+use rand::{rngs::StdRng, SeedableRng};
 use resend_rs::Resend;
-use std::sync::Arc;
+use socketioxide::SocketIo;
+use std::sync::{Arc, OnceLock};
 use tokio::sync::Mutex;
 use tracing::info;
 
@@ -19,6 +20,7 @@ pub struct GlobalState {
     pub csrf_secret: Arc<String>,
     pub audit_access_secret: Arc<String>,
     pub event_encryption_key: Arc<Vec<u8>>,
+    io: Arc<OnceLock<SocketIo>>,
 }
 
 impl GlobalState {
@@ -63,6 +65,7 @@ impl GlobalState {
             csrf_secret: Arc::new(csrf_secret),
             audit_access_secret: Arc::new(audit_access_secret),
             event_encryption_key: Arc::new(event_key_bytes),
+            io: Arc::new(OnceLock::new()),
         }
     }
 
@@ -83,6 +86,27 @@ impl GlobalState {
 
     pub fn get_rand(&self) -> &Mutex<StdRng> {
         &self.rng
+    }
+
+    /// Store the [`SocketIo`] handle. Must be called exactly once during startup.
+    ///
+    /// # Panics
+    /// Panics if called more than once.
+    pub fn set_io(&self, io: SocketIo) {
+        self.io
+            .set(io)
+            .expect("SocketIo handle already initialized");
+    }
+
+    /// Get a reference to the [`SocketIo`] handle for emitting WebSocket events.
+    ///
+    /// # Panics
+    /// Panics if called before [`set_io()`](Self::set_io).
+    #[allow(dead_code)]
+    pub fn get_io(&self) -> &SocketIo {
+        self.io
+            .get()
+            .expect("SocketIo handle not initialized — call set_io() first")
     }
 
     #[cfg(test)]
@@ -117,6 +141,7 @@ impl GlobalState {
             csrf_secret: Arc::new(csrf_secret),
             audit_access_secret: Arc::new(audit_access_secret),
             event_encryption_key: Arc::new(event_key_bytes),
+            io: Arc::new(OnceLock::new()),
         }
     }
 }
