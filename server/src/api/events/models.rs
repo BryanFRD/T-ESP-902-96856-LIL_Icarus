@@ -112,6 +112,14 @@ pub enum ResourceType {
     Invitation,
     Auth,
     Avatar,
+    Audit,
+    AuditClient,
+    AuditInvitation,
+    Ticket,
+    TicketComment,
+    TicketAttachment,
+    KanbanColumn,
+    TicketLabel,
 }
 
 impl<DB: Backend> FromSql<Text, DB> for ResourceType
@@ -127,6 +135,14 @@ where
             "invitation" => Ok(Self::Invitation),
             "auth" => Ok(Self::Auth),
             "avatar" => Ok(Self::Avatar),
+            "audit" => Ok(Self::Audit),
+            "audit_client" => Ok(Self::AuditClient),
+            "audit_invitation" => Ok(Self::AuditInvitation),
+            "ticket" => Ok(Self::Ticket),
+            "ticket_comment" => Ok(Self::TicketComment),
+            "ticket_attachment" => Ok(Self::TicketAttachment),
+            "kanban_column" => Ok(Self::KanbanColumn),
+            "ticket_label" => Ok(Self::TicketLabel),
             _ => Err("Unrecognized resource type".into()),
         }
     }
@@ -145,6 +161,14 @@ where
             Self::Invitation => "invitation".to_sql(out),
             Self::Auth => "auth".to_sql(out),
             Self::Avatar => "avatar".to_sql(out),
+            Self::Audit => "audit".to_sql(out),
+            Self::AuditClient => "audit_client".to_sql(out),
+            Self::AuditInvitation => "audit_invitation".to_sql(out),
+            Self::Ticket => "ticket".to_sql(out),
+            Self::TicketComment => "ticket_comment".to_sql(out),
+            Self::TicketAttachment => "ticket_attachment".to_sql(out),
+            Self::KanbanColumn => "kanban_column".to_sql(out),
+            Self::TicketLabel => "ticket_label".to_sql(out),
         }
     }
 }
@@ -159,6 +183,14 @@ impl Display for ResourceType {
             Self::Invitation => write!(f, "invitation"),
             Self::Auth => write!(f, "auth"),
             Self::Avatar => write!(f, "avatar"),
+            Self::Audit => write!(f, "audit"),
+            Self::AuditClient => write!(f, "audit_client"),
+            Self::AuditInvitation => write!(f, "audit_invitation"),
+            Self::Ticket => write!(f, "ticket"),
+            Self::TicketComment => write!(f, "ticket_comment"),
+            Self::TicketAttachment => write!(f, "ticket_attachment"),
+            Self::KanbanColumn => write!(f, "kanban_column"),
+            Self::TicketLabel => write!(f, "ticket_label"),
         }
     }
 }
@@ -341,4 +373,46 @@ pub struct EventFilters {
 
 fn default_anonymized() -> bool {
     true
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct PaginatedEventLogResponse {
+    pub data: Vec<EventLogResponse>,
+    pub total: i64,
+    pub limit: i64,
+    pub offset: i64,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct EventLogResponse {
+    pub id: String,
+    pub user_id: Option<String>,
+    pub user: Option<EventLogUser>,
+    pub action: EventAction,
+    pub resource_type: ResourceType,
+    pub resource_id: Option<String>,
+    pub request_method: String,
+    pub request_path: String,
+    pub created_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct EventLogUser {
+    pub id: String,
+    pub username: String,
+    pub email: String,
+    pub first_name: String,
+    pub last_name: String,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct AuditLogFilters {
+    pub include_user: Option<bool>,
+    pub action: Option<EventAction>,
+    pub limit: Option<i64>,
+    pub offset: Option<i64>,
 }

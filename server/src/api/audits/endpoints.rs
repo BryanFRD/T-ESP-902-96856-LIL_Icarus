@@ -1,6 +1,6 @@
 use axum::{
     Json,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     response::IntoResponse,
 };
 use http::StatusCode;
@@ -9,6 +9,7 @@ use validator::Validate;
 
 use crate::{
     api::auth::JwtClaims,
+    api::events::AuditLogFilters,
     helpers::{bad_request_error, internal_error, not_found_error},
     state::GlobalState,
 };
@@ -217,5 +218,60 @@ pub async fn remove_client(
         )
             .into_response(),
         Err(e) => internal_error("Failed to remove client", e),
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/v1/audits/{audit_id}/logs",
+    tag = "Audits",
+    params(
+        ("audit_id" = String, Path, description = "Audit ID"),
+        ("includeUser" = Option<bool>, Query, description = "Include user details in response"),
+        ("action" = Option<String>, Query, description = "Filter by event action"),
+        ("limit" = Option<i64>, Query, description = "Maximum number of results (default 50, max 200)"),
+        ("offset" = Option<i64>, Query, description = "Number of results to skip"),
+    ),
+    responses(
+        (status = 200, description = "Audit logs retrieved successfully", body = crate::api::events::PaginatedEventLogResponse),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden - not a team member"),
+        (status = 404, description = "Audit not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+)]
+pub async fn list_audit_logs(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    Path(audit_id): Path<Ulid>,
+    Query(filters): Query<AuditLogFilters>,
+) -> impl IntoResponse {
+    let audit_id_str = audit_id.to_string();
+
+    let audit = match super::get_audit(&state, &audit_id_str) {
+        Ok(a) => a,
+        Err(AuditError::NotFound) => return not_found_error("error.audit.notFound"),
+        Err(e) => return internal_error("Failed to get audit", e),
+    };
+
+    let user_id_str = jwt_user.sub.to_string();
+    if !jwt_user.is_admin()
+        && crate::api::teams::get_team_member(&state, &audit.team_id, &user_id_str)
+            .ok()
+            .flatten()
+            .is_none()
+    {
+        return (
+            StatusCode::FORBIDDEN,
+            Json("error.audit.mustBeTeamMember"),
+        )
+            .into_response();
+    }
+
+    match crate::api::events::query_audit_logs(&state, &audit_id_str, &filters) {
+        Ok(response) => (StatusCode::OK, Json(response)).into_response(),
+        Err(e) => internal_error("Failed to query audit logs", e),
     }
 }
