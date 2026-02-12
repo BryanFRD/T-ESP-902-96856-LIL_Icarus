@@ -29,8 +29,10 @@ use crate::api::csrf;
 use crate::api::csrf::CsrfResponse;
 use crate::api::events;
 use crate::api::events::{
-    Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType,
+    AuditLogFilters, Event, EventAction, EventChanges, EventFilters, EventLogResponse,
+    EventLogUser, EventResponse, PaginatedEventLogResponse, ResourceType,
 };
+
 use crate::api::status;
 use crate::api::status::{Status, StatusEnum};
 use crate::api::teams;
@@ -51,6 +53,7 @@ use utoipa::OpenApi;
         audits::endpoints::update_audit,
         audits::endpoints::archive_audit,
         audits::endpoints::remove_client,
+        audits::endpoints::list_audit_logs,
         audits::step_up::endpoints::verify_access,
         audits::step_up::endpoints::check_access,
         audits::invitations::endpoints::create_invitation,
@@ -136,7 +139,7 @@ use utoipa::OpenApi;
             CreateTeam, UpdateTeam, TeamReturn, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole,
             CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload,
             User, UserRole, UpdatePayload, AvatarForm,
-            Event, EventAction, EventChanges, EventFilters, EventResponse, ResourceType,
+            Event, EventAction, EventChanges, EventFilters, EventResponse, EventLogResponse, EventLogUser, AuditLogFilters, PaginatedEventLogResponse, ResourceType,
             Status, StatusEnum, CsrfResponse,
             ColumnResponse, CreateColumnPayload, UpdateColumnPayload, ReorderColumnsPayload,
             CreateTicketPayload, UpdateTicketPayload, MoveTicketPayload, TicketPriority, TicketResponse, TicketSummary, TicketUser, BoardColumn, BoardResponse,

@@ -1,12 +1,20 @@
+use std::collections::HashMap;
+
 use super::endpoints;
 use crate::{
-    api::events::{Event, EventError, EventFilters, NewEvent},
+    api::events::{
+        AuditLogFilters, Event, EventError, EventFilters, EventLogResponse, EventLogUser, NewEvent,
+        PaginatedEventLogResponse,
+    },
     state::GlobalState,
     utils::event_encryption::decrypt_json,
     utils::redaction::{redact_json_value, redact_string},
 };
 use axum::{Router, middleware::from_fn_with_state, routing::get};
-use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
+use diesel::{
+    ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
+    TextExpressionMethods,
+};
 use tracing::error;
 
 pub fn get_routes(state: &GlobalState) -> Router {
@@ -138,4 +146,104 @@ pub fn decrypt_and_redact_event(state: &GlobalState, mut event: Event, is_admin:
     }
 
     event
+}
+
+pub fn query_audit_logs(
+    state: &GlobalState,
+    audit_id: &str,
+    filters: &AuditLogFilters,
+) -> Result<PaginatedEventLogResponse, EventError> {
+    use crate::schema::events::dsl::{action, created_at, events, request_path};
+    use crate::schema::users;
+
+    let mut conn = state.get_db_conn()?;
+    let path_prefix = format!("/v1/audits/{audit_id}");
+
+    // Build base query for counting
+    let mut count_query = events.into_boxed();
+    count_query = count_query.filter(request_path.like(format!("{path_prefix}%")));
+
+    if let Some(ref act) = filters.action {
+        count_query = count_query.filter(action.eq(act));
+    }
+
+    let total = count_query
+        .count()
+        .get_result::<i64>(&mut conn)
+        .map_err(EventError::from)?;
+
+    // Build data query
+    let mut data_query = events.into_boxed();
+    data_query = data_query.filter(request_path.like(format!("{path_prefix}%")));
+
+    if let Some(ref act) = filters.action {
+        data_query = data_query.filter(action.eq(act));
+    }
+
+    data_query = data_query.order(created_at.desc());
+
+    let limit_val = filters.limit.unwrap_or(50).min(200);
+    let offset_val = filters.offset.unwrap_or(0);
+    data_query = data_query.limit(limit_val).offset(offset_val);
+
+    let rows = data_query
+        .select(Event::as_select())
+        .load::<Event>(&mut conn)
+        .map_err(EventError::from)?;
+
+    let include_user = filters.include_user.unwrap_or(false);
+
+    let users_map: HashMap<String, crate::api::users::User> = if include_user {
+        let user_ids: Vec<String> = rows.iter().filter_map(|e| e.user_id.clone()).collect();
+        if user_ids.is_empty() {
+            HashMap::new()
+        } else {
+            users::table
+                .filter(users::id.eq_any(&user_ids))
+                .select(crate::api::users::User::as_select())
+                .load::<crate::api::users::User>(&mut conn)
+                .map_err(EventError::from)?
+                .into_iter()
+                .map(|u| (u.id.clone(), u))
+                .collect()
+        }
+    } else {
+        HashMap::new()
+    };
+
+    let data = rows
+        .into_iter()
+        .map(|event| {
+            let user = event
+                .user_id
+                .as_ref()
+                .and_then(|uid| users_map.get(uid))
+                .map(|u| EventLogUser {
+                    id: u.id.clone(),
+                    username: u.username.clone(),
+                    email: u.email.clone(),
+                    first_name: u.first_name.clone(),
+                    last_name: u.last_name.clone(),
+                });
+
+            EventLogResponse {
+                id: event.id,
+                user_id: event.user_id,
+                user,
+                action: event.action,
+                resource_type: event.resource_type,
+                resource_id: event.resource_id,
+                request_method: event.request_method,
+                request_path: event.request_path,
+                created_at: event.created_at.to_string(),
+            }
+        })
+        .collect();
+
+    Ok(PaginatedEventLogResponse {
+        data,
+        total,
+        limit: limit_val,
+        offset: offset_val,
+    })
 }

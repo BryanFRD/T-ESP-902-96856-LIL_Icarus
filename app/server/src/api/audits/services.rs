@@ -71,12 +71,18 @@ pub fn get_routes(state: &GlobalState) -> Router {
     // Ticket routes (nested under /audits)
     let ticket_routes = tickets::services::get_routes(state);
 
+    // Log routes (auth only, no step-up)
+    let log_routes = Router::new()
+        .route("/{audit_id}/logs", get(endpoints::list_audit_logs))
+        .layer(from_fn(auth::middleware));
+
     // Merge all routers
     protected_routes
         .merge(invitation_routes)
         .merge(verify_routes)
         .merge(public_routes)
         .merge(ticket_routes)
+        .merge(log_routes)
         .with_state(state.clone())
 }
 

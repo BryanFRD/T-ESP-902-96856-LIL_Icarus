@@ -38,7 +38,17 @@ impl ResourceFetcherRegistry {
             ResourceType::Team => Some(Box::new(TeamFetcher)),
             ResourceType::Company => Some(Box::new(CompanyFetcher)),
             ResourceType::TeamMember => Some(Box::new(TeamMemberFetcher)),
-            ResourceType::Invitation | ResourceType::Auth | ResourceType::Avatar => None,
+            ResourceType::Invitation
+            | ResourceType::Auth
+            | ResourceType::Avatar
+            | ResourceType::Audit
+            | ResourceType::AuditClient
+            | ResourceType::AuditInvitation
+            | ResourceType::Ticket
+            | ResourceType::TicketComment
+            | ResourceType::TicketAttachment
+            | ResourceType::KanbanColumn
+            | ResourceType::TicketLabel => None,
         }
     }
 
