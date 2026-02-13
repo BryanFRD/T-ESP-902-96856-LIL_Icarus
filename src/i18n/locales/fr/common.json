@@ -12,6 +12,15 @@
     "previous": "Précédent",
     "save": "Enregistrer"
   },
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "confirmAction": {
+    "typeToConfirm": "Tapez pour confirmer",
+    "pleaseType": "Veuillez taper",
+    "toContinue": "pour continuer"
+  },
   "days": {
     "fri": "Ven",
     "mon": "Lun",

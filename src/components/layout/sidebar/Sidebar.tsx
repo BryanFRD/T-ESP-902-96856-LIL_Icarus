@@ -46,21 +46,34 @@ const Sidebar = ({
               const isAuditItem =
                 item.href === '/audits' || item.label === 'Audits'
 
+              const isActive =
+                location.pathname === item.href ||
+                (item.href !== '/' && location.pathname.startsWith(item.href))
+
               return (
                 <Button
                   key={item.label}
-                  variant={
-                    item.href === location.pathname
-                      ? 'navigationActive'
-                      : 'ghost'
-                  }
+                  variant={isActive ? 'navigationActive' : 'ghost'}
                   as='link'
                   to={item.href}
                   size='lg'
                   fullWidth
                   className='justify-start'
                 >
-                  {item.icon && <item.icon size={20} className='shrink-0' />}
+                  {item.icon && (
+                    <div className='relative shrink-0'>
+                      <item.icon size={20} />
+                      {isAuditItem && isDesktopCollapsed && (
+                        <div className='absolute -right-1 -bottom-1'>
+                          {auditsAccessData?.hasAccess ? (
+                            <LockOpen size={10} className='text-green-700' />
+                          ) : (
+                            <Lock size={10} className='text-red-500' />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {!isDesktopCollapsed && (
                     <>
@@ -68,9 +81,9 @@ const Sidebar = ({
                       {isAuditItem && (
                         <div className='ml-auto'>
                           {auditsAccessData?.hasAccess ? (
-                            <LockOpen size={16} className='text-shadow-white' />
+                            <LockOpen size={16} className='text-green-400' />
                           ) : (
-                            <Lock size={16} className='text-shadow-white' />
+                            <Lock size={16} className='text-red-500' />
                           )}
                         </div>
                       )}

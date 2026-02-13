@@ -1,0 +1,180 @@
+{
+  "title": "Tableau Kanban",
+  "board": "Tableau",
+  "loading": "Chargement...",
+  "emptyBoard": "Aucune colonne trouvée",
+  "emptyBoardDescription": "Créez des colonnes pour commencer à organiser vos tickets.",
+  "emptyColumn": "Aucun ticket dans cette colonne",
+  "addTicket": "Ajouter un ticket",
+  "createTicket": "Créer un ticket",
+  "editTicket": "Modifier le ticket",
+  "comments": "Commentaires",
+  "attachments": "Pièces jointes",
+  "subtasks": "Sous-tâches",
+  "labels": "Étiquettes",
+  "dueDate": "Date d'échéance",
+  "tooltips": {
+    "subtasks": "Sous-tâches",
+    "comments": "Commentaires",
+    "attachments": "Pièces jointes"
+  },
+  "priority": {
+    "low": "Basse",
+    "medium": "Moyenne",
+    "high": "Haute",
+    "critical": "Critique"
+  },
+  "ticket": {
+    "title": "Titre",
+    "titlePlaceholder": "Entrez le titre du ticket",
+    "description": "Description",
+    "descriptionPlaceholder": "Décrivez le ticket en détail",
+    "noDescription": "Aucune description",
+    "priority": "Priorité",
+    "priorityPlaceholder": "Sélectionnez la priorité",
+    "assignee": "Assigné à",
+    "assigneePlaceholder": "Sélectionnez une personne",
+    "unassigned": "Non assigné",
+    "dueDate": "Date d'échéance",
+    "dueDatePlaceholder": "Sélectionnez une date",
+    "noDueDate": "Aucune date définie",
+    "createdBy": "Créé par",
+    "createdTicket": "a créé ce ticket",
+    "details": "Détails",
+    "activity": "Activité",
+    "created": "Ticket créé avec succès",
+    "updated": "Ticket mis à jour avec succès",
+    "deleted": "Ticket supprimé avec succès",
+    "createError": "Erreur lors de la création du ticket",
+    "updateError": "Erreur lors de la mise à jour du ticket",
+    "deleteError": "Erreur lors de la suppression du ticket",
+    "deleteTitle": "Supprimer le ticket",
+    "deleteDescription": "Cette action est irréversible. Toutes les données associées seront définitivement supprimées.",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce ticket ?"
+  },
+  "column": {
+    "name": "Nom de la colonne",
+    "namePlaceholder": "Entrez le nom de la colonne",
+    "create": "Créer une colonne",
+    "edit": "Modifier la colonne",
+    "created": "Colonne créée avec succès",
+    "updated": "Colonne mise à jour avec succès",
+    "deleted": "Colonne supprimée avec succès",
+    "createError": "Erreur lors de la création de la colonne",
+    "updateError": "Erreur lors de la mise à jour de la colonne",
+    "deleteError": "Erreur lors de la suppression de la colonne",
+    "reorderError": "Erreur lors de la réorganisation des colonnes"
+  },
+  "label": {
+    "name": "Nom de l'étiquette",
+    "namePlaceholder": "Entrez le nom de l'étiquette",
+    "color": "Couleur",
+    "add": "Ajouter une étiquette",
+    "create": "Créer une étiquette",
+    "edit": "Modifier l'étiquette",
+    "created": "Étiquette créée avec succès",
+    "updated": "Étiquette mise à jour avec succès",
+    "deleted": "Étiquette supprimée avec succès",
+    "createError": "Erreur lors de la création de l'étiquette",
+    "updateError": "Erreur lors de la mise à jour de l'étiquette",
+    "deleteError": "Erreur lors de la suppression de l'étiquette"
+  },
+  "comment": {
+    "title": "Commentaires",
+    "add": "Ajouter un commentaire",
+    "edit": "Modifier le commentaire",
+    "delete": "Supprimer le commentaire",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
+    "placeholder": "Écrivez votre commentaire...",
+    "noComments": "Aucun commentaire pour le moment",
+    "created": "Commentaire ajouté avec succès",
+    "updated": "Commentaire mis à jour avec succès",
+    "deleted": "Commentaire supprimé avec succès",
+    "createError": "Erreur lors de l'ajout du commentaire",
+    "updateError": "Erreur lors de la mise à jour du commentaire",
+    "deleteError": "Erreur lors de la suppression du commentaire"
+  },
+  "attachment": {
+    "title": "Pièces jointes",
+    "add": "Ajouter une pièce jointe",
+    "delete": "Supprimer la pièce jointe",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette pièce jointe ?",
+    "download": "Télécharger",
+    "preview": "Aperçu",
+    "upload": "Envoyer",
+    "noAttachments": "Aucune pièce jointe",
+    "fileTooLarge": "Le fichier est trop volumineux (max 10 MB)",
+    "uploaded": "Pièce jointe ajoutée avec succès",
+    "deleted": "Pièce jointe supprimée avec succès",
+    "uploadError": "Erreur lors de l'ajout de la pièce jointe",
+    "deleteError": "Erreur lors de la suppression de la pièce jointe",
+    "downloadError": "Erreur lors du téléchargement de la pièce jointe"
+  },
+  "validation": {
+    "ticket": {
+      "title": {
+        "required": "Le titre est requis",
+        "max": "Le titre ne peut pas dépasser 200 caractères"
+      },
+      "description": {
+        "max": "La description ne peut pas dépasser 5000 caractères"
+      },
+      "column": {
+        "required": "La colonne est requise"
+      }
+    },
+    "column": {
+      "name": {
+        "required": "Le nom est requis",
+        "max": "Le nom ne peut pas dépasser 50 caractères"
+      }
+    },
+    "label": {
+      "name": {
+        "required": "Le nom est requis",
+        "max": "Le nom ne peut pas dépasser 30 caractères"
+      },
+      "color": {
+        "invalid": "Couleur hexadécimale invalide (ex: #FF5733)"
+      }
+    },
+    "comment": {
+      "content": {
+        "required": "Le contenu est requis",
+        "max": "Le commentaire ne peut pas dépasser 2000 caractères"
+      }
+    }
+  },
+  "error": {
+    "noAuditId": "Identifiant d'audit manquant",
+    "loadFailed": "Erreur lors du chargement du tableau",
+    "noPermission": "Vous n'avez pas les permissions nécessaires"
+  },
+  "onboarding": {
+    "title": "Configurez votre tableau",
+    "subtitle": "Créez vos colonnes pour organiser efficacement vos tickets",
+    "columnsTitle": "Vos colonnes",
+    "columnsDescription": "Définissez les étapes de votre processus de travail",
+    "addColumn": "Ajouter une colonne",
+    "removeColumn": "Retirer cette colonne",
+    "columnPlaceholder": "Nom de la colonne...",
+    "defaultColumns": {
+      "todo": "À faire",
+      "inProgress": "En cours",
+      "review": "En révision",
+      "done": "Terminé"
+    },
+    "validation": {
+      "minOneColumn": "Vous devez créer au moins une colonne"
+    },
+    "tip": "Conseil : Gardez 3 à 5 colonnes pour une meilleure lisibilité. Vous pourrez toujours les modifier plus tard.",
+    "createBoard": "Créer le tableau",
+    "success": "Tableau créé avec succès !",
+    "error": "Erreur lors de la création du tableau"
+  },
+  "emptyState": {
+    "title": "Configuration en attente",
+    "description": "Le tableau Kanban n'a pas encore été initialisé par le propriétaire de l'équipe. Vous serez notifié dès qu'il sera prêt à être utilisé.",
+    "info": "Seuls les propriétaires et modérateurs peuvent initialiser le tableau"
+  }
+}

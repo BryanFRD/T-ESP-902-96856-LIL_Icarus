@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion'
 import {
   ArrowLeft,
+  Building2,
   Loader2,
+  Mail,
   MoreVertical,
   Pencil,
   Plus,
@@ -14,7 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import TeamForm from '@/components/team/TeamForm.tsx'
-import TeamTabs, { type TeamTab } from '@/components/team/TeamTabs.tsx'
+import type { TeamTab } from '@/components/team/TeamTabs.tsx'
 import CompaniesList from '@/components/team/companies/CompaniesList.tsx'
 import CompanyForm from '@/components/team/companies/CompanyForm.tsx'
 import InvitationForm from '@/components/team/invitations/InvitationForm.tsx'
@@ -23,6 +25,7 @@ import InvitationsList from '@/components/team/invitations/InvitationsList.tsx'
 import MemberRoleModal from '@/components/team/members/MemberRoleModal.tsx'
 import MembersList from '@/components/team/members/MembersList.tsx'
 import Button from '@/components/ui/button/Button'
+import DetailCard from '@/components/ui/card/DetailCard'
 import Modal from '@/components/ui/modal/Modal'
 import { useUserContext } from '@/context/UserContext.tsx'
 import { MemberRole } from '@/domain/enum/MemberRole.ts'
@@ -302,11 +305,11 @@ const TeamDetailScreen = () => {
         {t('team:backToTeams')}
       </Link>
 
-      <div className='mb-8 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800'>
+      <div className='mb-8 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900'>
         <div className='flex items-start justify-between'>
           <div className='flex items-center gap-4'>
-            <div className='flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-r from-red-500 to-orange-500'>
-              <Users className='h-7 w-7 text-white' />
+            <div className='flex h-14 w-14 items-center justify-center rounded-lg bg-orange-50 text-orange-500 dark:bg-orange-900/20 dark:text-orange-500'>
+              <Users className='h-7 w-7' />
             </div>
             <div>
               <h1 className='text-xl font-bold text-gray-900 dark:text-white'>
@@ -362,13 +365,30 @@ const TeamDetailScreen = () => {
         </div>
       </div>
 
-      <div className='rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'>
-        <div className='flex items-center justify-between px-6 pt-4'>
-          <TeamTabs activeTab={activeTab} onTabChange={setActiveTab} />
-          {renderAddButton()}
-        </div>
-        <div className='p-6'>{renderTabContent()}</div>
-      </div>
+      <DetailCard
+        tabs={[
+          {
+            id: 'members' as const,
+            label: t('team:tabs.members'),
+            icon: Users
+          },
+          {
+            id: 'companies' as const,
+            label: t('team:tabs.companies'),
+            icon: Building2
+          },
+          {
+            id: 'invitations' as const,
+            label: t('team:tabs.invitations'),
+            icon: Mail
+          }
+        ]}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        actionButton={renderAddButton()}
+      >
+        {renderTabContent()}
+      </DetailCard>
 
       {/* Edit Team Modal */}
       <Modal

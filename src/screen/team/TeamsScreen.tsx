@@ -19,7 +19,7 @@ const TeamsScreen = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className='mx-auto max-w-5xl px-4 py-8'
+      className='mx-auto max-w-7xl px-2 py-8'
     >
       <div className='mb-8 flex items-center justify-between'>
         <div>

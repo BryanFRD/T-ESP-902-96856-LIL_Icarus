@@ -1,3 +1,17 @@
+# [1.32.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.31.0...v1.32.0) (2026-02-13)
+
+
+### Features
+
+* **AP-65:** add Kanban board functionality and related components ([183333e](https://git.icarus-cyber.fr/icarus/web/commit/183333e8bfbbeabc9375f59a928050e66b5c651a))
+
+# [1.31.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.30.1...v1.31.0) (2026-02-13)
+
+
+### Features
+
+* **AP-35:** enhance UI components ([8c27a16](https://git.icarus-cyber.fr/icarus/web/commit/8c27a16af64be006d5c2eb85c36d400164350f75))
+
 ## [1.30.1](https://git.icarus-cyber.fr/icarus/web/compare/v1.30.0...v1.30.1) (2026-02-06)
 
 
