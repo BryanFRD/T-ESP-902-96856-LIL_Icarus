@@ -12,6 +12,15 @@
     "previous": "Previous",
     "save": "Save"
   },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "save": "Save",
+  "confirmAction": {
+    "typeToConfirm": "Type to confirm",
+    "pleaseType": "Please type",
+    "toContinue": "to continue"
+  },
   "days": {
     "fri": "Fri",
     "mon": "Mon",

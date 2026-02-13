@@ -37,7 +37,8 @@
     "endDate": "Date de fin",
     "noDescription": "Aucune description fournie",
     "notFound": "Audit introuvable",
-    "status": "Statut"
+    "status": "Statut",
+    "openKanban": "Ouvrir le Kanban"
   },
   "endDate": "Date de fin",
   "list": {
@@ -60,9 +61,25 @@
     "expired": "Audit expiré"
   },
   "subtitle": "Gérez et consultez vos audits de sécurité ici.",
+  "tabs": {
+    "kanban": "Tableau Kanban",
+    "clients": "Clients",
+    "invitations": "Invitations"
+  },
   "team": {
     "invalid": "Équipe invalide"
   },
   "title": "Mes audits",
-  "verifying": "Vérification en cours..."
+  "verifying": "Vérification en cours...",
+  "noClients": "Aucun client dans cet audit",
+  "noInvitations": "Aucune invitation envoyée",
+  "backToAudits": "Retour aux audits",
+  "createInvitation": "Créer une invitation",
+  "kanban": {
+    "todo": "À faire",
+    "inProgress": "En cours",
+    "inReview": "En révision",
+    "done": "Terminé",
+    "noTickets": "Aucun ticket dans cette colonne"
+  }
 }

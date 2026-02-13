@@ -15,7 +15,7 @@ i18n
   .init({
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'team', 'audit', 'ui', 'messages', 'app'],
+    ns: ['common', 'auth', 'team', 'audit', 'ui', 'messages', 'app', 'kanban'],
     interpolation: {
       escapeValue: false
     },

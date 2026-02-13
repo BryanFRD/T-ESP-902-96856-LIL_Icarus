@@ -7,6 +7,7 @@ import Button from '@/components/ui/button/Button'
 import { MemberRole } from '@/domain/enum/MemberRole.ts'
 import type { TeamMember } from '@/domain/types/Team.ts'
 import useInteractionOutside from '@/hooks/common/useInteractionOutside.ts'
+import { useGetAvatar } from '@/hooks/user/useGetAvatar.ts'
 
 interface MemberCardProps {
   member: TeamMember
@@ -43,6 +44,7 @@ const MemberCard = ({
 }: MemberCardProps) => {
   const { t } = useTranslation()
   const [showMenu, setShowMenu] = useState(false)
+  const { data: avatarUrl } = useGetAvatar(member.avatarUrl)
 
   const { ref } = useInteractionOutside<HTMLDivElement>(
     () => setShowMenu(false),
@@ -55,7 +57,7 @@ const MemberCard = ({
   const displayName =
     member.firstName && member.lastName
       ? `${member.firstName} ${member.lastName}`
-      : member.username || member.email || t('team:unknownMember')
+      : member.username || member.email || t('team.unknownMember')
 
   return (
     <motion.div
@@ -66,9 +68,9 @@ const MemberCard = ({
     >
       <div className='flex items-center gap-4'>
         <div className='flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700'>
-          {member.avatarUrl ? (
+          {avatarUrl ? (
             <img
-              src={member.avatarUrl}
+              src={avatarUrl}
               alt={displayName}
               className='h-10 w-10 rounded-full object-cover'
             />
@@ -102,7 +104,7 @@ const MemberCard = ({
               variant='ghost'
               size='sm'
               onClick={() => setShowMenu(!showMenu)}
-              aria-label={t('common:actions.more')}
+              aria-label={t('actions.more')}
             >
               <MoreVertical className='h-4 w-4' />
             </Button>
@@ -118,7 +120,7 @@ const MemberCard = ({
                   className='flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
                 >
                   <Shield className='h-4 w-4' />
-                  {t('team:changeRole')}
+                  {t('team.changeRole')}
                 </button>
                 <button
                   type='button'
@@ -129,7 +131,7 @@ const MemberCard = ({
                   className='flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-gray-700'
                 >
                   <UserMinus className='h-4 w-4' />
-                  {t('team:removeMember')}
+                  {t('team.removeMember')}
                 </button>
               </div>
             )}

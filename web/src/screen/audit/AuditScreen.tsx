@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { Loader2, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -6,8 +7,6 @@ import AuditList from '@/components/audit/AuditList'
 import Button from '@/components/ui/button/Button'
 import { useCheckAuditsAccess } from '@/hooks/audit/useCheckAuditsAccess'
 import ROUTES, { getRoutePath } from '@/router/routesName'
-
-// Import de la liste
 
 const AuditScreen = () => {
   const { t } = useTranslation()
@@ -45,7 +44,12 @@ const AuditScreen = () => {
   }
 
   return (
-    <div className='p-8'>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className='mx-auto max-w-7xl px-2 py-8'
+    >
       <div className='mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
           <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
@@ -68,7 +72,7 @@ const AuditScreen = () => {
       </div>
 
       <AuditList />
-    </div>
+    </motion.div>
   )
 }
 
