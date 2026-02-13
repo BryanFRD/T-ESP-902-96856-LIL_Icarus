@@ -29,6 +29,10 @@ pub enum EventAction {
     InvitationCancel,
     AvatarUpload,
     AvatarDelete,
+    AgentConnect,
+    AgentDisconnect,
+    AgentCommand,
+    AgentShutdown,
 }
 
 impl<DB: Backend> FromSql<Text, DB> for EventAction
@@ -51,6 +55,10 @@ where
             "invitation_cancel" => Ok(Self::InvitationCancel),
             "avatar_upload" => Ok(Self::AvatarUpload),
             "avatar_delete" => Ok(Self::AvatarDelete),
+            "agent_connect" => Ok(Self::AgentConnect),
+            "agent_disconnect" => Ok(Self::AgentDisconnect),
+            "agent_command" => Ok(Self::AgentCommand),
+            "agent_shutdown" => Ok(Self::AgentShutdown),
             _ => Err("Unrecognized event action".into()),
         }
     }
@@ -76,6 +84,10 @@ where
             Self::InvitationCancel => "invitation_cancel".to_sql(out),
             Self::AvatarUpload => "avatar_upload".to_sql(out),
             Self::AvatarDelete => "avatar_delete".to_sql(out),
+            Self::AgentConnect => "agent_connect".to_sql(out),
+            Self::AgentDisconnect => "agent_disconnect".to_sql(out),
+            Self::AgentCommand => "agent_command".to_sql(out),
+            Self::AgentShutdown => "agent_shutdown".to_sql(out),
         }
     }
 }
@@ -97,6 +109,10 @@ impl Display for EventAction {
             Self::InvitationCancel => write!(f, "invitation_cancel"),
             Self::AvatarUpload => write!(f, "avatar_upload"),
             Self::AvatarDelete => write!(f, "avatar_delete"),
+            Self::AgentConnect => write!(f, "agent_connect"),
+            Self::AgentDisconnect => write!(f, "agent_disconnect"),
+            Self::AgentCommand => write!(f, "agent_command"),
+            Self::AgentShutdown => write!(f, "agent_shutdown"),
         }
     }
 }
@@ -120,6 +136,7 @@ pub enum ResourceType {
     TicketAttachment,
     KanbanColumn,
     TicketLabel,
+    Agent,
 }
 
 impl<DB: Backend> FromSql<Text, DB> for ResourceType
@@ -143,6 +160,7 @@ where
             "ticket_attachment" => Ok(Self::TicketAttachment),
             "kanban_column" => Ok(Self::KanbanColumn),
             "ticket_label" => Ok(Self::TicketLabel),
+            "agent" => Ok(Self::Agent),
             _ => Err("Unrecognized resource type".into()),
         }
     }
@@ -169,6 +187,7 @@ where
             Self::TicketAttachment => "ticket_attachment".to_sql(out),
             Self::KanbanColumn => "kanban_column".to_sql(out),
             Self::TicketLabel => "ticket_label".to_sql(out),
+            Self::Agent => "agent".to_sql(out),
         }
     }
 }
@@ -191,6 +210,7 @@ impl Display for ResourceType {
             Self::TicketAttachment => write!(f, "ticket_attachment"),
             Self::KanbanColumn => write!(f, "kanban_column"),
             Self::TicketLabel => write!(f, "ticket_label"),
+            Self::Agent => write!(f, "agent"),
         }
     }
 }

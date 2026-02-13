@@ -1,0 +1,76 @@
+use thiserror::Error;
+
+use super::{
+    AgentAuth, AgentAuthResponse, AgentControl, EncryptionRequest, EncryptionResponse, Heartbeat,
+    StreamClose, StreamData, StreamError, StreamOpen, SystemInfo,
+};
+
+#[derive(Debug)]
+pub enum Packets {
+    EncryptionRequest(EncryptionRequest),
+    EncryptionResponse(EncryptionResponse),
+    StreamOpen(StreamOpen),
+    StreamClose(StreamClose),
+    StreamData(StreamData),
+    StreamError(StreamError),
+    Heartbeat(Heartbeat),
+    AgentAuth(AgentAuth),
+    AgentAuthResponse(AgentAuthResponse),
+    SystemInfo(SystemInfo),
+    AgentControl(AgentControl),
+}
+
+#[derive(Error, Debug)]
+pub enum PacketError {
+    #[error("Got unknown packet code : {0}")]
+    UnknownPacket(String),
+    #[error("Error while encoding packet: {0}")]
+    EncodingError(String),
+    #[error("Error while decoding packet: {0}")]
+    DecodingError(String),
+}
+
+pub trait Packet {
+    /// Serializes the packet.
+    ///
+    /// # Errors
+    /// Returns an error if serialization fails.
+    fn serialize(&self) -> Result<Vec<u8>, PacketError>;
+    /// Deserializes a packet from byte data.
+    ///
+    /// # Errors
+    /// Returns an error if deserialization fails.
+    fn deserialize(data: &[u8]) -> Result<Self, PacketError>
+    where
+        Self: Sized;
+    fn packet_code() -> u8;
+}
+
+/// Deserializes a packet from raw bytes.
+///
+/// # Errors
+/// Returns an error if deserialization fails or the packet code is unknown.
+pub fn from_packet_bytes(data: &[u8]) -> Result<Packets, PacketError> {
+    let packet_code = data[0];
+    let data = &data[1..];
+    match packet_code {
+        0x01 => Ok(Packets::EncryptionRequest(EncryptionRequest::deserialize(
+            data,
+        )?)),
+        0x02 => Ok(Packets::EncryptionResponse(
+            EncryptionResponse::deserialize(data)?,
+        )),
+        0x03 => Ok(Packets::StreamOpen(StreamOpen::deserialize(data)?)),
+        0x04 => Ok(Packets::StreamClose(StreamClose::deserialize(data)?)),
+        0x05 => Ok(Packets::StreamData(StreamData::deserialize(data)?)),
+        0x06 => Ok(Packets::StreamError(StreamError::deserialize(data)?)),
+        0x07 => Ok(Packets::Heartbeat(Heartbeat::deserialize(data)?)),
+        0x08 => Ok(Packets::AgentAuth(AgentAuth::deserialize(data)?)),
+        0x09 => Ok(Packets::AgentAuthResponse(AgentAuthResponse::deserialize(
+            data,
+        )?)),
+        0x0A => Ok(Packets::SystemInfo(SystemInfo::deserialize(data)?)),
+        0x0B => Ok(Packets::AgentControl(AgentControl::deserialize(data)?)),
+        _ => Err(PacketError::UnknownPacket(packet_code.to_string())),
+    }
+}

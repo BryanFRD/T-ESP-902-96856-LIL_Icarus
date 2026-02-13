@@ -6,8 +6,7 @@ use thiserror::Error;
 /// Encrypts plaintext using AES-256-GCM.
 ///
 /// # Errors
-///
-/// Returns `EncryptionError::FailedToEncrypt` if the encryption operation fails.
+/// Returns an error if encryption fails.
 pub fn encrypt(key: &[u8], plaintext: &[u8]) -> Result<(Vec<u8>, Vec<u8>), EncryptionError> {
     let cipher = Aes256Gcm::new(Key::<aes_gcm::aes::Aes256>::from_slice(key));
     let nonce: [u8; 12] = rand::rng().random();
@@ -21,8 +20,7 @@ pub fn encrypt(key: &[u8], plaintext: &[u8]) -> Result<(Vec<u8>, Vec<u8>), Encry
 /// Decrypts ciphertext using AES-256-GCM.
 ///
 /// # Errors
-///
-/// Returns `EncryptionError::FailedToDecrypt` if the decryption operation fails.
+/// Returns an error if decryption fails.
 pub fn decrypt(key: &[u8], nonce: &[u8], ciphertext: &[u8]) -> Result<Vec<u8>, EncryptionError> {
     let cipher = Aes256Gcm::new(Key::<aes_gcm::aes::Aes256>::from_slice(key));
     match cipher.decrypt(Nonce::from_slice(nonce), ciphertext) {

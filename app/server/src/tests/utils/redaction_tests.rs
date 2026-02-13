@@ -157,7 +157,7 @@ fn test_redact_json_preserves_non_string_values() {
     let mut json = json!({
         "count": 42,
         "active": true,
-        "ratio": 3.14,
+        "ratio": std::f64::consts::PI,
         "items": null
     });
 
@@ -165,7 +165,7 @@ fn test_redact_json_preserves_non_string_values() {
 
     assert_eq!(json["count"], 42);
     assert_eq!(json["active"], true);
-    assert_eq!(json["ratio"], 3.14);
+    assert_eq!(json["ratio"], std::f64::consts::PI);
     assert_eq!(json["items"], json!(null));
 }
 

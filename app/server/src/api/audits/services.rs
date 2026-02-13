@@ -76,6 +76,9 @@ pub fn get_routes(state: &GlobalState) -> Router {
         .route("/{audit_id}/logs", get(endpoints::list_audit_logs))
         .layer(from_fn(auth::middleware));
 
+    // Agent management routes (auth only, no step-up)
+    let agent_routes = crate::api::agents::get_routes();
+
     // Merge all routers
     protected_routes
         .merge(invitation_routes)
@@ -83,6 +86,7 @@ pub fn get_routes(state: &GlobalState) -> Router {
         .merge(public_routes)
         .merge(ticket_routes)
         .merge(log_routes)
+        .merge(agent_routes)
         .with_state(state.clone())
 }
 

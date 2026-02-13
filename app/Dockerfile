@@ -19,6 +19,7 @@ WORKDIR /app
 
 # Copy manifests first (to cache deps)
 COPY Cargo.toml Cargo.lock ./
+COPY derive/ derive/
 COPY shared/ shared/
 
 # Copy in agent and server crates

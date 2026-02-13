@@ -60,9 +60,7 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
     let csrf_protection =
         std::sync::Arc::new(CsrfProtection::new(state.csrf_secret.as_ref().clone()));
 
-    let (ws_layer, io) = SocketIo::builder()
-        .with_state(state.clone())
-        .build_layer();
+    let (ws_layer, io) = SocketIo::builder().with_state(state.clone()).build_layer();
     state.set_io(io.clone());
     ws::setup_ws(&io);
 
