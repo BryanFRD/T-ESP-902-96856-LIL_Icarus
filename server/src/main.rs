@@ -21,6 +21,12 @@ async fn main() {
     let state = utils::init::get_state().await;
     let app = utils::router::get_router_with_state(&state);
 
+    // Spawn the agent TCP listener on port 1337
+    let tcp_state = state.clone();
+    tokio::spawn(async move {
+        api::agents::tcp::listener::start_tcp_listener(tcp_state).await;
+    });
+
     tokio::spawn(async move {
         utils::start_cleanup_task(state).await;
     });

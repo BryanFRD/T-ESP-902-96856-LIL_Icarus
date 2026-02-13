@@ -1,3 +1,7 @@
+use crate::api::agents;
+use crate::api::agents::{
+    AgentResponse, AgentTokenResponse, CreateAgentPayload, SystemInfoResponse,
+};
 use crate::api::audits;
 use crate::api::audits::invitations::{
     AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn,
@@ -54,6 +58,9 @@ use utoipa::OpenApi;
         audits::endpoints::archive_audit,
         audits::endpoints::remove_client,
         audits::endpoints::list_audit_logs,
+        agents::endpoints::create_agent,
+        agents::endpoints::list_agents,
+        agents::endpoints::revoke_agent,
         audits::step_up::endpoints::verify_access,
         audits::step_up::endpoints::check_access,
         audits::invitations::endpoints::create_invitation,
@@ -133,6 +140,7 @@ use utoipa::OpenApi;
     ),
     components(
         schemas(
+            CreateAgentPayload, AgentResponse, AgentTokenResponse, SystemInfoResponse,
             CreateAuditPayload, UpdateAuditPayload, AuditResponse, ClientUser, VerifyAccessPayload, CheckAccessResponse,
             CreateAuditInvitationPayload, AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn, CheckInvitationResponse,
             ConfirmEmailPayload, LoginPayload, RegisterPayload, ResetPasswordRequestPayload, ResetPasswordPayload,
@@ -155,6 +163,7 @@ use utoipa::OpenApi;
         (name = "Admin", description = "Admin management endpoints"),
         (name = "Status", description = "Application status endpoints"),
         (name = "Teams", description = "Team management endpoints"),
+        (name = "Agents", description = "Agent management endpoints"),
         (name = "Audits", description = "Audit management endpoints"),
         (name = "Tickets", description = "Kanban ticket management endpoints"),
         (name = "Kanban Columns", description = "Kanban column management endpoints"),

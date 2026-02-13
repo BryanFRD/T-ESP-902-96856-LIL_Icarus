@@ -1,3 +1,4 @@
+pub mod agents;
 pub mod audits;
 pub mod auth;
 pub mod csrf;

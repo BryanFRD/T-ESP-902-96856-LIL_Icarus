@@ -2,7 +2,12 @@
 name = "agent"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.87.0"
 
 [dependencies]
+x25519-dalek = "2.0.1"
 shared = { path = "../shared" }
+aes-gcm = "0.10.3"
+rand = "0.9.1"
+thiserror = "2.0.16"
+crossbeam = "0.8"
+sysinfo = "0.35"

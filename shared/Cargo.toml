@@ -8,3 +8,4 @@ aes-gcm = "0.10.3"
 bincode = "2.0.1"
 rand = "0.9.1"
 thiserror = "2.0.16"
+derive = { path = "../derive"}

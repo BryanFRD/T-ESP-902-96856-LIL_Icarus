@@ -69,9 +69,14 @@ pub fn infer_post_event(
         (Some("audits"), Some("invite"), Some(token), Some("accept"), _, _) => {
             event_with_id!(InvitationConsume, AuditInvitation, TOKEN => token)
         }
-        (Some("audits"), Some(audit_id), Some("tickets"), Some(ticket_id), Some("comments"), None)
-            if audit_id != "me" =>
-        {
+        (
+            Some("audits"),
+            Some(audit_id),
+            Some("tickets"),
+            Some(ticket_id),
+            Some("comments"),
+            None,
+        ) if audit_id != "me" => {
             event_with_id!(Create, TicketComment, AUDIT_ID => audit_id, TICKET_ID => ticket_id)
         }
         (
@@ -119,9 +124,7 @@ pub fn infer_get_event(
     ) {
         (Some("auth"), Some("confirm-email"), _, _, _) => event!(EmailConfirm, Auth),
         (Some("users"), Some("me"), _, _, _) => event!(Read, User),
-        (Some("users"), Some(user_id), _, _, _)
-            if user_id != "me" && user_id != "avatars" =>
-        {
+        (Some("users"), Some(user_id), _, _, _) if user_id != "me" && user_id != "avatars" => {
             event_with_id!(Read, User, USER_ID => user_id)
         }
         (Some("teams"), Some("me"), _, _, _) => event!(Read, Team),

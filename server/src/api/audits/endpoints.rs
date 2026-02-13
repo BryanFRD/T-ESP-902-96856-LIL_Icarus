@@ -263,11 +263,7 @@ pub async fn list_audit_logs(
             .flatten()
             .is_none()
     {
-        return (
-            StatusCode::FORBIDDEN,
-            Json("error.audit.mustBeTeamMember"),
-        )
-            .into_response();
+        return (StatusCode::FORBIDDEN, Json("error.audit.mustBeTeamMember")).into_response();
     }
 
     match crate::api::events::query_audit_logs(&state, &audit_id_str, &filters) {

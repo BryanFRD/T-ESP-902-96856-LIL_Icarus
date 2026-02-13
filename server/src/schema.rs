@@ -1,6 +1,18 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    audit_agents (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        name -> Varchar,
+        token_hash -> Varchar,
+        is_revoked -> Bool,
+        last_connected_at -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     audits (id) {
         id -> Varchar,
         name -> Varchar,
@@ -203,6 +215,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(audit_agents -> audits (audit_id));
 diesel::joinable!(audits -> companies (company_id));
 diesel::joinable!(audits -> teams (team_id));
 diesel::joinable!(audits_clients -> audits (audit_id));
@@ -228,6 +241,7 @@ diesel::joinable!(tickets_labels -> ticket_labels (label_id));
 diesel::joinable!(tickets_labels -> tickets (ticket_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    audit_agents,
     audits,
     audits_clients,
     audits_invitations,

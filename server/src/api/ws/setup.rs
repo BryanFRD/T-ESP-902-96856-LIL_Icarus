@@ -29,6 +29,8 @@ async fn on_connect(socket: SocketRef) {
 
     socket.on("room:join", handlers::on_room_join);
     socket.on("room:leave", handlers::on_room_leave);
+    socket.on("agent:shutdown", handlers::on_agent_shutdown);
+    socket.on("agent:command", handlers::on_agent_command);
 
     socket.on_disconnect(on_disconnect);
 }

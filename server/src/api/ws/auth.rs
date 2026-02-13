@@ -17,17 +17,14 @@ impl std::error::Error for WsAuthError {}
 
 /// Extract the value of a named cookie from the raw `Cookie` header.
 fn extract_cookie_value<'a>(cookie_header: &'a str, name: &str) -> Option<&'a str> {
-    cookie_header
-        .split(';')
-        .map(str::trim)
-        .find_map(|pair| {
-            let (key, value) = pair.split_once('=')?;
-            if key.trim() == name {
-                Some(value.trim())
-            } else {
-                None
-            }
-        })
+    cookie_header.split(';').map(str::trim).find_map(|pair| {
+        let (key, value) = pair.split_once('=')?;
+        if key.trim() == name {
+            Some(value.trim())
+        } else {
+            None
+        }
+    })
 }
 
 /// Socket.IO connect middleware that authenticates users via the `auth` HTTP cookie.

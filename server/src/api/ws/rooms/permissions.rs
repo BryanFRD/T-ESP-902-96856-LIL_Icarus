@@ -1,9 +1,9 @@
 use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
 
-use crate::api::audits::step_up::services::{
-    validate_audit_access_token, AUDIT_ACCESS_COOKIE_NAME,
-};
 use crate::api::audits::Audit;
+use crate::api::audits::step_up::services::{
+    AUDIT_ACCESS_COOKIE_NAME, validate_audit_access_token,
+};
 use crate::api::ws::error::WsError;
 use crate::state::GlobalState;
 

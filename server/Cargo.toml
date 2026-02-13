@@ -55,6 +55,8 @@ diesel_migrations = "2.3.1"
 metrics = "0.24"
 metrics-exporter-prometheus = "0.16"
 socketioxide = { version = "0.18.0", features = ["state", "extensions"] }
+x25519-dalek = "2.0.1"
+aes-gcm = "0.10.3"
 
 [dev-dependencies]
 mockall = "0.13"

@@ -48,7 +48,8 @@ impl ResourceFetcherRegistry {
             | ResourceType::TicketComment
             | ResourceType::TicketAttachment
             | ResourceType::KanbanColumn
-            | ResourceType::TicketLabel => None,
+            | ResourceType::TicketLabel
+            | ResourceType::Agent => None,
         }
     }
 

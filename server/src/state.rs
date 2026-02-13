@@ -1,15 +1,78 @@
 use crate::vault::Secrets;
-use base64::{engine::general_purpose::STANDARD, Engine};
+use base64::{Engine, engine::general_purpose::STANDARD};
+use chrono::{DateTime, Utc};
 use diesel::{
-    r2d2::{ConnectionManager, Pool, PoolError, PooledConnection},
     PgConnection,
+    r2d2::{ConnectionManager, Pool, PoolError, PooledConnection},
 };
-use rand::{rngs::StdRng, SeedableRng};
+use rand::{SeedableRng, rngs::StdRng};
 use resend_rs::Resend;
 use socketioxide::SocketIo;
+use std::collections::HashMap;
+use std::net::SocketAddr;
 use std::sync::{Arc, OnceLock};
+use tokio::net::tcp::OwnedWriteHalf;
 use tokio::sync::Mutex;
 use tracing::info;
+
+/// Handle to a connected agent, stored in the agent registry.
+#[allow(dead_code)]
+pub struct AgentHandle {
+    pub agent_id: String,
+    pub audit_id: String,
+    pub addr: SocketAddr,
+    pub shutdown: tokio::sync::watch::Sender<bool>,
+    pub last_heartbeat: Arc<std::sync::Mutex<Option<DateTime<Utc>>>>,
+    pub system_info: Arc<std::sync::Mutex<Option<shared::packets::SystemInfo>>>,
+    pub writer: Arc<Mutex<OwnedWriteHalf>>,
+    pub shared_secret: [u8; 32],
+}
+
+impl AgentHandle {
+    /// Signal the agent to disconnect.
+    pub fn shutdown(&self) {
+        let _ = self.shutdown.send(true);
+    }
+
+    /// Send an encrypted packet to the agent via the TCP writer.
+    ///
+    /// # Errors
+    /// Returns an error if encryption or writing fails.
+    #[allow(dead_code)]
+    pub async fn send_packet(
+        &self,
+        data: &[u8],
+    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+        use shared::encryption::encrypt;
+        use tokio::io::AsyncWriteExt;
+
+        let (encrypted, nonce) = encrypt(&self.shared_secret, data)?;
+
+        #[allow(clippy::cast_possible_truncation)]
+        let len = encrypted.len() as u32;
+        let total_size = 4 + nonce.len() + encrypted.len();
+        let mut buf = vec![0u8; total_size];
+
+        buf[0..4].copy_from_slice(&len.to_be_bytes());
+        buf[4..16].copy_from_slice(&nonce);
+        buf[16..].copy_from_slice(&encrypted);
+
+        let mut writer = self.writer.lock().await;
+        writer.write_all(&buf).await?;
+        writer.flush().await?;
+        Ok(())
+    }
+
+    /// Check if the agent is online based on heartbeat recency.
+    #[must_use]
+    pub fn is_online(&self, timeout_secs: i64) -> bool {
+        self.last_heartbeat
+            .lock()
+            .ok()
+            .and_then(|hb| *hb)
+            .is_some_and(|ts| (Utc::now() - ts).num_seconds() < timeout_secs)
+    }
+}
 
 #[derive(Clone)]
 pub struct GlobalState {
@@ -21,6 +84,7 @@ pub struct GlobalState {
     pub audit_access_secret: Arc<String>,
     pub event_encryption_key: Arc<Vec<u8>>,
     io: Arc<OnceLock<SocketIo>>,
+    pub agent_registry: Arc<std::sync::Mutex<HashMap<String, AgentHandle>>>,
 }
 
 impl GlobalState {
@@ -66,6 +130,7 @@ impl GlobalState {
             audit_access_secret: Arc::new(audit_access_secret),
             event_encryption_key: Arc::new(event_key_bytes),
             io: Arc::new(OnceLock::new()),
+            agent_registry: Arc::new(std::sync::Mutex::new(HashMap::new())),
         }
     }
 
@@ -109,6 +174,12 @@ impl GlobalState {
             .expect("SocketIo handle not initialized — call set_io() first")
     }
 
+    /// Get an optional reference to the [`SocketIo`] handle.
+    /// Returns `None` if not yet initialized (e.g. during early startup or tests).
+    pub fn io_opt(&self) -> Option<&SocketIo> {
+        self.io.get()
+    }
+
     #[cfg(test)]
     pub fn new_with_pool(
         db_pool: Arc<Pool<ConnectionManager<PgConnection>>>,
@@ -142,6 +213,7 @@ impl GlobalState {
             audit_access_secret: Arc::new(audit_access_secret),
             event_encryption_key: Arc::new(event_key_bytes),
             io: Arc::new(OnceLock::new()),
+            agent_registry: Arc::new(std::sync::Mutex::new(HashMap::new())),
         }
     }
 }
