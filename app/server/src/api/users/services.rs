@@ -124,16 +124,6 @@ pub fn user_exists(
         return Ok(Some("email".to_string()));
     }
 
-    if select(exists(
-        users
-            .filter(first_name.eq(&payload.first_name))
-            .filter(last_name.eq(&payload.last_name)),
-    ))
-    .get_result(&mut conn)?
-    {
-        return Ok(Some("name".to_string()));
-    }
-
     if select(exists(users.filter(username.eq(&payload.username)))).get_result(&mut conn)? {
         return Ok(Some("username".to_string()));
     }
