@@ -1,4 +1,13 @@
 #[cfg(test)]
+pub mod audit_messages;
+
+#[cfg(test)]
+pub mod audit_invitations;
+
+#[cfg(test)]
+pub mod audit_step_up;
+
+#[cfg(test)]
 pub mod audits;
 
 #[cfg(test)]

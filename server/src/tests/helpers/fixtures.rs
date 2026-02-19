@@ -240,3 +240,45 @@ pub fn create_complete_audit_setup(pool: &DbPool, owner: &User) -> (Team, Compan
     );
     (team, company, audit)
 }
+// ============ Invitations fixtures ============
+
+#[cfg(test)]
+use crate::api::audits::invitations::AuditInvitation;
+#[cfg(test)]
+use crate::schema::audits_invitations;
+
+/// Insère une invitation de test dans la base de données
+#[cfg(test)]
+pub fn insert_test_invitation(
+    pool: &DbPool,
+    audit_id: &str,
+    client_email: &str,
+    token: &str,
+    creator_user_id: &str,
+) -> AuditInvitation {
+    let invitation = AuditInvitation::new(
+        audit_id.to_string(),
+        client_email.to_string(),
+        token.to_string(),
+        (chrono::Utc::now() + chrono::Duration::hours(24)).naive_utc(),
+        creator_user_id.to_string(),
+    );
+    let mut conn = pool.get().expect("Failed to get DB connection");
+
+    diesel::insert_into(audits_invitations::table)
+        .values(&invitation)
+        .execute(&mut conn)
+        .expect("Failed to insert test invitation");
+
+    invitation
+}
+
+/// Récupère une invitation du db par ID
+#[cfg(test)]
+pub fn get_test_invitation(pool: &DbPool, invitation_id: &str) -> Option<AuditInvitation> {
+    let mut conn = pool.get().expect("Failed to get DB connection");
+    audits_invitations::table
+        .filter(audits_invitations::id.eq(invitation_id))
+        .first::<AuditInvitation>(&mut conn)
+        .ok()
+}
