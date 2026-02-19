@@ -1,6 +1,7 @@
 pub mod endpoints;
 pub mod error;
 pub mod invitations;
+pub mod messages;
 pub mod models;
 pub mod services;
 pub mod step_up;

@@ -51,6 +51,31 @@ diesel::table! {
 }
 
 diesel::table! {
+    audit_message_attachments (id) {
+        id -> Varchar,
+        message_id -> Varchar,
+        uploaded_by -> Varchar,
+        file_name -> Varchar,
+        file_path -> Varchar,
+        file_size -> Int8,
+        mime_type -> Varchar,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    audit_messages (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        author_id -> Varchar,
+        content -> Text,
+        content_nonce -> Bytea,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     companies (id) {
         id -> Varchar,
         team_id -> Varchar,
@@ -216,6 +241,10 @@ diesel::table! {
 }
 
 diesel::joinable!(audit_agents -> audits (audit_id));
+diesel::joinable!(audit_message_attachments -> audit_messages (message_id));
+diesel::joinable!(audit_message_attachments -> users (uploaded_by));
+diesel::joinable!(audit_messages -> audits (audit_id));
+diesel::joinable!(audit_messages -> users (author_id));
 diesel::joinable!(audits -> companies (company_id));
 diesel::joinable!(audits -> teams (team_id));
 diesel::joinable!(audits_clients -> audits (audit_id));
@@ -242,6 +271,8 @@ diesel::joinable!(tickets_labels -> tickets (ticket_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     audit_agents,
+    audit_message_attachments,
+    audit_messages,
     audits,
     audits_clients,
     audits_invitations,

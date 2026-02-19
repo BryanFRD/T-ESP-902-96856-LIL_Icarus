@@ -19,7 +19,7 @@ use diesel::{
     ExpressionMethods, JoinOnDsl, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
 };
 
-use super::{endpoints, invitations, step_up};
+use super::{endpoints, invitations, messages, step_up};
 
 /// Get routes for audits module
 pub fn get_routes(state: &GlobalState) -> Router {
@@ -71,6 +71,9 @@ pub fn get_routes(state: &GlobalState) -> Router {
     // Ticket routes (nested under /audits)
     let ticket_routes = tickets::services::get_routes(state);
 
+    // Audit message routes (nested under /audits)
+    let message_routes = messages::services::get_routes(state);
+
     // Log routes (auth only, no step-up)
     let log_routes = Router::new()
         .route("/{audit_id}/logs", get(endpoints::list_audit_logs))
@@ -85,6 +88,7 @@ pub fn get_routes(state: &GlobalState) -> Router {
         .merge(verify_routes)
         .merge(public_routes)
         .merge(ticket_routes)
+        .merge(message_routes)
         .merge(log_routes)
         .merge(agent_routes)
         .with_state(state.clone())

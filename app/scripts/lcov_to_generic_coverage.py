@@ -139,21 +139,23 @@ def convert_lcov_to_generic_coverage(lcov_path: str, output_path: str, project_r
     print(f"Parsed coverage data:")
     print(f"  - {total_files} files")
     print(f"  - {total_lines} lines")
-    print(f"  - {covered_lines} covered lines ({covered_lines * 100 / total_lines:.1f}% coverage)")
+    if total_lines > 0:
+        print(f"  - {covered_lines} covered lines ({covered_lines * 100 / total_lines:.1f}% coverage)")
+    else:
+        print(f"  - No lines to cover")
 
     print(f"Creating Generic Coverage XML: {output_path}")
     root = create_generic_coverage_xml(coverage_data)
     indent_xml(root)
 
-    # Create XML tree and write to file
+    # Create XML tree and write to file with explicit declaration
     tree = ET.ElementTree(root)
     ET.register_namespace('', '')  # Avoid namespace prefixes
-    tree.write(
-        output_path,
-        encoding='UTF-8',
-        xml_declaration=True,
-        method='xml'
-    )
+    
+    with open(output_path, 'w', encoding='UTF-8') as f:
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        tree_str = ET.tostring(root, encoding='unicode')
+        f.write(tree_str)
 
     print(f"Successfully created Generic Coverage XML: {output_path}")
 

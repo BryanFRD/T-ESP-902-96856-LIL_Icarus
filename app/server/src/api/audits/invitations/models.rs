@@ -60,7 +60,7 @@ impl AuditInvitation {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Validate, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAuditInvitationPayload {
     #[validate(email)]

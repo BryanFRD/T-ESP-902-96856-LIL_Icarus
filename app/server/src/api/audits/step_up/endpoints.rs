@@ -14,7 +14,7 @@ use super::services::{
     validate_audit_access_token,
 };
 
-#[derive(Debug, Deserialize, Validate, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, Validate, ToSchema)]
 pub struct VerifyAccessPayload {
     #[validate(length(min = 1))]
     #[schema(example = "my_secure_password")]
