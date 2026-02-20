@@ -30,14 +30,13 @@ fn handle_db_option<T>(
 
 use super::User;
 use super::endpoints::{
-    delete_avatar, delete_me, delete_user_admin, get_user_admin, list_users_admin, me,
-    serve_avatar, update_me, update_user_admin, upload_avatar,
+    delete_avatar, delete_me, delete_user_admin, get_user_admin, list_users_admin, me, update_me,
+    update_user_admin, upload_avatar,
 };
 use super::models::UpdatePayload;
 
 pub fn get_routes(state: &GlobalState) -> Router {
     Router::new()
-        .route("/avatars/{filename}", get(serve_avatar))
         .route("/me", get(me))
         .route("/me", patch(update_me))
         .route("/me", delete(delete_me))

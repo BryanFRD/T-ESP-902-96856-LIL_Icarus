@@ -4,10 +4,7 @@ use axum::{
     response::IntoResponse,
 };
 use http::StatusCode;
-use std::path::PathBuf;
-use tokio::fs;
 use tower_cookies::Cookies;
-use tracing::{error, info};
 
 use super::{get_user_by_id_or_error, get_user_or_error};
 use crate::helpers::{
@@ -17,20 +14,20 @@ use crate::helpers::{
 
 use crate::api::{
     auth::JwtClaims,
-    users::{UserError, get_all_users, models::AvatarForm},
+    users::{UserError, UserResponse, avatar_url_path, get_all_users, models::AvatarForm},
 };
 use crate::state::GlobalState;
 
 use super::{
-    User, check_update_conflicts, delete_user, get_user_by_id, models::UpdatePayload,
-    update_user_fields, validate_update_payload,
+    check_update_conflicts, delete_user, get_user_by_id, models::UpdatePayload, update_user_fields,
+    validate_update_payload,
 };
 
 #[utoipa::path(
     get,
     path = "/v1/users/me",
     responses(
-        (status = 200, description = "User information retrieved successfully", body = User),
+        (status = 200, description = "User information retrieved successfully", body = UserResponse),
         (status = UNAUTHORIZED, description = "Invalid credentials"),
     ),
     security(
@@ -44,7 +41,7 @@ pub async fn me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl IntoRe
         Err(e) => return e,
     };
 
-    Json(user).into_response()
+    Json(UserResponse::from(user)).into_response()
 }
 
 #[utoipa::path(
@@ -152,7 +149,7 @@ pub async fn delete_me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl
     get,
     path = "/v1/users",
     responses(
-        (status = 200, description = "List of users retrieved successfully", body = [User]),
+        (status = 200, description = "List of users retrieved successfully", body = [UserResponse]),
         (status = UNAUTHORIZED, description = "Invalid credentials"),
         (status = FORBIDDEN, description = "Access denied")
     ),
@@ -163,7 +160,13 @@ pub async fn delete_me(State(state): State<GlobalState>, jwt: JwtClaims) -> impl
 )]
 pub async fn list_users_admin(State(state): State<GlobalState>) -> impl IntoResponse {
     match get_all_users(&state) {
-        Ok(users) => Json(users).into_response(),
+        Ok(users) => {
+            let users = users
+                .into_iter()
+                .map(UserResponse::from)
+                .collect::<Vec<_>>();
+            Json(users).into_response()
+        }
         Err(e) => internal_error("Failed to get users", e),
     }
 }
@@ -172,7 +175,7 @@ pub async fn list_users_admin(State(state): State<GlobalState>) -> impl IntoResp
     get,
     path = "/v1/users/{id}",
     responses(
-        (status = 200, description = "User information retrieved successfully", body = User),
+        (status = 200, description = "User information retrieved successfully", body = UserResponse),
         (status = UNAUTHORIZED, description = "Invalid credentials"),
         (status = FORBIDDEN, description = "Access denied"),
         (status = NOT_FOUND, description = "User not found")
@@ -187,7 +190,7 @@ pub async fn get_user_admin(
     Path(id): Path<String>,
 ) -> impl IntoResponse {
     match get_user_by_id(&state, &id) {
-        Ok(Some(user)) => Json(user).into_response(),
+        Ok(Some(user)) => Json(UserResponse::from(user)).into_response(),
         Ok(None) => not_found_error("error.user.admin.notFound"),
         Err(e) => internal_error("Failed to get user by ID", e),
     }
@@ -247,7 +250,7 @@ pub async fn update_user_admin(
     }
 
     match update_user_fields(&state, &user.id, &payload) {
-        Ok(()) => Json(user).into_response(),
+        Ok(()) => Json(UserResponse::from(user)).into_response(),
         Err(e) => internal_error("Failed to update user", e),
     }
 }
@@ -312,7 +315,7 @@ pub async fn upload_avatar(
 
     match super::save_avatar(&state, &user_id, multipart).await {
         Ok(filename) => Json(serde_json::json!({
-            "avatar_url": filename
+            "avatar_url": avatar_url_path(&filename)
         }))
         .into_response(),
         Err(UserError::MultipartError(e)) => {
@@ -328,42 +331,6 @@ pub async fn upload_avatar(
             Json("error.server.internalError"),
         )
             .into_response(),
-    }
-}
-
-#[utoipa::path(
-    get,
-    path = "/v1/users/avatars/{filename}",
-    description = "Serve user avatar by filename",
-    responses(
-        (status = 200, description = "Avatar served successfully"),
-        (status = NOT_FOUND, description = "Avatar file not found"),
-        (status = BAD_REQUEST, description = "Invalid filename"),
-        (status = INTERNAL_SERVER_ERROR, description = "Failed to read avatar file"),
-    ),
-    tag = "User",
-)]
-pub async fn serve_avatar(Path(filename): Path<String>) -> impl IntoResponse {
-    let file_path = PathBuf::from("dist").join("avatars").join(&filename);
-
-    info!("Serving avatar: {:?}", file_path);
-
-    if !file_path.exists() {
-        return (StatusCode::NOT_FOUND, Json("error.user.avatar.notFound")).into_response();
-    }
-
-    let avatars_dir = PathBuf::from("dist").join("avatars");
-    if !file_path.starts_with(&avatars_dir) {
-        return (StatusCode::BAD_REQUEST, Json("error.server.invalidPath")).into_response();
-    }
-
-    match fs::read(file_path).await {
-        Ok(contents) => (StatusCode::OK, contents).into_response(),
-
-        Err(e) => {
-            error!("Failed to read avatar file: {}", e);
-            (StatusCode::NOT_FOUND, Json("error.user.avatar.notFound")).into_response()
-        }
     }
 }
 
