@@ -575,7 +575,7 @@ mod audits_integration_tests {
         };
 
         let response = server
-            .patch(&format!("/v1/audits/{}", fake_audit_id))
+            .patch(&format!("/v1/audits/{fake_audit_id}"))
             .add_cookie(auth_cookie.clone())
             .json(&payload)
             .await;
@@ -738,7 +738,7 @@ mod audits_integration_tests {
 
         let fake_audit_id = ulid::Ulid::new().to_string();
         let response = server
-            .delete(&format!("/v1/audits/{}", fake_audit_id))
+            .delete(&format!("/v1/audits/{fake_audit_id}"))
             .add_cookie(auth_cookie.clone())
             .await;
 
@@ -1410,7 +1410,7 @@ mod audits_integration_tests {
         let auth_cookie = cookies.iter().find(|c| c.name() == "auth").unwrap();
 
         let payload = CreateAuditPayload {
-            name: "".to_string(),
+            name: String::new(),
             description: Some("Test".to_string()),
             team_id: team.id.clone(),
             company_id: company.id.clone(),

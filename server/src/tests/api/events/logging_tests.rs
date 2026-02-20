@@ -333,5 +333,5 @@ fn test_resource_id_format_with_multiple_ids() {
     let id = resource_id.unwrap();
     assert!(id.contains("team_id:abc"));
     assert!(id.contains("user_id:def"));
-    assert!(id.contains(","));
+    assert!(id.contains(','));
 }

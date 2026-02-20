@@ -55,7 +55,7 @@ fn test_team_new_generates_unique_ids() {
 
 #[test]
 fn test_team_new_with_empty_name() {
-    let team = Team::new("".to_string(), "Description".to_string());
+    let team = Team::new(String::new(), "Description".to_string());
 
     assert_eq!(team.name, "");
     assert!(
@@ -66,7 +66,7 @@ fn test_team_new_with_empty_name() {
 
 #[test]
 fn test_team_new_with_empty_description() {
-    let team = Team::new("Team Name".to_string(), "".to_string());
+    let team = Team::new("Team Name".to_string(), String::new());
 
     assert_eq!(team.description, "");
     assert!(

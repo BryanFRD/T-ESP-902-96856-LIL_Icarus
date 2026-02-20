@@ -127,7 +127,7 @@ mod audit_step_up_integration_tests {
         let auth_cookie = cookies.iter().find(|c| c.name() == "auth").unwrap();
 
         let payload = VerifyAccessPayload {
-            password: "".to_string(),
+            password: String::new(),
         };
 
         let response = server
