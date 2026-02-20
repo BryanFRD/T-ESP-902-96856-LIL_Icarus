@@ -46,7 +46,7 @@ use crate::api::teams::{
     TeamMemberWithRole, TeamReturn, TeamRole, UpdateCompanyPayload, UpdateTeam,
 };
 use crate::api::users;
-use crate::api::users::{AvatarForm, UpdatePayload, User, UserRole};
+use crate::api::users::{AvatarForm, UpdatePayload, UserResponse, UserRole};
 use utoipa::OpenApi;
 
 #[derive(OpenApi)]
@@ -120,7 +120,6 @@ use utoipa::OpenApi;
         users::endpoints::delete_user_admin,
         users::endpoints::upload_avatar,
         users::endpoints::delete_avatar,
-        users::endpoints::serve_avatar,
         teams::endpoints::create_team,
         teams::endpoints::get_my_teams,
         teams::endpoints::update_team,
@@ -146,7 +145,7 @@ use utoipa::OpenApi;
             ConfirmEmailPayload, LoginPayload, RegisterPayload, ResetPasswordRequestPayload, ResetPasswordPayload,
             CreateTeam, UpdateTeam, TeamReturn, CreateInvitationPayload, InvitationReturn, UpdateMemberRolePayload, TeamRole, TeamMemberWithRole,
             CompanyReturn, CreateCompanyPayload, UpdateCompanyPayload,
-            User, UserRole, UpdatePayload, AvatarForm,
+            UserResponse, UserRole, UpdatePayload, AvatarForm,
             Event, EventAction, EventChanges, EventFilters, EventResponse, EventLogResponse, EventLogUser, AuditLogFilters, PaginatedEventLogResponse, ResourceType,
             Status, StatusEnum, CsrfResponse,
             ColumnResponse, CreateColumnPayload, UpdateColumnPayload, ReorderColumnsPayload,

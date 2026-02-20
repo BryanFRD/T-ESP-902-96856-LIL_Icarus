@@ -3,7 +3,7 @@ use utoipa::ToSchema;
 
 use super::priority::TicketPriority;
 use crate::api::audits::tickets::labels::models::LabelResponse;
-use crate::api::users::User;
+use crate::api::users::{User, map_avatar_url};
 
 use super::ticket::Ticket;
 
@@ -24,7 +24,7 @@ impl From<User> for TicketUser {
             username: user.username,
             first_name: user.first_name,
             last_name: user.last_name,
-            avatar_url: user.avatar_url,
+            avatar_url: map_avatar_url(user.avatar_url),
         }
     }
 }

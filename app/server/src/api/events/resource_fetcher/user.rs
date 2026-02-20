@@ -1,5 +1,5 @@
 use crate::api::events::resource_fetcher::{ResourceFetcher, parse_resource_id};
-use crate::api::users::User;
+use crate::api::users::{User, UserResponse};
 use crate::schema::users::dsl::{id, users};
 use crate::state::GlobalState;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};
@@ -19,12 +19,8 @@ impl ResourceFetcher for UserFetcher {
             .first(&mut conn)
             .ok()?;
 
-        let mut json = serde_json::to_value(&user).ok()?;
-        if let Some(obj) = json.as_object_mut() {
-            obj.remove("passwordHash");
-            obj.remove("password_hash");
-        }
+        let user_response = UserResponse::from(user);
 
-        Some(json)
+        serde_json::to_value(&user_response).ok()
     }
 }

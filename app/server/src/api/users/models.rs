@@ -45,6 +45,16 @@ pub struct User {
     pub last_connected_at: chrono::NaiveDateTime,
 }
 
+const AVATAR_ROUTE_PREFIX: &str = "/v1/users/avatars";
+
+pub fn avatar_url_path(filename: &str) -> String {
+    format!("{AVATAR_ROUTE_PREFIX}/{filename}")
+}
+
+pub fn map_avatar_url(avatar_url: Option<String>) -> Option<String> {
+    avatar_url.map(|filename| avatar_url_path(&filename))
+}
+
 impl User {
     pub fn new(
         username: String,
@@ -90,6 +100,40 @@ impl From<RegisterPayload> for User {
             "pentester".to_string(),
             &payload.password,
         )
+    }
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UserResponse {
+    pub id: String,
+    pub username: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub role: UserRole,
+    pub is_connected: bool,
+    pub avatar_url: Option<String>,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+    pub last_connected_at: chrono::NaiveDateTime,
+}
+
+impl From<User> for UserResponse {
+    fn from(user: User) -> Self {
+        Self {
+            id: user.id,
+            username: user.username,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            role: user.role,
+            is_connected: user.is_connected,
+            avatar_url: map_avatar_url(user.avatar_url),
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+            last_connected_at: user.last_connected_at,
+        }
     }
 }
 

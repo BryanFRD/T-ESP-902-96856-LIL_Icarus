@@ -6,6 +6,7 @@ use http::{HeaderName, HeaderValue, Method};
 use socketioxide::SocketIo;
 use tower_cookies::CookieManagerLayer;
 use tower_http::cors::CorsLayer;
+use tower_http::services::ServeDir;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
 use tracing::Level;
 use utoipa::OpenApi;
@@ -74,6 +75,7 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
         .route("/csrf", get(crate::api::csrf::get_csrf));
 
     let main_router = Router::new()
+        .nest_service("/v1/users/avatars", ServeDir::new("dist/avatars"))
         .nest("/v1", router_v1)
         .layer(Extension(csrf_protection.clone()))
         .layer(CookieManagerLayer::new())
