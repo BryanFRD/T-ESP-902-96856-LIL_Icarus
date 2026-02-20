@@ -138,6 +138,7 @@ fn emit_error(socket: &SocketRef, code: &str, message: &str) {
 pub struct AgentShutdownPayload {
     pub audit_id: String,
     pub agent_id: String,
+    pub reason: Option<String>,
 }
 
 /// Payload for the `agent:command` event.
@@ -213,7 +214,10 @@ pub async fn on_agent_shutdown(
     };
 
     // Now send the shutdown packet without holding the registry lock
-    let shutdown_packet = AgentControl::shutdown("Shutdown requested by user".to_string());
+    let reason = payload
+        .reason
+        .unwrap_or_else(|| "Shutdown requested by user".to_string());
+    let shutdown_packet = AgentControl::shutdown(reason);
     if let Ok(data) = shutdown_packet.serialize() {
         let (encrypted, nonce) = match shared::encryption::encrypt(&agent_writer_info.1, &data) {
             Ok(v) => v,

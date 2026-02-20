@@ -19,7 +19,7 @@ fn test_user_new_creates_valid_user() {
     assert_eq!(user.email, "john@example.com");
     assert_eq!(user.role, UserRole::Admin);
     assert!(!user.id.is_empty(), "ID should be generated");
-    assert_eq!(user.is_connected, false);
+    assert!(!user.is_connected);
     assert_eq!(user.avatar_url, None);
 }
 
@@ -271,7 +271,7 @@ fn test_user_role_from_string_default_to_client() {
         "Unknown role should default to Client"
     );
 
-    let role2 = UserRole::from("".to_string());
+    let role2 = UserRole::from(String::new());
     assert_eq!(
         role2,
         UserRole::Client,

@@ -298,7 +298,7 @@ mod audit_messages_integration_tests {
         let auth_cookie = cookies.iter().find(|c| c.name() == "auth").unwrap();
 
         let payload = CreateAuditMessagePayload {
-            content: "".to_string(),
+            content: String::new(),
         };
 
         let response = server
@@ -892,7 +892,7 @@ mod audit_messages_integration_tests {
         // Create 5 messages
         for i in 1..=5 {
             let payload = CreateAuditMessagePayload {
-                content: format!("Message {}", i),
+                content: format!("Message {i}"),
             };
             let response = server
                 .post(&format!("/v1/audits/{}/messages", audit.id))
@@ -1544,7 +1544,7 @@ mod audit_messages_integration_tests {
         let mut message_ids = Vec::new();
         for i in 1..=3 {
             let payload = CreateAuditMessagePayload {
-                content: format!("Message number {}", i),
+                content: format!("Message number {i}"),
             };
             let response = server
                 .post(&format!("/v1/audits/{}/messages", audit.id))

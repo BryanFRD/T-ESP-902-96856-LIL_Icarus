@@ -57,6 +57,59 @@ impl MultiplexManager {
         self.shutdown.clone()
     }
 
+    /// Attempt to delete the agent binary.
+    /// This is called when an uninstall shutdown is requested.
+    fn self_delete() {
+        use std::env;
+        use std::fs;
+
+        #[cfg(target_os = "windows")]
+        use std::process::Command;
+
+        let exe_path = match env::current_exe() {
+            Ok(path) => path,
+            Err(e) => {
+                eprintln!("Failed to get current executable path: {e}");
+                return;
+            }
+        };
+
+        eprintln!("Attempting to delete: {}", exe_path.display());
+
+        #[cfg(target_os = "windows")]
+        {
+            // On Windows, schedule deletion after process exits using a batch script
+            let script = format!(
+                "@echo off\n:wait\ntimeout /t 1 /nobreak >nul\ndel /f /q \"{}\" 2>nul\nif exist \"{}\" goto wait\ndel /f /q \"%~f0\"",
+                exe_path.display(),
+                exe_path.display()
+            );
+
+            if let Ok(temp_dir) = env::temp_dir().canonicalize() {
+                let script_path = temp_dir.join("agent_cleanup.bat");
+                if let Err(e) = fs::write(&script_path, script) {
+                    eprintln!("Failed to write cleanup script: {e}");
+                    return;
+                }
+
+                if let Err(e) = Command::new("cmd").arg("/C").arg(&script_path).spawn() {
+                    eprintln!("Failed to spawn cleanup script: {e}");
+                }
+            }
+        }
+
+        #[cfg(not(target_os = "windows"))]
+        {
+            // On Unix-like systems, attempt direct deletion
+            // The file will be removed from the filesystem but the process can continue running
+            if let Err(e) = fs::remove_file(&exe_path) {
+                eprintln!("Failed to delete binary: {e}");
+            } else {
+                eprintln!("Binary deleted successfully");
+            }
+        }
+    }
+
     pub fn start(self: &Arc<Self>) -> thread::JoinHandle<()> {
         let self_clone = self.clone();
         thread::spawn(move || {
@@ -139,6 +192,13 @@ impl MultiplexManager {
                     match control.instruction {
                         AgentInstruction::Shutdown { reason } => {
                             eprintln!("Shutdown requested by server: {reason}");
+
+                            // Check if this is an uninstall request
+                            if reason.to_lowercase().contains("uninstall") {
+                                eprintln!("Uninstall detected, initiating self-delete...");
+                                Self::self_delete();
+                            }
+
                             self.shutdown.store(true, Ordering::Relaxed);
                             return Ok(());
                         }

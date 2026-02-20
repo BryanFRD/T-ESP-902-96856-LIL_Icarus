@@ -333,7 +333,7 @@ mod teams_integration_tests {
 
         let fake_team_id = ulid::Ulid::new().to_string();
         let response = server
-            .patch(&format!("/v1/teams/{}", fake_team_id))
+            .patch(&format!("/v1/teams/{fake_team_id}"))
             .add_cookie(auth_cookie.clone())
             .json(&payload)
             .await;
@@ -562,7 +562,7 @@ mod teams_integration_tests {
 
         let fake_team_id = ulid::Ulid::new().to_string();
         let response = server
-            .delete(&format!("/v1/teams/{}", fake_team_id))
+            .delete(&format!("/v1/teams/{fake_team_id}"))
             .add_cookie(auth_cookie.clone())
             .await;
 

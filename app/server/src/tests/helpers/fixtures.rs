@@ -35,7 +35,7 @@ pub fn insert_test_user(
     password: &str,
     role: &UserRole,
 ) -> User {
-    let user = create_test_user(username, email, password, &role);
+    let user = create_test_user(username, email, password, role);
     let mut conn = pool.get().expect("Failed to get DB connection");
 
     diesel::insert_into(users::table)

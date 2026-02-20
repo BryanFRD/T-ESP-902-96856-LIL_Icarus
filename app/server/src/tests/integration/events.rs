@@ -233,14 +233,13 @@ async fn test_event_metadata_contains_response_status() {
     assert_eq!(events_response.status_code(), StatusCode::OK);
     let events: Vec<Value> = events_response.json();
 
-    if let Some(first_event) = events.first() {
-        if let Some(metadata) = first_event.get("metadata") {
+    if let Some(first_event) = events.first()
+        && let Some(metadata) = first_event.get("metadata") {
             assert!(
                 metadata.get("response_status").is_some(),
                 "Metadata should contain response_status"
             );
         }
-    }
 }
 
 #[tokio::test]
@@ -275,14 +274,13 @@ async fn test_non_admin_sees_anonymized_data() {
     let events: Vec<Value> = events_response.json();
 
     for event in events {
-        if let Some(user_id) = event.get("userId") {
-            if let Some(user_id_str) = user_id.as_str() {
+        if let Some(user_id) = event.get("userId")
+            && let Some(user_id_str) = user_id.as_str() {
                 assert!(
                     user_id_str.contains("xxxx") || user_id_str.len() < 5,
                     "User ID should be redacted for non-admin users"
                 );
             }
-        }
     }
 }
 
@@ -370,14 +368,13 @@ async fn test_sensitive_fields_are_redacted() {
     let events: Vec<Value> = events_response.json();
 
     for event in events {
-        if let Some(changes) = event.get("changes") {
-            if let Some(after) = changes.get("after") {
+        if let Some(changes) = event.get("changes")
+            && let Some(after) = changes.get("after") {
                 let after_str = after.to_string();
                 assert!(
                     !after_str.contains("secretpassword123"),
                     "Password should be redacted/encrypted in event logs"
                 );
             }
-        }
     }
 }

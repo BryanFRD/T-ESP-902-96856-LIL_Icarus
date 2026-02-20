@@ -126,7 +126,7 @@ fn test_parse_resource_id_only_key_no_value() {
 #[test]
 fn test_parse_resource_id_long_value() {
     let long_id = "a".repeat(1000);
-    let resource_id = format!("team_id:{}", long_id);
+    let resource_id = format!("team_id:{long_id}");
     let result = parse_resource_id(&resource_id, "team_id");
     assert_eq!(result, long_id);
 }
