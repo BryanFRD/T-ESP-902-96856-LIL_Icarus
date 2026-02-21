@@ -28,4 +28,10 @@ pub enum AgentError {
 
     #[error("Invalid agent token")]
     InvalidToken,
+
+    #[error("Agent is not online")]
+    AgentNotOnline,
+
+    #[error("Failed to send shell request: {0}")]
+    ShellRequestFailed(String),
 }

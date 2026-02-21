@@ -1,4 +1,5 @@
 mod network;
+mod shell;
 mod sysinfo;
 
 use std::sync::Arc;

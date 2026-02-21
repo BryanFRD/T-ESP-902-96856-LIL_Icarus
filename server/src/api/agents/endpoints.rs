@@ -13,7 +13,10 @@ use crate::{
     state::GlobalState,
 };
 
-use super::{AgentError, AgentResponse, AgentTokenResponse, CreateAgentPayload};
+use super::{
+    AgentError, AgentResponse, AgentTokenResponse, CreateAgentPayload, ShellRequestPayload,
+    ShellStreamResponse,
+};
 
 #[utoipa::path(
     post,
@@ -128,5 +131,52 @@ pub async fn revoke_agent(
         }
         Err(AgentError::MustBeOwnerOrAdmin) => forbidden_error("error.agent.mustBeOwnerOrAdmin"),
         Err(e) => internal_error("Failed to revoke agent", e),
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/v1/audits/{audit_id}/agents/{agent_id}/shell",
+    tag = "Agents",
+    request_body = ShellRequestPayload,
+    responses(
+        (status = 200, description = "Shell session requested", body = ShellStreamResponse),
+        (status = 400, description = "Bad request"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden - must be team owner or admin"),
+        (status = 404, description = "Agent not found"),
+        (status = 409, description = "Agent not online"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+)]
+#[axum::debug_handler]
+pub async fn request_shell(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    Path((audit_id, agent_id)): Path<(Ulid, Ulid)>,
+    Json(payload): Json<ShellRequestPayload>,
+) -> impl IntoResponse {
+    match super::services::request_shell(
+        &state,
+        &audit_id.to_string(),
+        &agent_id.to_string(),
+        &jwt_user.sub.to_string(),
+        jwt_user.is_admin(),
+        payload,
+    )
+    .await
+    {
+        Ok(response) => (StatusCode::OK, Json(response)).into_response(),
+        Err(AgentError::NotFound) => not_found_error("error.agent.notFound"),
+        Err(AgentError::AgentNotOnline) => {
+            (StatusCode::CONFLICT, Json("error.agent.notOnline")).into_response()
+        }
+        Err(AgentError::Revoked) => {
+            (StatusCode::CONFLICT, Json("error.agent.alreadyRevoked")).into_response()
+        }
+        Err(AgentError::MustBeOwnerOrAdmin) => forbidden_error("error.agent.mustBeOwnerOrAdmin"),
+        Err(e) => internal_error("Failed to request shell", e),
     }
 }

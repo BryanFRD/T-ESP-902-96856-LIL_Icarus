@@ -34,12 +34,7 @@ pub async fn emit_agent_output(
 }
 
 /// Emit agent online/offline status to the audit room.
-pub async fn emit_agent_status(
-    io: &SocketIo,
-    audit_id: &str,
-    agent_id: &str,
-    online: bool,
-) {
+pub async fn emit_agent_status(io: &SocketIo, audit_id: &str, agent_id: &str, online: bool) {
     let room_id = format!("audit:{audit_id}");
     let payload = AgentStatusPayload {
         agent_id: agent_id.to_string(),
