@@ -1,4 +1,7 @@
-use super::{AgentError, AgentResponse, AgentTokenResponse, AuditAgent, CreateAgentPayload};
+use super::{
+    AgentError, AgentResponse, AgentTokenResponse, AuditAgent, CreateAgentPayload,
+    ShellRequestPayload, ShellStreamResponse,
+};
 use crate::{
     api::audits::{self, AuditError},
     middlewares::auth,
@@ -11,6 +14,8 @@ use axum::{
 };
 use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
 use sha2::{Digest, Sha256};
+use shared::multiplexing::MIN_DATA_STREAM_ID;
+use shared::packets::{Packet, ShellRequest};
 
 use super::endpoints;
 
@@ -24,6 +29,10 @@ pub fn get_routes() -> Router<GlobalState> {
         .route(
             "/{audit_id}/agents/{agent_id}",
             delete(endpoints::revoke_agent),
+        )
+        .route(
+            "/{audit_id}/agents/{agent_id}/shell",
+            post(endpoints::request_shell),
         )
         .layer(from_fn(auth::middleware))
 }
@@ -249,4 +258,92 @@ pub fn verify_agent_token(
         .execute(&mut conn)?;
 
     Ok(agent)
+}
+
+/// Request a shell session on an agent
+///
+/// # Errors
+/// Returns `AgentError` if agent not found, not online, or send fails
+pub async fn request_shell(
+    state: &GlobalState,
+    audit_id: &str,
+    agent_id: &str,
+    user_id: &str,
+    is_admin: bool,
+    payload: ShellRequestPayload,
+) -> Result<ShellStreamResponse, AgentError> {
+    use crate::schema::audit_agents;
+    use tokio::io::AsyncWriteExt;
+
+    let audit = audits::get_audit(state, audit_id)?;
+    if !audits::can_modify_audit(state, &audit, user_id, is_admin)? {
+        return Err(AgentError::MustBeOwnerOrAdmin);
+    }
+
+    let mut conn = state.get_db_conn()?;
+    let agent = audit_agents::table
+        .filter(audit_agents::id.eq(agent_id))
+        .filter(audit_agents::audit_id.eq(audit_id))
+        .select(AuditAgent::as_select())
+        .first::<AuditAgent>(&mut conn)
+        .optional()?
+        .ok_or(AgentError::NotFound)?;
+
+    if agent.is_revoked {
+        return Err(AgentError::Revoked);
+    }
+
+    let (writer, shared_secret) = {
+        let registry = state
+            .agent_registry
+            .lock()
+            .map_err(|_| AgentError::ShellRequestFailed("Failed to lock registry".to_string()))?;
+
+        let handle = registry.get(agent_id).ok_or(AgentError::NotFound)?;
+
+        if !handle.is_online(30) {
+            return Err(AgentError::AgentNotOnline);
+        }
+
+        (handle.writer.clone(), handle.shared_secret)
+    };
+
+    let stream_id = MIN_DATA_STREAM_ID + 100;
+
+    let shell_req = ShellRequest::new(payload.shell_type.into());
+
+    let serialized = shell_req.serialize().map_err(|e| {
+        AgentError::ShellRequestFailed(format!("Failed to serialize shell request: {e}"))
+    })?;
+
+    let (encrypted, nonce) = match shared::encryption::encrypt(&shared_secret, &serialized) {
+        Ok(v) => v,
+        Err(e) => {
+            return Err(AgentError::ShellRequestFailed(format!(
+                "Encryption error: {e}"
+            )));
+        }
+    };
+
+    #[allow(clippy::cast_possible_truncation)]
+    let len = encrypted.len() as u32;
+    let total_size = 4 + nonce.len() + encrypted.len();
+    let mut buf = vec![0u8; total_size];
+
+    buf[0..4].copy_from_slice(&len.to_be_bytes());
+    buf[4..16].copy_from_slice(&nonce);
+    buf[16..].copy_from_slice(&encrypted);
+
+    let mut writer_guard = writer.lock().await;
+    if let Err(e) = writer_guard.write_all(&buf).await {
+        return Err(AgentError::ShellRequestFailed(format!("Write error: {e}")));
+    }
+    if let Err(e) = writer_guard.flush().await {
+        return Err(AgentError::ShellRequestFailed(format!("Flush error: {e}")));
+    }
+
+    Ok(ShellStreamResponse {
+        stream_id,
+        message: "Shell session requested".to_string(),
+    })
 }

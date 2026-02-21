@@ -91,3 +91,38 @@ pub struct AgentTokenResponse {
     pub name: String,
     pub token: String,
 }
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum ShellType {
+    Auto,
+    Bash,
+    Sh,
+    Cmd,
+    PowerShell,
+}
+
+impl From<ShellType> for shared::packets::ShellType {
+    fn from(t: ShellType) -> Self {
+        match t {
+            ShellType::Auto => shared::packets::ShellType::Auto,
+            ShellType::Bash => shared::packets::ShellType::Bash,
+            ShellType::Sh => shared::packets::ShellType::Sh,
+            ShellType::Cmd => shared::packets::ShellType::Cmd,
+            ShellType::PowerShell => shared::packets::ShellType::PowerShell,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShellRequestPayload {
+    pub shell_type: ShellType,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShellStreamResponse {
+    pub stream_id: u32,
+    pub message: String,
+}
