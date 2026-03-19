@@ -123,8 +123,12 @@ mod audit_messages_integration_tests {
             .await;
 
         assert_eq!(response.status_code(), StatusCode::OK);
-        let body: Vec<serde_json::Value> = response.json();
-        assert!(body.is_empty() || body.iter().all(|m| m["id"].is_string()));
+        let body: serde_json::Value = response.json();
+        let messages = body["data"].as_array().unwrap();
+        assert!(messages.is_empty() || messages.iter().all(|m| m["id"].is_string()));
+        assert!(body["total"].is_number());
+        assert!(body["limit"].is_number());
+        assert!(body["offset"].is_number());
     }
 
     #[tokio::test]
@@ -479,10 +483,12 @@ mod audit_messages_integration_tests {
             .await;
 
         assert_eq!(list_response.status_code(), StatusCode::OK);
-        let messages: Vec<serde_json::Value> = list_response.json();
+        let body: serde_json::Value = list_response.json();
+        let messages = body["data"].as_array().unwrap();
 
         // Should have both messages
         assert!(messages.len() >= 2);
+        assert!(body["total"].as_i64().unwrap() >= 2);
 
         // Verify message contents
         let contents: Vec<_> = messages
@@ -912,8 +918,12 @@ mod audit_messages_integration_tests {
             .await;
 
         assert_eq!(list_response.status_code(), StatusCode::OK);
-        let messages: Vec<serde_json::Value> = list_response.json();
+        let body: serde_json::Value = list_response.json();
+        let messages = body["data"].as_array().unwrap();
         assert_eq!(messages.len(), 2);
+        assert_eq!(body["total"].as_i64().unwrap(), 5);
+        assert_eq!(body["limit"].as_i64().unwrap(), 2);
+        assert_eq!(body["offset"].as_i64().unwrap(), 0);
 
         // List with offset 2
         let list_response2 = server
@@ -925,8 +935,11 @@ mod audit_messages_integration_tests {
             .await;
 
         assert_eq!(list_response2.status_code(), StatusCode::OK);
-        let messages2: Vec<serde_json::Value> = list_response2.json();
+        let body2: serde_json::Value = list_response2.json();
+        let messages2 = body2["data"].as_array().unwrap();
         assert_eq!(messages2.len(), 2);
+        assert_eq!(body2["total"].as_i64().unwrap(), 5);
+        assert_eq!(body2["offset"].as_i64().unwrap(), 2);
 
         // Verify they're different messages
         assert_ne!(messages[0]["id"], messages2[0]["id"]);
@@ -1084,7 +1097,14 @@ mod audit_messages_integration_tests {
             .await;
 
         assert_eq!(response.status_code(), StatusCode::OK);
-        let messages: Vec<serde_json::Value> = response.json();
+        let body: serde_json::Value = response.json();
+
+        // Verify paginated response structure
+        assert!(body["total"].is_number());
+        assert!(body["limit"].is_number());
+        assert!(body["offset"].is_number());
+
+        let messages = body["data"].as_array().unwrap();
 
         // Verify each message has required fields
         assert!(!messages.is_empty());
@@ -1504,8 +1524,10 @@ mod audit_messages_integration_tests {
             .await;
 
         assert_eq!(response.status_code(), StatusCode::OK);
-        let messages: Vec<serde_json::Value> = response.json();
+        let body: serde_json::Value = response.json();
+        let messages = body["data"].as_array().unwrap();
         assert_eq!(messages.len(), 0);
+        assert_eq!(body["total"].as_i64().unwrap(), 0);
     }
 
     #[tokio::test]
@@ -1561,8 +1583,10 @@ mod audit_messages_integration_tests {
             .add_cookie(auth_cookie.clone())
             .await;
 
-        let messages: Vec<serde_json::Value> = list_response.json();
+        let body: serde_json::Value = list_response.json();
+        let messages = body["data"].as_array().unwrap();
         assert_eq!(messages.len(), 3);
+        assert_eq!(body["total"].as_i64().unwrap(), 3);
 
         // Verify they appear in response
         for (i, msg) in messages.iter().enumerate() {

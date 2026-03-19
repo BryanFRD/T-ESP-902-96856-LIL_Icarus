@@ -16,7 +16,7 @@ use crate::api::audits::messages::endpoints;
 use crate::api::audits::messages::error::AuditMessageError;
 use crate::api::audits::messages::models::{
     AuditMessage, AuditMessageAttachment, AuditMessageAttachmentResponse, AuditMessageResponse,
-    CreateAuditMessagePayload,
+    CreateAuditMessagePayload, PaginatedAuditMessageResponse,
 };
 use crate::api::users::User;
 use crate::middlewares::{audit_step_up_middleware, auth};
@@ -125,7 +125,7 @@ pub fn list_messages(
     is_admin: bool,
     limit: Option<i64>,
     offset: Option<i64>,
-) -> Result<Vec<AuditMessageResponse>, AuditMessageError> {
+) -> Result<PaginatedAuditMessageResponse, AuditMessageError> {
     use crate::schema::{audit_messages, users};
 
     let _audit = require_audit_access(state, audit_id, user_id, is_admin)?;
@@ -133,6 +133,11 @@ pub fn list_messages(
     let mut conn = state.get_db_conn()?;
     let limit_val = limit.unwrap_or(100).min(500);
     let offset_val = offset.unwrap_or(0);
+
+    let total = audit_messages::table
+        .filter(audit_messages::audit_id.eq(audit_id))
+        .count()
+        .get_result::<i64>(&mut conn)?;
 
     let messages_with_authors = audit_messages::table
         .filter(audit_messages::audit_id.eq(audit_id))
@@ -143,13 +148,20 @@ pub fn list_messages(
         .select((AuditMessage::as_select(), User::as_select()))
         .load::<(AuditMessage, User)>(&mut conn)?;
 
-    Ok(messages_with_authors
+    let data = messages_with_authors
         .into_iter()
         .map(|(message, author)| {
             let content = decrypt_content(state, &message);
             AuditMessageResponse::from_message_and_author(message, author, content)
         })
-        .collect())
+        .collect();
+
+    Ok(PaginatedAuditMessageResponse {
+        data,
+        total,
+        limit: limit_val,
+        offset: offset_val,
+    })
 }
 
 pub fn create_message(

@@ -119,6 +119,15 @@ impl AuditMessageResponse {
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
+pub struct PaginatedAuditMessageResponse {
+    pub data: Vec<AuditMessageResponse>,
+    pub total: i64,
+    pub limit: i64,
+    pub offset: i64,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct AuditMessageAttachmentResponse {
     pub id: String,
     pub message_id: String,

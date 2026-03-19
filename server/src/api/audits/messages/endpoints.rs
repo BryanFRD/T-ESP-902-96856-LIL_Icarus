@@ -36,7 +36,7 @@ pub struct MessageListQuery {
         ("offset" = Option<i64>, Query, description = "Offset for pagination"),
     ),
     responses(
-        (status = 200, description = "Messages retrieved successfully", body = Vec<super::models::AuditMessageResponse>),
+        (status = 200, description = "Messages retrieved successfully", body = super::models::PaginatedAuditMessageResponse),
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden"),
         (status = 404, description = "Audit not found"),
