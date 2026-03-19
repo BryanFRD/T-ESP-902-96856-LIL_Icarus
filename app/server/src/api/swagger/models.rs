@@ -7,6 +7,11 @@ use crate::api::audits::invitations::{
     AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn,
     CheckInvitationResponse, CreateAuditInvitationPayload,
 };
+use crate::api::audits::messages;
+use crate::api::audits::messages::models::{
+    AuditMessageAttachmentForm, AuditMessageAttachmentResponse, AuditMessageResponse,
+    CreateAuditMessagePayload, PaginatedAuditMessageResponse,
+};
 use crate::api::audits::step_up::endpoints::{CheckAccessResponse, VerifyAccessPayload};
 use crate::api::audits::tickets;
 use crate::api::audits::tickets::attachments::models::AttachmentResponse;
@@ -101,6 +106,13 @@ use utoipa::OpenApi;
         tickets::attachments::endpoints::upload_attachment,
         tickets::attachments::endpoints::download_attachment,
         tickets::attachments::endpoints::delete_attachment,
+        // Audit Messages
+        messages::endpoints::list_messages,
+        messages::endpoints::create_message,
+        messages::endpoints::list_attachments,
+        messages::endpoints::upload_attachment,
+        messages::endpoints::download_attachment,
+        messages::endpoints::delete_attachment,
         // Auth
         auth::endpoints::login,
         auth::endpoints::register,
@@ -153,6 +165,8 @@ use utoipa::OpenApi;
             LabelResponse, CreateLabelPayload, UpdateLabelPayload,
             CommentResponse, CreateCommentPayload, UpdateCommentPayload,
             AttachmentResponse,
+            AuditMessageResponse, PaginatedAuditMessageResponse, CreateAuditMessagePayload,
+            AuditMessageAttachmentResponse, AuditMessageAttachmentForm,
         ),
     ),
     tags(
@@ -169,6 +183,8 @@ use utoipa::OpenApi;
         (name = "Ticket Labels", description = "Ticket label management endpoints"),
         (name = "Ticket Comments", description = "Ticket comment management endpoints"),
         (name = "Ticket Attachments", description = "Ticket attachment management endpoints"),
+        (name = "Audit Messages", description = "Audit message management endpoints"),
+        (name = "Audit Message Attachments", description = "Audit message attachment management endpoints"),
     ),
     security(
         ("cookieAuth" = [])
