@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { ServerStatus, type ServerStatusEnum } from '../ServerStatus.ts'
+import { ServerStatus, type ServerStatusEnum } from '../server-status.ts'
 
 describe('ServerStatus', () => {
   describe('enum values', () => {

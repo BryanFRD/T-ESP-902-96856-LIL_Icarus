@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 
 import routes from '@/router/routes'
-import { ROUTES, getRoutePath } from '@/router/routesName.ts'
+import { ROUTES, getRoutePath } from '@/router/routes-name.ts'
 import type { MenuItem, RouteType } from '@/types/global'
 
 export const MENU_ITEMS: MenuItem[] = [

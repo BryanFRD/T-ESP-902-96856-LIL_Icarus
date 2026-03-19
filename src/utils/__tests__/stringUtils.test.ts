@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { isEmptyString, isNotNull, isNull, validToken } from '../stringUtils.ts'
+import {
+  isEmptyString,
+  isNotNull,
+  isNull,
+  validToken
+} from '../string-utils.ts'
 
 describe('stringUtils', () => {
   describe('isNull', () => {

@@ -3,9 +3,9 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { UserRole } from '@/domain/enum/RoleEnum.ts'
+import { UserRole } from '@/domain/enum/role-enum.ts'
 
-import { UserContextProvider, useUserContext } from '../UserContext.tsx'
+import { UserContextProvider, useUserContext } from '../user-context.tsx'
 
 // Mock the hooks
 vi.mock('@/hooks/auth/useMe', () => ({
@@ -78,7 +78,7 @@ describe('UserContext', () => {
         updatedAt: '2024-01-01T00:00:00Z'
       }
 
-      const { useMe } = await import('@/hooks/auth/useMe.ts')
+      const { useMe } = await import('@/hooks/auth/use-me.ts')
       vi.mocked(useMe).mockReturnValue({
         data: mockUser,
         isLoading: false
@@ -95,7 +95,7 @@ describe('UserContext', () => {
     })
 
     it('should show loading state when fetching user', async () => {
-      const { useMe } = await import('@/hooks/auth/useMe.ts')
+      const { useMe } = await import('@/hooks/auth/use-me.ts')
       vi.mocked(useMe).mockReturnValue({
         data: undefined,
         isLoading: true

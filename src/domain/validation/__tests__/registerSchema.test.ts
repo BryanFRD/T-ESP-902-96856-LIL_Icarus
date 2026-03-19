@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getRegisterSchema } from '../registerSchema.ts'
+import { getRegisterSchema } from '../register-schema.ts'
 
 describe('registerSchema', () => {
   const t = (key: string) => key

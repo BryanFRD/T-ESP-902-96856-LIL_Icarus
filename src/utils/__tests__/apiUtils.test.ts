@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { ApiError, getErrorMessage } from '../apiUtils.ts'
+import { ApiError, getErrorMessage } from '../api-utils.ts'
 
 describe('ApiError', () => {
   it('should set errorKey and error', () => {

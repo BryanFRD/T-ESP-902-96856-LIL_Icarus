@@ -1,19 +1,29 @@
 {
-  "branding": {
-    "advancedPenetration": "Advanced Penetration",
-    "advancedReporting": "Advanced Reporting",
-    "advancedReportingDesc": "Detailed insights and actionable recommendations",
-    "enterpriseSecurity": "Enterprise Security",
-    "enterpriseSecurityDesc": "Bank-grade encryption and compliance standards",
-    "realtimeScanning": "Real-time Scanning",
-    "realtimeScanningDesc": "Continuous monitoring and instant threat detection",
-    "secureInfra": "Secure your infrastructure with comprehensive security assessments and real-time vulnerability detection.",
-    "securityExpert": "Leading Security Expert",
-    "securityQuote": "Security is not a product, but a process. Icarus makes that process seamless and effective.",
-    "testingPlatform": "Testing Platform"
-  },
-  "description": "Pentest Platform",
-  "logoAlt": "Icarus Logo",
   "name": "Icarus",
-  "welcomeBack": "Welcome Back"
+  "layout": {
+    "sidebar": {
+      "items": {
+        "dashboard": "Dashboard",
+        "audits": "Audits",
+        "teams": "Teams"
+      },
+      "footer": {
+        "closeSidebar": "Close sidebar",
+        "userMenu": {
+          "profile": "Profile",
+          "language": {
+            "label": "Language",
+            "en": "English",
+            "fr": "French"
+          },
+          "theme": {
+            "label": "Theme",
+            "light": "Light",
+            "dark": "Dark",
+            "system": "System"
+          }
+        }
+      }
+    }
+  }
 }

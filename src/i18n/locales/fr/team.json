@@ -1,85 +1,180 @@
 {
-  "addCompany": "Ajouter une entreprise",
-  "addCompanyTitle": "Ajouter une nouvelle entreprise",
-  "backToTeams": "Retour aux équipes",
-  "cancelInvitation": "Annuler l'invitation",
-  "changeRole": "Changer le rôle",
-  "changeRoleDescription": "Modifiez le rôle de ce membre dans l'équipe",
-  "changeRoleTitle": "Changer le rôle du membre",
-  "companyDescriptionPlaceholder": "Entrez une description pour votre entreprise",
+  "index": {
+    "title": "Mes Équipes",
+    "description": "Gérez vos équipes et collaborez avec vos collègues",
+    "createTeam": "Créer une Équipe",
+    "teamCard": {
+      "members": "{{count}} membre",
+      "members_other": "{{count}} membres"
+    },
+    "empty": {
+      "title": "Pas encore d'équipes",
+      "description": "Vous n'avez pas encore créé d'équipes. Commencez par créer une nouvelle équipe pour collaborer avec vos collègues."
+    }
+  },
+  "show": {
+    "tabs": {
+      "members": "Membres",
+      "companies": "Entreprises",
+      "invitations": "Invitations"
+    },
+    "companies": {
+      "empty": "Aucune entreprise dans cette équipe pour l'instant.",
+      "add": "Ajouter une entreprise",
+      "actions": {
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      },
+      "formDialog": {
+        "createTitle": "Ajouter une entreprise",
+        "editTitle": "Modifier l'entreprise",
+        "editDescription": "Mettre à jour les informations de {{name}}."
+      },
+      "deleteDialog": {
+        "title": "Supprimer l'entreprise",
+        "description": "Êtes-vous sûr de vouloir supprimer {{name}} ? Cette action est irréversible.",
+        "confirm": "Supprimer",
+        "cancel": "Annuler",
+        "toast": {
+          "success": "Entreprise supprimée avec succès",
+          "error": "Échec de la suppression de l'entreprise. Veuillez réessayer."
+        }
+      }
+    },
+    "invitations": {
+      "empty": "Aucune invitation pour cette équipe pour l'instant.",
+      "add": "Nouvelle invitation",
+      "usageCount": "{{used}} / {{max}} utilisations",
+      "status": {
+        "noExpiration": "Sans expiration",
+        "expiresAt": "Expire le {{date}}",
+        "expiredAt": "Expiré le {{date}}",
+        "fullyUsed": "Entièrement utilisé",
+        "canceled": "Annulé"
+      },
+      "toast": {
+        "copied": "Lien d'invitation copié !",
+        "canceled": "Invitation annulée avec succès",
+        "cancelError": "Échec de l'annulation. Veuillez réessayer."
+      },
+      "createDialog": {
+        "title": "Nouvelle invitation",
+        "fields": {
+          "maxUses": {
+            "label": "Nombre d'utilisations max",
+            "placeholder": "ex. 10"
+          },
+          "expiresAt": {
+            "label": "Date d'expiration",
+            "placeholder": "Choisir une date",
+            "hint": "Laisser vide pour aucune expiration"
+          }
+        },
+        "actions": {
+          "create": "Créer",
+          "cancel": "Annuler"
+        },
+        "toast": {
+          "success": "Invitation créée avec succès",
+          "error": "Échec de la création. Veuillez réessayer."
+        }
+      }
+    },
+    "members": {
+      "empty": "Aucun membre dans cette équipe pour l'instant.",
+      "unknownMember": "Membre inconnu",
+      "actions": {
+        "changeRole": "Changer le rôle",
+        "removeMember": "Retirer le membre"
+      },
+      "removeMember": {
+        "title": "Retirer le membre",
+        "description": "Êtes-vous sûr de vouloir retirer {{name}} de cette équipe ? Cette action est irréversible.",
+        "confirm": "Retirer",
+        "cancel": "Annuler",
+        "toast": {
+          "success": "Membre retiré avec succès",
+          "error": "Échec du retrait du membre. Veuillez réessayer."
+        }
+      },
+      "updateRole": {
+        "title": "Changer le rôle",
+        "description": "Modifier le rôle de {{name}} dans cette équipe.",
+        "submit": "Enregistrer",
+        "toast": {
+          "success": "Rôle mis à jour avec succès",
+          "error": "Échec de la mise à jour du rôle. Veuillez réessayer."
+        }
+      }
+    }
+  },
   "companyName": "Nom de l'entreprise",
   "companyNamePlaceholder": "Entrez le nom de l'entreprise",
-  "copyInvitationLink": "Copier le lien d'invitation",
-  "createCompany": "Créer une entreprise",
-  "createFirstTeam": "Créer votre première équipe",
-  "createInvitation": "Créer une invitation",
-  "createInvitationTitle": "Créer une nouvelle invitation",
-  "createTeam": "Créer une équipe",
-  "createTeamTitle": "Créer une nouvelle équipe",
-  "deleteTeam": "Supprimer l'équipe",
-  "deleteTeamConfirmation": "Êtes-vous sûr de vouloir supprimer cette équipe ? Cette action est irréversible.",
-  "description": "Description",
-  "descriptionPlaceholder": "Entrez une description pour votre équipe",
-  "editCompany": "Modifier l'entreprise",
-  "editTeam": "Modifier l'équipe",
-  "expiresAt": "Expire le",
-  "expiresAtDate": "Expire le {{date}}",
-  "expiresAtHint": "Définissez une date d'expiration pour cette invitation (optionnel)",
-  "invalidInvitationToken": "Le jeton d'invitation est invalide",
-  "invitationCanceledAt": "Annulée le {{date}}",
-  "invitationCreatedSuccess": "Invitation créée avec succès",
-  "invitationExpired": "Cette invitation a expiré",
-  "invitationFullyUsed": "Cette invitation a atteint son nombre maximum d'utilisations",
-  "invitationLink": "Lien d'invitation",
-  "invitationLinkCopied": "Lien d'invitation copié dans le presse-papiers",
-  "invitationLinkHint": "Partagez ce lien avec les personnes que vous souhaitez inviter à rejoindre l'équipe",
-  "joinedTeamSuccess": "Vous avez rejoint l'équipe avec succès",
-  "joinedTeamSuccessDescription": "Vous êtes maintenant membre de cette équipe et pouvez accéder à ses ressources.",
-  "joiningTeam": "Rejoindre l'équipe en cours...",
-  "joiningTeamDescription": "Veuillez patienter pendant que nous vous ajoutons à l'équipe.",
-  "joinTeamError": "Erreur lors de la tentative de rejoindre l'équipe",
-  "joinTeamErrorDescription": "Une erreur s'est produite lors de la tentative de rejoindre l'équipe. Veuillez réessayer.",
-  "maxUses": "Nombre maximum d'utilisations",
-  "maxUsesHint": "Limitez le nombre de personnes pouvant utiliser cette invitation (optionnel)",
-  "maxUsesPlaceholder": "Entrez le nombre maximum d'utilisations",
-  "members_one": "{{count}} membre",
-  "members_many": "{{count}} membres",
-  "members_other": "{{count}} membres",
-  "noCompanies": "Aucune entreprise",
-  "noCompaniesDescription": "Créez une entreprise pour gérer vos équipes et projets.",
-  "noExpiration": "Aucune expiration",
-  "noInvitations": "Aucune invitation",
-  "noInvitationsDescription": "Créez une invitation pour inviter de nouveaux membres à rejoindre votre équipe.",
-  "noMembers": "Aucun membre",
-  "noMembersDescription": "Invitez des membres pour commencer à collaborer sur vos projets.",
-  "noTeams": "Aucune équipe",
-  "noTeamsDescription": "Créez une équipe pour collaborer avec d'autres et gérer vos projets.",
-  "removeMember": "Retirer le membre",
-  "siret": "Numéro SIRET",
-  "siretHint": "Le numéro SIRET à 14 chiffres de votre entreprise",
+  "siret": "SIRET",
   "siretPlaceholder": "Entrez le numéro SIRET",
-  "subtitle": "Gérez vos équipes et collaborez avec d'autres.",
-  "tabs": {
-    "companies": "Entreprises",
-    "invitations": "Invitations",
-    "members": "Membres"
+  "siretHint": "Le SIRET est un numéro d'identification à 14 chiffres",
+  "description": "Description",
+  "companyDescriptionPlaceholder": "Entrez une description (optionnel)",
+  "createCompany": "Créer l'entreprise",
+  "memberRoles": {
+    "owner": "Propriétaire",
+    "moderator": "Modérateur",
+    "member": "Membre",
+    "client": "Client",
+    "descriptions": {
+      "moderator": "Peut gérer les membres et le contenu, mais ne peut pas supprimer l'équipe.",
+      "member": "Accès standard aux ressources et projets de l'équipe.",
+      "client": "Accès en lecture seule aux livrables partagés."
+    }
   },
-  "teamName": "Nom de l'équipe",
-  "teamNamePlaceholder": "Entrez le nom de l'équipe",
-  "teamNotFound": "Équipe introuvable",
-  "teamNotFoundDescription": "L'équipe que vous recherchez n'existe pas ou vous n'y avez pas accès.",
-  "title": "Équipes",
-  "unknownMember": "Membre inconnu",
-  "usageCount": "{{used}} / {{max}} utilisations",
-  "validation": {
-    "companyNameMaxLength": "Le nom de l'entreprise doit contenir au maximum 100 caractères.",
-    "companyNameRequired": "Le nom de l'entreprise est requis.",
-    "descriptionMaxLength": "La description doit contenir au maximum 500 caractères.",
-    "maxUsesMax": "Le nombre d'utilisations ne peut pas dépasser 100.",
-    "maxUsesMin": "Le nombre d'utilisations doit être au moins 1.",
-    "nameMaxLength": "Le nom de l'équipe doit contenir au maximum 100 caractères.",
-    "nameRequired": "Le nom de l'équipe est requis.",
-    "siretInvalid": "Le numéro SIRET doit contenir exactement 14 chiffres.",
-    "siretRequired": "Le numéro SIRET est requis."
+  "shared": {
+    "teamForm": {
+      "title": {
+        "create": "Créer une Équipe",
+        "edit": "Modifier l'Équipe"
+      },
+      "form": {
+        "fields": {
+          "name": {
+            "label": "Nom de l'Équipe",
+            "placeholder": "Entrez le nom de l'équipe"
+          },
+          "description": {
+            "label": "Description de l'Équipe",
+            "placeholder": "Entrez la description de l'équipe"
+          }
+        }
+      },
+      "actions": {
+        "create": "Créer",
+        "save": "Enregistrer"
+      },
+      "toast": {
+        "createSuccess": "Équipe créée avec succès",
+        "updateSuccess": "Équipe mise à jour avec succès",
+        "error": "Une erreur est survenue. Veuillez réessayer."
+      }
+    }
+  },
+  "joinTeam": {
+    "loading": {
+      "title": "Rejoindre une Équipe",
+      "description": "Veuillez patienter pendant que nous traitons votre invitation..."
+    },
+    "success": {
+      "title": "Équipe Rejointe avec Succès",
+      "description": "Vous êtes maintenant membre de cette équipe. Redirection vers vos équipes..."
+    },
+    "error": {
+      "title": "Impossible de Rejoindre l'Équipe",
+      "description": "Une erreur s'est produite lors du traitement de votre invitation. Veuillez réessayer ou contacter le support.",
+      "invalidToken": "Lien d'Invitation Invalide"
+    },
+    "backToTeams": "Retour aux Équipes"
+  },
+  "teamNotFound": {
+    "title": "Équipe Non Trouvée",
+    "description": "L'équipe que vous recherchez n'existe pas ou a été supprimée.",
+    "backToTeams": "Retour aux Équipes"
   }
 }

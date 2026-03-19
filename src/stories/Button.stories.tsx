@@ -1,4 +1,4 @@
-import Button from '@/components/ui/button/Button.tsx'
+import Button from '@/components/oldUi/button/Button.tsx'
 import { buttonSizes, buttonVariants } from '@/types/components/button.type'
 
 export default {
