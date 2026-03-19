@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getModifiedFields } from '../modifiedFields.ts'
+import { getModifiedFields } from '../modified-fields.ts'
 
 describe('getModifiedFields', () => {
   it('returns modified fields', () => {

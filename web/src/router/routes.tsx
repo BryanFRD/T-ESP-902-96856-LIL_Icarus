@@ -1,22 +1,24 @@
 import { lazy } from 'react'
 
-import { ROUTES, getRoutePath } from '@/router/routesName.ts'
+import { ROUTES, getRoutePath } from '@/router/routes-name.ts'
 import type { RouteType } from '@/types/global'
 
-const Login = lazy(() => import('@/screen/auth/LoginScreen.tsx'))
-const Register = lazy(() => import('@/screen/auth/RegisterScreen.tsx'))
-const Dashboard = lazy(() => import('@/screen/DashboardScreen.tsx'))
-const Audits = lazy(() => import('@/screen/audit/AuditScreen.tsx'))
-const Profile = lazy(() => import('@/screen/auth/ProfileScreen.tsx'))
-const ResetPassword = lazy(() => import('@/screen/ResetPasswordScreen.tsx'))
-const ConfirmEmail = lazy(() => import('@/screen/ConfirmEmailScreen.tsx'))
+const Login = lazy(() => import('@/screen/auth/login-screen.tsx'))
+const Register = lazy(() => import('@/screen/auth/register-screen.tsx'))
+const Dashboard = lazy(() => import('@/screen/dashboard-screen.tsx'))
+const Audits = lazy(() => import('@/screen/audit/audit-screen.tsx'))
+const Profile = lazy(() => import('@/screen/auth/profile-screen.tsx'))
+const ResetPassword = lazy(() => import('@/screen/reset-password-screen.tsx'))
+const ConfirmEmail = lazy(() => import('@/screen/confirm-email-screen.tsx'))
 const AuditFormCreation = lazy(
-  () => import('@/screen/audit/form/AuditCreateFormScreen.tsx')
+  () => import('@/screen/audit/form/audit-create-form-screen.tsx')
 )
-const AuditDetails = lazy(() => import('@/components/audit/AuditDetails.tsx'))
-const Teams = lazy(() => import('@/screen/team/TeamsScreen.tsx'))
-const TeamDetail = lazy(() => import('@/screen/team/TeamDetailScreen.tsx'))
-const JoinTeam = lazy(() => import('@/screen/team/JoinTeamScreen.tsx'))
+const AuditDetailsScreen = lazy(
+  () => import('@/screen/audit/audit-detail-screen.tsx')
+)
+const Teams = lazy(() => import('@/screen/team/team-screen'))
+const TeamDetail = lazy(() => import('@/screen/team/team-detail-screen.tsx'))
+const JoinTeam = lazy(() => import('@/screen/team/join-team-screen.tsx'))
 
 const routes: RouteType[] = [
   {
@@ -76,7 +78,7 @@ const routes: RouteType[] = [
     routeKey: 'router.auditDetail',
     path: getRoutePath(ROUTES.AUDIT_DETAILS),
     isAuthRequired: true,
-    component: AuditDetails
+    component: AuditDetailsScreen
   },
   {
     name: ROUTES.TEAMS,

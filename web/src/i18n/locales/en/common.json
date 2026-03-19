@@ -1,54 +1,24 @@
 {
   "actions": {
-    "back": "Back",
+    "save": "Save",
     "cancel": "Cancel",
-    "close": "Close",
-    "delete": "Delete",
-    "done": "Done",
     "edit": "Edit",
-    "goLogin": "Go to Login",
-    "more": "More actions",
-    "next": "Next",
-    "previous": "Previous",
-    "save": "Save"
+    "delete": "Delete",
+    "more": "More options",
+    "done": "Done",
+    "confirm": "Confirm",
+    "back": "Back",
+    "create": "Create",
+    "close": "Close"
   },
-  "cancel": "Cancel",
-  "delete": "Delete",
-  "edit": "Edit",
-  "save": "Save",
-  "confirmAction": {
-    "typeToConfirm": "Type to confirm",
-    "pleaseType": "Please type",
-    "toContinue": "to continue"
-  },
-  "days": {
-    "fri": "Fri",
-    "mon": "Mon",
-    "sat": "Sat",
-    "sun": "Sun",
-    "thu": "Thu",
-    "tue": "Tue",
-    "wed": "Wed"
-  },
-  "language": "Language",
-  "languages": {
-    "english": "English",
-    "french": "French"
-  },
-  "loading": "Loading...",
-  "memberRoles": {
-    "owner": "Owner",
-    "moderator": "Moderator",
-    "member": "Member",
-    "client": "Client"
-  },
-  "selectDate": "Select a date",
-  "theme": "Theme",
-  "time": {
-    "label": "Time",
-    "nextMonth": "Next month",
-    "nextYear": "Next year",
-    "previousMonth": "Previous month",
-    "previousYear": "Previous year"
+  "ui": {
+    "imageCropper": {
+      "title": "Crop Image",
+      "alt": "Cropped Image Preview",
+      "actions": {
+        "cancel": "Cancel",
+        "apply": "Apply"
+      }
+    }
   }
 }

@@ -1,54 +1,24 @@
 {
   "actions": {
-    "back": "Retour",
+    "save": "Enregistrer",
     "cancel": "Annuler",
-    "close": "Fermer",
-    "delete": "Supprimer",
-    "done": "Terminé",
     "edit": "Modifier",
-    "goLogin": "Aller à la connexion",
-    "more": "Plus d'actions",
-    "next": "Suivant",
-    "previous": "Précédent",
-    "save": "Enregistrer"
+    "delete": "Supprimer",
+    "more": "Plus d'options",
+    "done": "Terminé",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "create": "Créer",
+    "close": "Fermer"
   },
-  "cancel": "Annuler",
-  "delete": "Supprimer",
-  "edit": "Modifier",
-  "save": "Enregistrer",
-  "confirmAction": {
-    "typeToConfirm": "Tapez pour confirmer",
-    "pleaseType": "Veuillez taper",
-    "toContinue": "pour continuer"
-  },
-  "days": {
-    "fri": "Ven",
-    "mon": "Lun",
-    "sat": "Sam",
-    "sun": "Dim",
-    "thu": "Jeu",
-    "tue": "Mar",
-    "wed": "Mer"
-  },
-  "language": "Langue",
-  "languages": {
-    "english": "Anglais",
-    "french": "Français"
-  },
-  "loading": "Chargement...",
-  "memberRoles": {
-    "owner": "Propriétaire",
-    "moderator": "Modérateur",
-    "member": "Membre",
-    "client": "Client"
-  },
-  "selectDate": "Sélectionner une date",
-  "theme": "Thème",
-  "time": {
-    "label": "Heure",
-    "nextMonth": "Mois suivant",
-    "nextYear": "Année suivante",
-    "previousMonth": "Mois précédent",
-    "previousYear": "Année précédente"
+  "ui": {
+    "imageCropper": {
+      "title": "Recadrer l'image",
+      "alt": "Aperçu de l'image recadrée",
+      "actions": {
+        "cancel": "Annuler",
+        "apply": "Appliquer"
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getLoginSchema } from '../loginSchema.ts'
+import { getLoginSchema } from '../login-schema.ts'
 
 describe('loginSchema', () => {
   const t = (key: string) => key

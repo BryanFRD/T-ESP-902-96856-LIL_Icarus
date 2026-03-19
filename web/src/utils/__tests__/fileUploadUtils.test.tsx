@@ -6,7 +6,7 @@ import {
   getFileIcon,
   getPreview,
   processErrors
-} from '../fileUploadUtils.tsx'
+} from '../file-upload-utils.tsx'
 
 describe('fileUploadUtils', () => {
   it('getFileIcon returns Image for image/*', () => {

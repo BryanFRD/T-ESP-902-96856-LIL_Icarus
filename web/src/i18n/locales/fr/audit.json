@@ -1,85 +1,86 @@
 {
-  "access": {
-    "message": "Pour accéder à cet audit, veuillez entrer votre mot de passe ci-dessous.",
-    "submit": "Débloquer l'accès",
-    "title": "Accès sécurisé à l'audit"
+  "index": {
+    "title": "Audits",
+    "description": "Gérez vos audits de sécurité",
+    "createAudit": "Créer un audit",
+    "empty": {
+      "title": "Aucun audit",
+      "description": "Vous n'avez pas encore créé d'audits. Commencez par en créer un nouveau."
+    },
+    "list": {
+      "error": "Impossible de charger les audits. Veuillez réessayer."
+    }
   },
-  "accessGranted": "Accès accordé",
-  "company": {
-    "invalid": "Entreprise invalide"
+  "show": {
+    "notFound": "Audit introuvable",
+    "notFoundDescription": "Cet audit n'existe pas ou vous n'y avez pas accès.",
+    "backToAudits": "Retour aux audits",
+    "endDate": "Date de fin",
+    "status": {
+      "active": "Actif",
+      "archived": "Archivé"
+    },
+    "tabs": {
+      "kanban": "Kanban",
+      "clients": "Clients",
+      "invitations": "Invitations"
+    },
+    "clients": {
+      "empty": "Aucun client sur cet audit pour l'instant."
+    },
+    "invitations": {
+      "empty": "Aucune invitation pour cet audit pour l'instant.",
+      "create": "Nouvelle invitation"
+    },
+    "actions": {
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "more": "Plus d'options"
+    }
+  },
+  "access": {
+    "title": "Accès aux audits requis",
+    "message": "Veuillez saisir le mot de passe pour accéder aux audits.",
+    "submit": "Vérifier l'accès",
+    "verifying": "Vérification...",
+    "accessGranted": "Accès accordé !",
+    "password": {
+      "label": "Mot de passe",
+      "placeholder": "Saisissez le mot de passe des audits",
+      "invalid": "Mot de passe invalide. Veuillez réessayer."
+    }
   },
   "create": {
-    "auditLabel": "Nom de l'audit",
-    "auditPlaceholder": "Entrez le nom de l'audit",
-    "companyLabel": "Entreprise",
-    "companyPlaceholder": "Sélectionnez une entreprise",
-    "descriptionLabel": "Description",
-    "descriptionPlaceholder": "Entrez une description pour l'audit",
-    "endDateLabel": "Date de fin",
-    "endDatePlaceholder": "Sélectionnez une date de fin",
-    "submit": "Créer l'audit",
-    "teamLabel": "Équipe",
-    "teamPlaceholder": "Sélectionnez une équipe"
-  },
-  "createAudit": "Créer un audit",
-  "createAuditFormTitle": "Détails du nouvel audit",
-  "created": "Audit créé avec succès.",
-  "creating": "Création de l'audit...",
-  "date": {
-    "invalid": "Date invalide"
-  },
-  "description": {
-    "max": "La description doit contenir au maximum 500 caractères"
-  },
-  "details": {
-    "company": "Entreprise",
-    "description": "Description",
-    "endDate": "Date de fin",
-    "noDescription": "Aucune description fournie",
-    "notFound": "Audit introuvable",
-    "status": "Statut",
-    "openKanban": "Ouvrir le Kanban"
-  },
-  "endDate": "Date de fin",
-  "list": {
-    "emptyDescription": "Créez votre premier audit pour commencer à suivre les évaluations de sécurité.",
-    "emptyTitle": "Aucun audit trouvé",
-    "error": "Échec du chargement des audits. Veuillez réessayer plus tard."
-  },
-  "name": {
-    "max": "Le nom doit contenir au maximum 100 caractères",
-    "min": "Le nom doit contenir au minimum 3 caractères"
-  },
-  "password": {
-    "label": "Mot de passe",
-    "placeholder": "Entrez votre mot de passe",
-    "required": "Le mot de passe est requis"
-  },
-  "status": {
-    "active": "Audit actif",
-    "archived": "Audit archivé",
-    "expired": "Audit expiré"
-  },
-  "subtitle": "Gérez et consultez vos audits de sécurité ici.",
-  "tabs": {
-    "kanban": "Tableau Kanban",
-    "clients": "Clients",
-    "invitations": "Invitations"
-  },
-  "team": {
-    "invalid": "Équipe invalide"
-  },
-  "title": "Mes audits",
-  "verifying": "Vérification en cours...",
-  "noClients": "Aucun client dans cet audit",
-  "noInvitations": "Aucune invitation envoyée",
-  "backToAudits": "Retour aux audits",
-  "createInvitation": "Créer une invitation",
-  "kanban": {
-    "todo": "À faire",
-    "inProgress": "En cours",
-    "inReview": "En révision",
-    "done": "Terminé",
-    "noTickets": "Aucun ticket dans cette colonne"
+    "title": "Créer un audit",
+    "fields": {
+      "name": {
+        "label": "Nom de l'audit",
+        "placeholder": "ex. Audit Sécurité T1 2025"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Saisissez une description (optionnel)"
+      },
+      "team": {
+        "label": "Équipe",
+        "placeholder": "Sélectionnez une équipe"
+      },
+      "company": {
+        "label": "Entreprise",
+        "placeholder": "Sélectionnez une entreprise"
+      },
+      "endDate": {
+        "label": "Date de fin",
+        "placeholder": "Choisir une date"
+      }
+    },
+    "actions": {
+      "submit": "Créer l'audit"
+    },
+    "toast": {
+      "creating": "Création de l'audit...",
+      "success": "Audit créé avec succès",
+      "error": "Impossible de créer l'audit. Veuillez réessayer."
+    }
   }
 }

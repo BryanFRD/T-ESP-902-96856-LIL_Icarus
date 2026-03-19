@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 import { action } from 'storybook/actions'
 
-import Button from '@/components/ui/button/Button.tsx'
-import Modal from '@/components/ui/modal/Modal.tsx'
+import Button from '@/components/oldUi/button/Button.tsx'
+import Modal from '@/components/oldUi/modal/Modal.tsx'
 
 const mockFn = (name?: string) => action(`[Storybook] ${name ?? 'action'}`)
 

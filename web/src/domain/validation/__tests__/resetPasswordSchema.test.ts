@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getNewPasswordSchema,
   getPasswordSchema
-} from '../resetPasswordSchema.ts'
+} from '../reset-password-schema.ts'
 
 describe('resetPasswordSchema', () => {
   const t = (key: string) => key

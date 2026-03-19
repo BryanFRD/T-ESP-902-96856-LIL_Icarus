@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { uploadAvatarFileSchema } from '../uploadFileSchema.ts'
+import { uploadAvatarFileSchema } from '../upload-file-schema.ts'
 
 describe('uploadAvatarFileSchema', () => {
   describe('valid data', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { UserRole } from '../RoleEnum.ts'
+import { UserRole } from '../role-enum.ts'
 
 describe('UserRole', () => {
   describe('enum values', () => {

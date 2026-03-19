@@ -8,7 +8,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle
-} from '../components/ui/card/Card'
+} from '../components/oldUi/card/Card'
 
 const meta: Meta<typeof Card> = {
   title: 'UI/Card',

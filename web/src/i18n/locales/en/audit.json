@@ -1,85 +1,94 @@
 {
-  "access": {
-    "message": "To access this audit, please enter your password below.",
-    "submit": "Grant Access",
-    "title": "Audit security access"
+  "index": {
+    "title": "Audits",
+    "description": "Manage your security audits",
+    "createAudit": "Create Audit",
+    "empty": {
+      "title": "No audits yet",
+      "description": "You haven't created any audits yet. Start by creating a new one."
+    }
   },
-  "accessGranted": "Access granted",
-  "company": {
-    "invalid": "Invalid company"
+  "show": {
+    "notFound": "Audit not found",
+    "notFoundDescription": "This audit doesn't exist or you don't have access to it.",
+    "backToAudits": "Back to audits",
+    "endDate": "End date",
+    "status": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "tabs": {
+      "kanban": "Kanban",
+      "clients": "Clients",
+      "invitations": "Invitations"
+    },
+    "clients": {
+      "empty": "No clients on this audit yet."
+    },
+    "invitations": {
+      "empty": "No invitations for this audit yet.",
+      "create": "New Invitation"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "more": "More options"
+    }
+  },
+  "access": {
+    "title": "Audit Access Required",
+    "subtitle": "Please enter the password to access the audits.",
+    "form": {
+      "fields": {
+        "password": {
+          "label": "Password",
+          "placeholder": "Enter the audit password"
+        }
+      },
+      "actions": {
+        "submit": "Verify Access",
+        "cancel": "Cancel"
+      },
+      "toast": {
+        "verifying": "Verifying access...",
+        "success": "Access granted!",
+        "error": "Incorrect password. Please try again."
+      }
+    }
   },
   "create": {
-    "auditLabel": "Audit name",
-    "auditPlaceholder": "Enter the audit name",
-    "companyLabel": "Company",
-    "companyPlaceholder": "Select a company",
-    "descriptionLabel": "Description",
-    "descriptionPlaceholder": "Enter a description for the audit",
-    "endDateLabel": "End date",
-    "endDatePlaceholder": "Select an end date",
-    "submit": "Create audit",
-    "teamLabel": "Team",
-    "teamPlaceholder": "Select a team"
-  },
-  "createAudit": "Create an audit",
-  "createAuditFormTitle": "New Audit Details",
-  "created": "Audit created successfully.",
-  "creating": "Creating audit...",
-  "date": {
-    "invalid": "Invalid date"
-  },
-  "description": {
-    "max": "Description must be at most 500 characters"
-  },
-  "details": {
-    "company": "Company",
-    "description": "Description",
-    "endDate": "End Date",
-    "noDescription": "No description provided",
-    "notFound": "Audit not found",
-    "status": "Status",
-    "openKanban": "Open Kanban"
-  },
-  "endDate": "End Date",
-  "list": {
-    "emptyDescription": "Create your first audit to start tracking security assessments.",
-    "emptyTitle": "No audits found",
-    "error": "Failed to load audits. Please try again later."
-  },
-  "name": {
-    "max": "Name must be at most 100 characters",
-    "min": "Name must be at least 3 characters"
-  },
-  "password": {
-    "label": "Password",
-    "placeholder": "Enter your password",
-    "required": "Password is required"
-  },
-  "status": {
-    "active": "Active Audit",
-    "archived": "Archived Audit",
-    "expired": "Expired Audit"
-  },
-  "subtitle": "Manage and view your security audits here.",
-  "tabs": {
-    "kanban": "Kanban Board",
-    "clients": "Clients",
-    "invitations": "Invitations"
-  },
-  "team": {
-    "invalid": "Invalid team"
-  },
-  "title": "My audits",
-  "verifying": "Verifying...",
-  "noClients": "No clients in this audit",
-  "noInvitations": "No pending invitations",
-  "backToAudits": "Back to audits",
-  "createInvitation": "Create invitation",
-  "kanban": {
-    "todo": "To Do",
-    "inProgress": "In Progress",
-    "inReview": "In Review",
-    "done": "Done",
-    "noTickets": "No tickets in this column"
+    "title": "Create an Audit",
+    "form": {
+      "fields": {
+        "name": {
+          "label": "Audit Name",
+          "placeholder": "e.g. Security Audit Q1 2025"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Enter a description"
+        },
+        "team": {
+          "label": "Team",
+          "placeholder": "Select a team"
+        },
+        "company": {
+          "label": "Company",
+          "placeholder": "Select a company"
+        },
+        "endDate": {
+          "label": "End Date",
+          "placeholder": "Pick an end date"
+        }
+      },
+      "actions": {
+        "submit": "Create Audit"
+      },
+      "toast": {
+        "creating": "Creating audit...",
+        "success": "Audit created successfully",
+        "error": "Failed to create audit. Please try again."
+      }
+    }
   }
 }

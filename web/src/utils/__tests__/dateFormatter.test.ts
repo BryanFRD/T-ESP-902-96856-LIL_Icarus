@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatter } from '../dateFormatter.ts'
+import { formatter } from '../date-formatter.ts'
 
 describe('formatter', () => {
   const lang = 'fr'
