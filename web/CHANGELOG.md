@@ -1,3 +1,11 @@
+# [1.33.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.32.0...v1.33.0) (2026-03-20)
+
+
+### Features
+
+* enhance login form with navigation and success toast ([e15348c](https://git.icarus-cyber.fr/icarus/web/commit/e15348c48aec4d2924af97a5ed7310ba230b5ef8))
+* update login form to use context for user login and dynamic navigation ([7e8d132](https://git.icarus-cyber.fr/icarus/web/commit/7e8d132ea2885f32162f7fe4f7680f371b3c9da2))
+
 # [1.32.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.31.0...v1.32.0) (2026-02-13)
 
 
