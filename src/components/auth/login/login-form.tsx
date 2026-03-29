@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -13,7 +14,8 @@ import {
   FieldLabel
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { login } from '@/service/auth-service.ts'
+import { useUserContext } from '@/context/user-context'
+import ROUTES, { getRoutePath } from '@/router/routes-name'
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -24,6 +26,8 @@ type FormSchema = z.infer<typeof formSchema>
 
 export function LoginForm(props: React.ComponentProps<typeof Card>) {
   const { t } = useTranslation('auth')
+  const { login } = useUserContext()
+  const navigate = useNavigate()
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -36,10 +40,10 @@ export function LoginForm(props: React.ComponentProps<typeof Card>) {
   const onSubmit = async (data: FormSchema) => {
     try {
       await login(data)
+      toast.success(t('login.form.toast.success'))
+      navigate(getRoutePath(ROUTES.DASHBOARD))
     } catch {
       toast.error(t('login.form.toast.error'))
-    } finally {
-      toast.success(t('login.form.toast.success'))
     }
   }
 
