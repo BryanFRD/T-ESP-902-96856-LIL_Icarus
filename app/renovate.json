@@ -28,6 +28,7 @@
       "automerge": false
     }
   ],
+  "rebaseWhen": "behind-base-branch",
   "prConcurrentLimit": 10,
   "branchConcurrentLimit": 10
 }
