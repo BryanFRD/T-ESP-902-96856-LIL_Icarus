@@ -1,3 +1,10 @@
+## [1.33.1](https://git.icarus-cyber.fr/icarus/web/compare/v1.33.0...v1.33.1) (2026-03-29)
+
+
+### Bug Fixes
+
+* **ci:** trigger deploy_dev automatically on merge request pipelines ([7b8562f](https://git.icarus-cyber.fr/icarus/web/commit/7b8562fc38e56a7744bb6925658ad36200342ade))
+
 # [1.33.0](https://git.icarus-cyber.fr/icarus/web/compare/v1.32.0...v1.33.0) (2026-03-20)
 
 
