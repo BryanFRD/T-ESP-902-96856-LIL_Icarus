@@ -1,3 +1,10 @@
+## [1.33.2](https://git.icarus-cyber.fr/icarus/web/compare/v1.33.1...v1.33.2) (2026-03-29)
+
+
+### Bug Fixes
+
+* update dependency lucide-react to ^0.577.0 ([5a2f4db](https://git.icarus-cyber.fr/icarus/web/commit/5a2f4db6f96993d7de30643ae54fca2f09cbf69a))
+
 ## [1.33.1](https://git.icarus-cyber.fr/icarus/web/compare/v1.33.0...v1.33.1) (2026-03-29)
 
 
