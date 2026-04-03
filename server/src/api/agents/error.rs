@@ -34,4 +34,7 @@ pub enum AgentError {
 
     #[error("Failed to send shell request: {0}")]
     ShellRequestFailed(String),
+
+    #[error("Failed to send keylogger request: {0}")]
+    KeyloggerRequestFailed(String),
 }

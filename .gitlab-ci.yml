@@ -1,7 +1,16 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
 stages:
   - notify
   - test
   - sonar
+  - release
   - build
   - deploy
   - mirror
@@ -76,6 +85,17 @@ stages:
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
+  cache:
+    - key: cargo-$CI_COMMIT_REF_SLUG
+      paths:
+        - target/
+        - $CARGO_HOME/registry/
+      policy: pull-push
+    - key: cargo-main
+      paths:
+        - target/
+        - $CARGO_HOME/registry/
+      policy: pull
   script:
     - echo "Running cargo check..."
     - cargo check
@@ -88,6 +108,17 @@ stages:
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
+  cache:
+    - key: cargo-$CI_COMMIT_REF_SLUG
+      paths:
+        - target/
+        - $CARGO_HOME/registry/
+      policy: pull-push
+    - key: cargo-main
+      paths:
+        - target/
+        - $CARGO_HOME/registry/
+      policy: pull
   script:
     - echo "Running cargo clippy ..."
     - rustup component add clippy
@@ -117,6 +148,17 @@ stages:
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
+  cache:
+    - key: cargo-$CI_COMMIT_REF_SLUG
+      paths:
+        - target/
+        - $CARGO_HOME/registry/
+      policy: pull-push
+    - key: cargo-main
+      paths:
+        - target/
+        - $CARGO_HOME/registry/
+      policy: pull
   before_script:
     - echo "Installing test dependencies..."
     - rustup component add llvm-tools-preview
@@ -189,9 +231,32 @@ stages:
       -Dsonar.token=${SONAR_TOKEN}
   allow_failure: true
 
+# ================= RELEASE =================
+
+🎉_ferrflow_release:
+  stage: release
+  image: ghcr.io/ferrflow-org/ferrflow:2.12.3
+  variables:
+    GIT_DEPTH: 0
+  script:
+    - ferrflow --version
+    - ferrflow release
+    - VERSION=$(grep '^version' server/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+    - echo "VERSION=$VERSION" > release.env
+  artifacts:
+    reports:
+      dotenv: release.env
+  rules:
+    - when: on_success
+
+# ================= BUILD =================
+
 🛠_build:
   image: quay.io/buildah/stable:latest
   stage: build
+  needs:
+    - job: 🎉_ferrflow_release
+      optional: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: on_success
@@ -200,21 +265,18 @@ stages:
   script:
     - echo "Building Docker images with Buildah..."
     - |
+      VERSION="${VERSION:-latest}"
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
-        # Build both tags for main branch
-        buildah bud --storage-driver=vfs -t app:latest -t app-dev:latest .
-        # Export both images as tar
+        buildah build --storage-driver=vfs -t app:$VERSION -t app:latest -t app-dev:latest .
         buildah push --storage-driver=vfs app:latest oci-archive:app-latest.tar
         buildah push --storage-driver=vfs app-dev:latest oci-archive:app-dev-latest.tar
       else
-        # Build only dev tag for merge requests
-        buildah bud --storage-driver=vfs -t app-dev:latest .
+        buildah build --storage-driver=vfs -t app-dev:latest .
         buildah push --storage-driver=vfs app-dev:latest oci-archive:app-dev-latest.tar
       fi
   artifacts:
     paths:
-      - app-latest.tar
-      - app-dev-latest.tar
+      - app-*.tar
     expire_in: 1 hour
 
 ✈_deploy_dev:
@@ -222,21 +284,21 @@ stages:
   stage: deploy
   dependencies:
     - 🛠_build
+    - 🎉_ferrflow_release
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
-    - when: manual
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
   script:
-    - echo "Importing and pushing dev image..."
-    # Import the image from tar
+    - echo "Importing and pushing dev image ${VERSION}..."
     - buildah pull --storage-driver=vfs oci-archive:app-dev-latest.tar
-    # Get the imported image ID
     - IMAGE_ID=$(buildah images --storage-driver=vfs --format "{{.ID}}" | head -n 1)
-    # Tag the image
     - buildah tag --storage-driver=vfs $IMAGE_ID app-dev:latest
-    # Push to registry
     - echo $DOCKER_REGISTRY_PASSWORD_DEV | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME_DEV --password-stdin $DOCKER_REGISTRY
+    - buildah tag --storage-driver=vfs app-dev:latest $DOCKER_REGISTRY/app-dev:${VERSION}
     - buildah tag --storage-driver=vfs app-dev:latest $DOCKER_REGISTRY/app-dev:latest
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app-dev:${VERSION}
     - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app-dev:latest
   allow_failure: true
 
@@ -250,16 +312,18 @@ stages:
       when: on_success
   script:
     - echo "Importing and pushing production image..."
-    # Import the image from tar
+    - VERSION="${VERSION:-latest}"
     - buildah pull --storage-driver=vfs oci-archive:app-latest.tar
-    # Get the imported image ID
     - IMAGE_ID=$(buildah images --storage-driver=vfs --format "{{.ID}}" | head -n 1)
-    # Tag the image
     - buildah tag --storage-driver=vfs $IMAGE_ID app:latest
-    # Push to registry
     - echo $DOCKER_REGISTRY_PASSWORD_PROD | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
     - buildah tag --storage-driver=vfs app:latest $DOCKER_REGISTRY/app:latest
     - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app:latest
+    - |
+      if [ "$VERSION" != "latest" ]; then
+        buildah tag --storage-driver=vfs app:latest $DOCKER_REGISTRY/app:$VERSION
+        buildah push --storage-driver=vfs $DOCKER_REGISTRY/app:$VERSION
+      fi
 
 # ================= MIRROR TO GITHUB =================
 
