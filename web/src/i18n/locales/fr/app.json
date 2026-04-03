@@ -15,6 +15,7 @@
             "en": "Anglais",
             "fr": "Français"
           },
+          "logout": "Déconnexion",
           "theme": {
             "label": "Thème",
             "light": "Clair",

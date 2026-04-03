@@ -33,7 +33,7 @@ export default defineConfig(async ({ mode }) => {
     test: {
       globals: true,
       environment: 'happy-dom',
-      setupFiles: ['src/test/setup.ts'],
+      setupFiles: ['src/configuration/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}', 'src/**/*.spec.{ts,tsx}'],
       exclude: ['node_modules/', 'dist/'],
       coverage: {

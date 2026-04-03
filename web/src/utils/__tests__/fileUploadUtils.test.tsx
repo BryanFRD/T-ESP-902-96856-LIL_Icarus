@@ -93,7 +93,7 @@ describe('fileUploadUtils', () => {
       },
       {
         file: { name: 'bad.pdf' },
-        errors: [{ code: 'file-invalid-types' }]
+        errors: [{ code: 'file-invalid-type' }]
       },
       {
         file: { name: 'extra.zip' },
@@ -106,9 +106,9 @@ describe('fileUploadUtils', () => {
       1,
       ['image/png']
     )
-    expect(errors[0]).toMatch(/file_upload.errors.too_large/)
-    expect(errors[1]).toMatch(/file_upload.errors.invalid_type/)
-    expect(errors[2]).toMatch(/file_upload.errors.too_many_files/)
+    expect(errors[0]).toMatch(/fileUpload\.errors\.too_large/)
+    expect(errors[1]).toMatch(/fileUpload\.errors\.invalid_type/)
+    expect(errors[2]).toMatch(/fileUpload\.errors\.too_many_files/)
   })
 
   it('getDisplaySize returns formatted string', () => {

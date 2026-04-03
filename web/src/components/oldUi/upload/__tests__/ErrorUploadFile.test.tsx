@@ -22,7 +22,7 @@ describe('ErrorUploadFile components', () => {
   it('renders validation errors header', () => {
     render(<ErrorUploadFile errors={['Error 1']} />)
     expect(
-      screen.getByText('file_upload.validation_errors')
+      screen.getByText('ui:fileUpload.validation_errors')
     ).toBeInTheDocument()
   })
 

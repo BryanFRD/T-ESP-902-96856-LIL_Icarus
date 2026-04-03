@@ -46,7 +46,9 @@ describe('loginSchema', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('email')
-        expect(result.error.issues[0].message).toBe('email.invalid')
+        expect(result.error.issues[0].message).toBe(
+          'auth:validation.emailInvalid'
+        )
       }
     })
 
@@ -82,7 +84,9 @@ describe('loginSchema', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('password')
-        expect(result.error.issues[0].message).toBe('password.min')
+        expect(result.error.issues[0].message).toBe(
+          'auth:validation.passwordMin'
+        )
       }
     })
 
