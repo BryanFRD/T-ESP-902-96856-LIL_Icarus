@@ -1,3 +1,11 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
 stages:
   - notify
   - test
@@ -21,10 +29,10 @@ stages:
       echo "CI_PROJECT_ID=$CI_PROJECT_ID"
       echo "CI_MERGE_REQUEST_IID=$CI_MERGE_REQUEST_IID"
 
-      GITLAB_URL="${CI_SERVER_URL}" 
+      GITLAB_URL="${CI_SERVER_URL}"
       MR_INFO=$(curl --silent --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "${GITLAB_URL}/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID")
 
-    
+
       if [ -z "$MR_INFO" ] || [ "$MR_INFO" = "null" ]; then
         echo "Failed to fetch MR info from GitLab API. Response: $MR_INFO"
         exit 0
@@ -52,7 +60,7 @@ stages:
         "Bryan": "210742118669484034",
         "corentincollery": "684002215139999774",
         "Natchi59": "483189540622958593",
-        "Reweilk": "924211405866037278" 
+        "Reweilk": "924211405866037278"
       }'
 
       for REVIEWER in $REVIEWER_IDS; do
@@ -74,19 +82,58 @@ stages:
 
 # ================= TEST =================
 
-🧪_test:
-  stage: test
-  image: mcr.microsoft.com/playwright:v1.40.0-focal
+.pnpm_setup:
+  image: node:22-alpine
+  variables:
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    HUSKY: '0'
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@latest --activate
+    - pnpm install --frozen-lockfile
+  cache:
+    - key: pnpm-$CI_COMMIT_REF_SLUG
+      paths:
+        - .pnpm-store/
+      policy: pull-push
+    - key: pnpm-main
+      paths:
+        - .pnpm-store/
+      policy: pull
   rules:
     - when: always
-  cache:
-    paths:
-      - node_modules/
-      - .npm/
+
+📏_lint:
+  extends: .pnpm_setup
+  stage: test
   script:
-    - npm ci --cache .npm --prefer-offline
-    - npm run test -- --coverage || echo "Tests exited with code $?"
-    - npm run lint
+    - pnpm run lint --max-warnings 0
+
+📝_type_check:
+  extends: .pnpm_setup
+  stage: test
+  script:
+    - pnpm run type:check
+
+🎨_format_check:
+  extends: .pnpm_setup
+  stage: test
+  script:
+    - pnpm run format:check
+
+🧪_test:
+  extends: .pnpm_setup
+  image: node:22
+  stage: test
+  variables:
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '0'
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@latest --activate
+    - pnpm install --frozen-lockfile
+    - pnpm exec playwright install --with-deps
+  script:
+    - pnpm run test:run --coverage
   artifacts:
     paths:
       - coverage
@@ -105,13 +152,10 @@ stages:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
     GIT_DEPTH: "0"
   cache:
-    - key: "sonar-cache-$CI_COMMIT_REF_SLUG"
+    - key: sonar-$CI_COMMIT_REF_SLUG
       policy: pull-push
       paths:
         - "${SONAR_USER_HOME}/cache"
-    - paths:
-        - node_modules/
-        - .npm/
   script:
     - echo "Running SonarQube scan..."
     - sonar-scanner
@@ -126,63 +170,62 @@ stages:
 
 # ================= RELEASE =================
 
-🎉_semantic_release:
+🎉_ferrflow_release:
   stage: release
-  image: node:21
+  image: ghcr.io/ferrflow-org/ferrflow:2.12.3
   variables:
     HUSKY: '0'
-    GITLAB_TOKEN: $CI_JOB_TOKEN
-  cache:
-    paths:
-      - node_modules/
-      - .npm/
+    GIT_DEPTH: 0
+  before_script:
+    - apk add --no-cache jq
   script:
-    - npm ci --cache .npm --prefer-offline --ignore-scripts
-    - npx semantic-release
+    - ferrflow --version
+    - ferrflow release
+    - VERSION=$(jq -r '.version' package.json)
+    - echo "VERSION=$VERSION" > release.env
   artifacts:
     paths:
       - CHANGELOG.md
       - package.json
-  only:
-    - main
+    reports:
+      dotenv: release.env
+  rules:
+    - when: on_success
 
 # ================= DEPLOY =================
 
 ✈_deploy_dev:
   stage: deploy
   image: quay.io/buildah/stable:latest
-  dependencies:
-    - 🧪_test
+  needs:
+    - job: 🎉_ferrflow_release
+      artifacts: true
   rules:
-    - if: '$CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE == "push"'
-      when: on_success
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
-    - when: manual
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
   script:
-    - echo "Building and deploying DEV web image..."
-    - echo "BUILD_MODE=development"
-    - buildah build --build-arg BUILD_MODE=development --storage-driver=vfs -t web-dev:latest .
+    - echo "Building and deploying DEV web image ${VERSION}..."
+    - buildah build --build-arg BUILD_MODE=development --storage-driver=vfs -t web-dev:${VERSION} -t web-dev:latest .
     - echo "$DOCKER_REGISTRY_PASSWORD_DEV" | buildah login --storage-driver=vfs --username "$DOCKER_REGISTRY_USERNAME_DEV" --password-stdin $DOCKER_REGISTRY
+    - buildah tag --storage-driver=vfs web-dev:${VERSION} $DOCKER_REGISTRY/web-dev:${VERSION}
     - buildah tag --storage-driver=vfs web-dev:latest $DOCKER_REGISTRY/web-dev:latest
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/web-dev:${VERSION}
     - buildah push --storage-driver=vfs $DOCKER_REGISTRY/web-dev:latest
 
 📝_deploy_prod:
   stage: deploy
   image: quay.io/buildah/stable:latest
-  dependencies:
-    - 🎉_semantic_release
+  needs:
+    - job: 🎉_ferrflow_release
+      artifacts: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "main"'
       when: on_success
-  before_script:
-    - dnf install -y jq nodejs
   script:
-    - echo "Building and deploying PRODUCTION web image with semantic-release version..."
-    - VERSION=$(jq -r '.version' package.json)
+    - echo "Building and deploying PRODUCTION web image with ferrflow version..."
     - echo "Version -> $VERSION"
-    - npm ci --cache .npm --prefer-offline
-    - npm run build -- --mode production
     - buildah build --storage-driver=vfs -t $DOCKER_REGISTRY/web:$VERSION -t $DOCKER_REGISTRY/web:latest .
     - echo "$DOCKER_REGISTRY_PASSWORD_PROD" | buildah login --storage-driver=vfs --username "$DOCKER_REGISTRY_USERNAME_PROD" --password-stdin $DOCKER_REGISTRY
     - buildah push --storage-driver=vfs $DOCKER_REGISTRY/web:$VERSION

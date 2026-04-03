@@ -61,6 +61,6 @@ describe('FeatureItem components', () => {
     const mainDiv = container.firstChild as HTMLElement
     expect(mainDiv.className).toContain('flex')
     expect(mainDiv.className).toContain('items-center')
-    expect(mainDiv.className).toContain('gap-4')
+    expect(mainDiv.className).toContain('gap-x-4')
   })
 })

@@ -75,8 +75,8 @@ export function InvitationRow({ invitation, canManage, teamId }: Props) {
       <div className='flex flex-1 flex-col'>
         <p className='text-sm font-medium'>
           {t('show.invitations.usageCount', {
-            used: invitation.usedCount,
-            max: invitation.maxUses
+            used: String(invitation.usedCount),
+            max: String(invitation.maxUses)
           })}
         </p>
         <p

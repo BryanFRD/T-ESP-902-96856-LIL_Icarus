@@ -17,6 +17,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuPortal,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -33,7 +34,7 @@ import { useUserContext } from '@/context/user-context.tsx'
 
 export function AppSidebarFooter() {
   const { t } = useTranslation('app')
-  const { user } = useUserContext()
+  const { user, logout } = useUserContext()
 
   const { toggleSidebar } = useSidebar()
   const { setTheme } = useTheme()
@@ -139,6 +140,12 @@ export function AppSidebarFooter() {
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem variant='destructive' onClick={logout}>
+              {t('layout.sidebar.footer.userMenu.logout')}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenu>

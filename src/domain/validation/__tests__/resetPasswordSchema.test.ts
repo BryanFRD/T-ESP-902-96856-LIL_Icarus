@@ -32,7 +32,9 @@ describe('resetPasswordSchema', () => {
         expect(result.success).toBe(false)
         if (!result.success) {
           expect(result.error.issues[0].path).toContain('resetEmail')
-          expect(result.error.issues[0].message).toBe('email.invalid')
+          expect(result.error.issues[0].message).toBe(
+            'auth:validation.emailInvalid'
+          )
         }
       })
 
@@ -45,7 +47,7 @@ describe('resetPasswordSchema', () => {
         expect(result.success).toBe(false)
         if (!result.success) {
           const emailRequiredIssue = result.error.issues.find(
-            issue => issue.message === 'inputField.emailRequired'
+            issue => issue.message === 'auth:validation.emailRequired'
           )
           expect(emailRequiredIssue).toBeDefined()
         }
@@ -93,7 +95,9 @@ describe('resetPasswordSchema', () => {
         expect(result.success).toBe(false)
         if (!result.success) {
           expect(result.error.issues[0].path).toContain('newPassword')
-          expect(result.error.issues[0].message).toBe('password.min')
+          expect(result.error.issues[0].message).toBe(
+            'auth:validation.passwordMin'
+          )
         }
       })
 

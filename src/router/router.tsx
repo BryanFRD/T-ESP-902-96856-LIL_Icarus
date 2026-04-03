@@ -8,7 +8,7 @@ import { useUserContext } from '@/context/user-context.tsx'
 import routes from './routes'
 
 const Router = () => {
-  const { user, loading } = useUserContext()
+  const { user } = useUserContext()
 
   const isUserAuthenticated = !!user
 
@@ -28,30 +28,26 @@ const Router = () => {
   return (
     <BrowserRouter>
       <Suspense fallback={<RefreshLoader />}>
-        {loading ? (
-          <RefreshLoader />
-        ) : (
-          <Routes>
-            {publicRoutes.map(route => (
-              <Route
-                key={route.name}
-                path={route.path}
-                element={<route.component />}
-              />
-            ))}
-            {privateRoutes.length > 0 && (
-              <Route element={<DefaultLayout />}>
-                {privateRoutes.map(route => (
-                  <Route
-                    key={route.name}
-                    path={route.path}
-                    element={<route.component />}
-                  />
-                ))}
-              </Route>
-            )}
-          </Routes>
-        )}
+        <Routes>
+          {publicRoutes.map(route => (
+            <Route
+              key={route.name}
+              path={route.path}
+              element={<route.component />}
+            />
+          ))}
+          {privateRoutes.length > 0 && (
+            <Route element={<DefaultLayout />}>
+              {privateRoutes.map(route => (
+                <Route
+                  key={route.name}
+                  path={route.path}
+                  element={<route.component />}
+                />
+              ))}
+            </Route>
+          )}
+        </Routes>
       </Suspense>
     </BrowserRouter>
   )

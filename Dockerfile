@@ -1,13 +1,15 @@
 # Build stage
-FROM node:21-alpine AS builder
+FROM node:22-alpine AS builder
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
-RUN npm ci --prefer-offline
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -15,7 +17,7 @@ COPY . .
 # Build application (mode will be set via build arg)
 ARG BUILD_MODE=production
 RUN echo "Building with BUILD_MODE=${BUILD_MODE}" && \
-    npm run build -- --mode ${BUILD_MODE}
+    pnpm run build -- --mode ${BUILD_MODE}
 
 # Production stage
 FROM nginx:alpine

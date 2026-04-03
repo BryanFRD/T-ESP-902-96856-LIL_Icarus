@@ -11,6 +11,7 @@ interface Resources {
               fr: 'French'
               label: 'Language'
             }
+            logout: 'Logout'
             profile: 'Profile'
             theme: {
               dark: 'Dark'

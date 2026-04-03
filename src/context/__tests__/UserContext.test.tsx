@@ -8,26 +8,26 @@ import { UserRole } from '@/domain/enum/role-enum.ts'
 import { UserContextProvider, useUserContext } from '../user-context.tsx'
 
 // Mock the hooks
-vi.mock('@/hooks/auth/useMe', () => ({
+vi.mock('@/hooks/auth/use-me', () => ({
   useMe: vi.fn(() => ({
     data: null,
     isLoading: false
   }))
 }))
 
-vi.mock('@/hooks/auth/useLogin', () => ({
+vi.mock('@/hooks/auth/use-login', () => ({
   useLogin: vi.fn(() => ({
     mutateAsync: vi.fn()
   }))
 }))
 
-vi.mock('@/hooks/auth/useRegister', () => ({
+vi.mock('@/hooks/auth/use-register', () => ({
   useRegister: vi.fn(() => ({
     mutateAsync: vi.fn()
   }))
 }))
 
-vi.mock('@/hooks/auth/useLogout', () => ({
+vi.mock('@/hooks/auth/use-logout', () => ({
   useLogout: vi.fn(() => ({
     mutateAsync: vi.fn()
   }))

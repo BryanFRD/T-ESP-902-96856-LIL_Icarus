@@ -16,6 +16,7 @@
             "en": "English",
             "fr": "French"
           },
+          "logout": "Logout",
           "theme": {
             "label": "Theme",
             "light": "Light",

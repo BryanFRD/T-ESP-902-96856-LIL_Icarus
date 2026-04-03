@@ -38,7 +38,7 @@ describe('registerSchema', () => {
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('username')
         expect(result.error.issues[0].message).toBe(
-          'inputField.usernameRequired'
+          'auth:validation.usernameRequired'
         )
       }
     })
@@ -59,7 +59,9 @@ describe('registerSchema', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('email')
-        expect(result.error.issues[0].message).toBe('email.invalid')
+        expect(result.error.issues[0].message).toBe(
+          'auth:validation.emailInvalid'
+        )
       }
     })
   })
@@ -80,7 +82,7 @@ describe('registerSchema', () => {
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('firstName')
         expect(result.error.issues[0].message).toBe(
-          'inputField.firstNameRequired'
+          'auth:validation.firstNameRequired'
         )
       }
     })
@@ -102,7 +104,7 @@ describe('registerSchema', () => {
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('lastName')
         expect(result.error.issues[0].message).toBe(
-          'inputField.lastNameRequired'
+          'auth:validation.lastNameRequired'
         )
       }
     })
@@ -123,7 +125,9 @@ describe('registerSchema', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('password')
-        expect(result.error.issues[0].message).toBe('password.min')
+        expect(result.error.issues[0].message).toBe(
+          'auth:validation.passwordMin'
+        )
       }
     })
   })
@@ -146,7 +150,9 @@ describe('registerSchema', () => {
           issue.path.includes('confirmPassword')
         )
         expect(confirmPasswordIssue).toBeDefined()
-        expect(confirmPasswordIssue?.message).toBe('password.mismatch')
+        expect(confirmPasswordIssue?.message).toBe(
+          'auth:validation.passwordMismatch'
+        )
       }
     })
 
