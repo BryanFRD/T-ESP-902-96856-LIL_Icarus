@@ -155,8 +155,9 @@ mod agents_integration_tests {
     #[serial]
     async fn test_revoke_agent_not_found() {
         let (server, audit_id) = setup_authenticated().await;
+        let fake_id = ulid::Ulid::new();
         let resp = server
-            .delete(&format!("/v1/audits/{audit_id}/agents/nonexistent"))
+            .delete(&format!("/v1/audits/{audit_id}/agents/{fake_id}"))
             .await;
         assert_eq!(resp.status_code(), StatusCode::NOT_FOUND);
     }

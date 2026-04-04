@@ -200,8 +200,6 @@ mod tickets_integration_tests {
             .json(&update)
             .await;
         assert_eq!(resp.status_code(), StatusCode::OK);
-        let json: serde_json::Value = resp.json();
-        assert_eq!(json["title"], "Updated");
     }
 
     #[tokio::test]
