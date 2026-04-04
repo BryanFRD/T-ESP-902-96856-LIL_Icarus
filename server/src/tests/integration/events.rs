@@ -15,7 +15,7 @@ async fn test_list_events_requires_authentication() {
     let (_container, pool) = setup_test_db().await;
     let state = create_test_state_from_pool(pool.clone());
     let app = create_test_router(state);
-    let server = TestServer::new(app).unwrap();
+    let server = TestServer::new(app);
 
     let response = server.get("/v1/events").await;
 
@@ -28,7 +28,7 @@ async fn test_list_events_as_admin() {
     let (_container, pool) = setup_test_db().await;
     let state = create_test_state_from_pool(pool.clone());
     let app = create_test_router(state);
-    let server = TestServer::new(app).unwrap();
+    let server = TestServer::new(app);
 
     let _admin = insert_test_user(
         &pool,
@@ -62,7 +62,7 @@ async fn test_list_events_with_filters() {
     let (_container, pool) = setup_test_db().await;
     let state = create_test_state_from_pool(pool.clone());
     let app = create_test_router(state);
-    let server = TestServer::new(app).unwrap();
+    let server = TestServer::new(app);
 
     let _admin = insert_test_user(
         &pool,
@@ -100,7 +100,7 @@ async fn test_get_event_by_id_not_found() {
     let (_container, pool) = setup_test_db().await;
     let state = create_test_state_from_pool(pool.clone());
     let app = create_test_router(state);
-    let server = TestServer::new(app).unwrap();
+    let server = TestServer::new(app);
 
     let _admin = insert_test_user(
         &pool,
@@ -134,7 +134,7 @@ async fn test_event_logging_on_user_update() {
     let (_container, pool) = setup_test_db().await;
     let state = create_test_state_from_pool(pool.clone());
     let app = create_test_router(state);
-    let server = TestServer::new(app).unwrap();
+    let server = TestServer::new(app);
 
     let _user = insert_test_user(
         &pool,
@@ -197,7 +197,7 @@ async fn test_event_metadata_contains_response_status() {
     let (_container, pool) = setup_test_db().await;
     let state = create_test_state_from_pool(pool.clone());
     let app = create_test_router(state);
-    let server = TestServer::new(app).unwrap();
+    let server = TestServer::new(app);
 
     let _user = insert_test_user(
         &pool,
@@ -248,7 +248,7 @@ async fn test_non_admin_sees_anonymized_data() {
     let (_container, pool) = setup_test_db().await;
     let state = create_test_state_from_pool(pool.clone());
     let app = create_test_router(state);
-    let server = TestServer::new(app).unwrap();
+    let server = TestServer::new(app);
 
     let _user = insert_test_user(
         &pool,
@@ -290,7 +290,7 @@ async fn test_admin_can_disable_anonymization() {
     let (_container, pool) = setup_test_db().await;
     let state = create_test_state_from_pool(pool.clone());
     let app = create_test_router(state);
-    let server = TestServer::new(app).unwrap();
+    let server = TestServer::new(app);
 
     let _admin = insert_test_user(
         &pool,
@@ -325,7 +325,7 @@ async fn test_sensitive_fields_are_redacted() {
     let (_container, pool) = setup_test_db().await;
     let state = create_test_state_from_pool(pool.clone());
     let app = create_test_router(state);
-    let server = TestServer::new(app).unwrap();
+    let server = TestServer::new(app);
 
     let _admin = insert_test_user(
         &pool,

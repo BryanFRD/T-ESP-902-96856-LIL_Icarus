@@ -27,3 +27,9 @@ pub mod status;
 
 #[cfg(test)]
 pub mod teams;
+
+#[cfg(test)]
+pub mod tickets;
+
+#[cfg(test)]
+pub mod agents;

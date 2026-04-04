@@ -14,4 +14,7 @@ pub use models::{
 pub use models::EmailConfirmationToken;
 
 #[cfg(test)]
+pub use models::{ConfirmationTokenError, PasswordResetToken};
+
+#[cfg(test)]
 pub use services::hash_password;

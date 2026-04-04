@@ -36,3 +36,82 @@ pub enum EncryptionError {
     #[error("Failed to decrypt: {0}")]
     FailedToDecrypt(String),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_key() -> [u8; 32] {
+        [0xAB; 32]
+    }
+
+    #[test]
+    fn encrypt_then_decrypt_roundtrip() {
+        let key = test_key();
+        let plaintext = b"hello world";
+        let (ciphertext, nonce) = encrypt(&key, plaintext).unwrap();
+        let decrypted = decrypt(&key, &nonce, &ciphertext).unwrap();
+        assert_eq!(decrypted, plaintext);
+    }
+
+    #[test]
+    fn decrypt_with_wrong_key_fails() {
+        let key = test_key();
+        let wrong_key = [0xCD; 32];
+        let plaintext = b"secret data";
+        let (ciphertext, nonce) = encrypt(&key, plaintext).unwrap();
+        assert!(decrypt(&wrong_key, &nonce, &ciphertext).is_err());
+    }
+
+    #[test]
+    fn decrypt_with_wrong_nonce_fails() {
+        let key = test_key();
+        let plaintext = b"secret data";
+        let (ciphertext, _nonce) = encrypt(&key, plaintext).unwrap();
+        let wrong_nonce = vec![0x00; 12];
+        assert!(decrypt(&key, &wrong_nonce, &ciphertext).is_err());
+    }
+
+    #[test]
+    fn encrypt_produces_different_nonces() {
+        let key = test_key();
+        let plaintext = b"same input";
+        let (_ct1, nonce1) = encrypt(&key, plaintext).unwrap();
+        let (_ct2, nonce2) = encrypt(&key, plaintext).unwrap();
+        assert_ne!(nonce1, nonce2);
+    }
+
+    #[test]
+    fn encrypt_decrypt_empty_plaintext() {
+        let key = test_key();
+        let (ciphertext, nonce) = encrypt(&key, b"").unwrap();
+        let decrypted = decrypt(&key, &nonce, &ciphertext).unwrap();
+        assert!(decrypted.is_empty());
+    }
+
+    #[test]
+    fn ciphertext_differs_from_plaintext() {
+        let key = test_key();
+        let plaintext = b"hello world";
+        let (ciphertext, _) = encrypt(&key, plaintext).unwrap();
+        assert_ne!(ciphertext, plaintext);
+    }
+
+    #[test]
+    fn decrypt_tampered_ciphertext_fails() {
+        let key = test_key();
+        let (mut ciphertext, nonce) = encrypt(&key, b"data").unwrap();
+        if let Some(byte) = ciphertext.first_mut() {
+            *byte ^= 0xFF;
+        }
+        assert!(decrypt(&key, &nonce, &ciphertext).is_err());
+    }
+
+    #[test]
+    fn encryption_error_display() {
+        let err = EncryptionError::FailedToEncrypt("test".to_string());
+        assert_eq!(format!("{err}"), "Failed to encrypt: test");
+        let err = EncryptionError::FailedToDecrypt("test".to_string());
+        assert_eq!(format!("{err}"), "Failed to decrypt: test");
+    }
+}

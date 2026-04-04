@@ -59,3 +59,42 @@ pub enum ShellType {
     /// `PowerShell`
     PowerShell,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::packets::Packet;
+
+    #[test]
+    fn factory_methods() {
+        assert_eq!(ShellRequest::auto().shell_type, ShellType::Auto);
+        assert_eq!(ShellRequest::bash().shell_type, ShellType::Bash);
+        assert_eq!(ShellRequest::sh().shell_type, ShellType::Sh);
+        assert_eq!(ShellRequest::cmd().shell_type, ShellType::Cmd);
+        assert_eq!(ShellRequest::powershell().shell_type, ShellType::PowerShell);
+    }
+
+    #[test]
+    fn serialize_deserialize_roundtrip() {
+        let req = ShellRequest::bash();
+        let bytes = req.serialize().unwrap();
+        let decoded = ShellRequest::deserialize(&bytes[1..]).unwrap();
+        assert_eq!(decoded.shell_type, ShellType::Bash);
+    }
+
+    #[test]
+    fn all_shell_types_roundtrip() {
+        let types = [ShellType::Auto, ShellType::Bash, ShellType::Sh, ShellType::Cmd, ShellType::PowerShell];
+        for st in types {
+            let req = ShellRequest::new(st);
+            let bytes = req.serialize().unwrap();
+            let decoded = ShellRequest::deserialize(&bytes[1..]).unwrap();
+            assert_eq!(decoded.shell_type, st);
+        }
+    }
+
+    #[test]
+    fn packet_code_is_correct() {
+        assert_eq!(ShellRequest::packet_code(), 0x0C);
+    }
+}

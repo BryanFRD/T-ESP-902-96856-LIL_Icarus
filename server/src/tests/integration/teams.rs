@@ -49,7 +49,7 @@ mod teams_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "user@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -81,7 +81,7 @@ mod teams_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = CreateTeam {
             name: "Test Team".to_string(),
@@ -115,7 +115,7 @@ mod teams_integration_tests {
         let _team2 = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "user@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -147,7 +147,7 @@ mod teams_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "user@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -171,7 +171,7 @@ mod teams_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server.get("/v1/teams/me").await;
 
@@ -199,7 +199,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -243,7 +243,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "admin@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -280,7 +280,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -320,7 +320,7 @@ mod teams_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "user@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -367,7 +367,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -412,7 +412,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "other@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -450,7 +450,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = UpdateTeam {
             name: Some("Updated".to_string()),
@@ -486,7 +486,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -524,7 +524,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "admin@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -554,7 +554,7 @@ mod teams_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "user@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -595,7 +595,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -634,7 +634,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "other@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -666,7 +666,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &user);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server.delete(&format!("/v1/teams/{}", team.id)).await;
 
@@ -702,7 +702,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -749,7 +749,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "moderator@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -788,7 +788,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -834,7 +834,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "admin@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -865,7 +865,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -906,7 +906,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &moderator.id, TeamRole::Moderator);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "moderator@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -954,7 +954,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member2.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "member1@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -994,7 +994,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server
             .delete(&format!("/v1/teams/{}/members/{}", team.id, member.id))
@@ -1032,7 +1032,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1083,7 +1083,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "admin@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1119,7 +1119,7 @@ mod teams_integration_tests {
         let team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1173,7 +1173,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "moderator@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1226,7 +1226,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member2.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "member1@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1271,7 +1271,7 @@ mod teams_integration_tests {
         insert_team_member(&pool, &team.id, &member.id, TeamRole::Member);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = UpdateMemberRolePayload {
             role: TeamRole::Moderator,

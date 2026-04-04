@@ -83,3 +83,132 @@ pub fn from_packet_bytes(data: &[u8]) -> Result<Packets, PacketError> {
         _ => Err(PacketError::UnknownPacket(packet_code.to_string())),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // serialize() already prepends the packet code byte,
+    // so we can pass the result directly to from_packet_bytes
+    fn to_wire<P: Packet>(packet: &P) -> Vec<u8> {
+        packet.serialize().unwrap()
+    }
+
+    #[test]
+    fn from_packet_bytes_heartbeat() {
+        let pkt = Heartbeat::new();
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::Heartbeat(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_encryption_request() {
+        let pkt = EncryptionRequest::new([0xAA; 32], 42);
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::EncryptionRequest(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_encryption_response() {
+        let pkt = EncryptionResponse::new([0xBB; 32], [0xCC; 12], [0xDD; 24]);
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::EncryptionResponse(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_stream_open() {
+        let pkt = StreamOpen { stream_id: 1 };
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::StreamOpen(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_stream_close() {
+        let pkt = StreamClose { stream_id: 1 };
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::StreamClose(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_stream_data() {
+        let pkt = StreamData { stream_id: 1, data: vec![1, 2, 3] };
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::StreamData(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_stream_error() {
+        let pkt = StreamError { stream_id: 1, error: "err".to_string() };
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::StreamError(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_agent_auth() {
+        let pkt = AgentAuth::new("audit".to_string(), "token".to_string());
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::AgentAuth(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_agent_auth_response() {
+        let pkt = AgentAuthResponse::new(true, "ok".to_string());
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::AgentAuthResponse(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_system_info() {
+        let pkt = SystemInfo {
+            hostname: "h".to_string(), os_name: "o".to_string(), os_version: "v".to_string(),
+            cpu_name: "c".to_string(), cpu_count: 1, total_memory_bytes: 1, used_memory_bytes: 1,
+            uptime_secs: 1,
+        };
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::SystemInfo(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_agent_control() {
+        let pkt = AgentControl::pause();
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::AgentControl(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_shell_request() {
+        let pkt = ShellRequest::bash();
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::ShellRequest(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_keylogger_request() {
+        let pkt = KeyloggerRequest::start();
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::KeyloggerRequest(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_keylogger_data() {
+        let pkt = KeyloggerData::new(vec![0x41]);
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::KeyloggerData(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_unknown_code() {
+        let bytes = vec![0xFF, 0x00];
+        assert!(matches!(from_packet_bytes(&bytes), Err(PacketError::UnknownPacket(_))));
+    }
+
+    #[test]
+    fn packet_error_display() {
+        let err = PacketError::UnknownPacket("255".to_string());
+        assert!(format!("{err}").contains("255"));
+        let err = PacketError::EncodingError("test".to_string());
+        assert!(format!("{err}").contains("test"));
+        let err = PacketError::DecodingError("test".to_string());
+        assert!(format!("{err}").contains("test"));
+    }
+}

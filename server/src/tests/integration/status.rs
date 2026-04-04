@@ -16,7 +16,7 @@ mod status_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server.get("/v1/status").await;
 
@@ -41,7 +41,7 @@ mod status_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server.get("/v1/status").await;
 
@@ -67,7 +67,7 @@ mod status_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server.get("/v1/status").await;
 
@@ -93,7 +93,7 @@ mod status_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server.get("/v1/status").await;
 
@@ -112,7 +112,7 @@ mod status_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server.get("/v1/status").await;
 
@@ -136,7 +136,7 @@ mod status_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         for _ in 0..5 {
             let response = server.get("/v1/status").await;
@@ -161,7 +161,7 @@ mod status_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server.get("/v1/status").await;
 
