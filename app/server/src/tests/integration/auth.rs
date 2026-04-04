@@ -37,7 +37,7 @@ mod auth_integration_tests {
 
         // Créer le router et le serveur de test
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Tenter de se connecter
         let payload = LoginPayload {
@@ -76,7 +76,7 @@ mod auth_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Tenter de se connecter avec un mauvais mot de passe
         let payload = LoginPayload {
@@ -100,7 +100,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Tenter de se connecter avec un email inexistant
         let payload = LoginPayload {
@@ -124,7 +124,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Tenter de se connecter avec un email invalide
         let payload = LoginPayload {
@@ -157,7 +157,7 @@ mod auth_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter d'abord
         let login_payload = LoginPayload {
@@ -209,7 +209,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = RegisterPayload {
             username: "newuser".to_string(),
@@ -232,7 +232,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = RegisterPayload {
             username: "newuser".to_string(),
@@ -265,7 +265,7 @@ mod auth_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = RegisterPayload {
             username: "existinguser".to_string(),
@@ -298,7 +298,7 @@ mod auth_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = RegisterPayload {
             username: "differentuser".to_string(),
@@ -326,7 +326,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Créer un token de confirmation valide
         let token = create_valid_email_token(
@@ -353,7 +353,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = ConfirmEmailPayload {
             token: "invalid_token_that_cannot_be_decrypted".to_string(),
@@ -373,7 +373,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Créer un token expiré
         let token = create_expired_email_token(
@@ -409,7 +409,7 @@ mod auth_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Token avec le même username
         let token = create_valid_email_token(
@@ -445,7 +445,7 @@ mod auth_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Token avec le même email
         let token = create_valid_email_token(
@@ -485,7 +485,7 @@ mod auth_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = ResetPasswordRequestPayload {
             reset_email: "test@example.com".to_string(),
@@ -507,7 +507,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = ResetPasswordRequestPayload {
             reset_email: "nonexistent@example.com".to_string(),
@@ -546,7 +546,7 @@ mod auth_integration_tests {
         let token = create_valid_reset_token(&pool, &user.id);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = ResetPasswordPayload {
             token,
@@ -575,7 +575,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = ResetPasswordPayload {
             token: "invalid_token_that_does_not_exist".to_string(),
@@ -608,7 +608,7 @@ mod auth_integration_tests {
         let token = create_expired_reset_token(&pool, &user.id);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = ResetPasswordPayload {
             token,
@@ -641,7 +641,7 @@ mod auth_integration_tests {
         let token = create_valid_reset_token(&pool, &user.id);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = ResetPasswordPayload {
             token: token.clone(),
@@ -674,7 +674,7 @@ mod auth_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Étape 1: Enregistrement
         let register_payload = RegisterPayload {
@@ -739,7 +739,7 @@ mod auth_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Étape 1: Demander un reset de mot de passe
         let request_payload = ResetPasswordRequestPayload {
@@ -873,7 +873,7 @@ mod auth_integration_tests {
         );
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter pour obtenir le cookie auth
         let login_payload = LoginPayload {
@@ -912,7 +912,7 @@ mod auth_integration_tests {
         }
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Accéder sans cookie auth
         let response = server.get("/v1/test/protected").await;
@@ -934,7 +934,7 @@ mod auth_integration_tests {
         }
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Accéder avec un JWT invalide
         let invalid_cookie = tower_cookies::Cookie::build(("auth", "invalid_jwt_token"))
@@ -991,7 +991,7 @@ mod auth_integration_tests {
             .build();
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Accéder avec un JWT expiré
         let response = server
@@ -1042,7 +1042,7 @@ mod auth_integration_tests {
             .build();
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Accéder avec un JWT signé avec le mauvais secret
         let response = server
@@ -1079,7 +1079,7 @@ mod auth_integration_tests {
         );
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter en tant qu'admin
         let login_payload = LoginPayload {
@@ -1122,7 +1122,7 @@ mod auth_integration_tests {
         );
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter en tant que pentester
         let login_payload = LoginPayload {
@@ -1165,7 +1165,7 @@ mod auth_integration_tests {
         );
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter en tant que client
         let login_payload = LoginPayload {
@@ -1200,7 +1200,7 @@ mod auth_integration_tests {
         }
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Accéder sans authentification
         let response = server.get("/v1/test/admin").await;
@@ -1234,7 +1234,7 @@ mod auth_integration_tests {
         );
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter en tant que pentester
         let login_payload = LoginPayload {
@@ -1280,7 +1280,7 @@ mod auth_integration_tests {
         );
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter en tant qu'admin
         let login_payload = LoginPayload {
@@ -1326,7 +1326,7 @@ mod auth_integration_tests {
         );
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter en tant que client
         let login_payload = LoginPayload {
@@ -1364,7 +1364,7 @@ mod auth_integration_tests {
         }
 
         let app = create_middleware_test_router(&state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Accéder sans authentification
         let response = server.get("/v1/test/pentester").await;

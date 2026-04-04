@@ -54,7 +54,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "inv_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -104,7 +104,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "inv_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -140,7 +140,7 @@ mod audit_invitations_integration_tests {
         let _team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "nonexist_inv_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -178,7 +178,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &_team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "invalid_email_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -226,7 +226,7 @@ mod audit_invitations_integration_tests {
         .unwrap();
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "archive_inv_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -283,7 +283,7 @@ mod audit_invitations_integration_tests {
             .unwrap();
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "dup_inv_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -330,7 +330,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "admin_inv@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -372,7 +372,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "struct_inv_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -426,7 +426,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "unauth_inv_user@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -464,7 +464,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = CreateAuditInvitationPayload {
             client_email: "client@test.com".to_string(),
@@ -501,7 +501,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "list_inv_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -558,7 +558,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "list_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -588,7 +588,7 @@ mod audit_invitations_integration_tests {
         let _team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "list_nonexist_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -624,7 +624,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "cancel_inv_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -680,7 +680,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Create invitation as owner
         let owner_login = login_user(&server, "cancel_member_owner@test.com", "password").await;
@@ -732,7 +732,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response =
             login_user(&server, "cancel_nonexist_owner@test.com", "password").await;
@@ -775,7 +775,7 @@ mod audit_invitations_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Create invitation as owner
         let owner_login = login_user(&server, "cancel_admin_owner@test.com", "password").await;
@@ -820,7 +820,7 @@ mod audit_invitations_integration_tests {
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server
             .get("/v1/audits/invite/invalid-token-xyz/check")
@@ -841,7 +841,7 @@ mod audit_invitations_integration_tests {
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test a valid token format but invalid content
         let response = server.get("/v1/audits/invite/invalidtoken123/check").await;
@@ -865,7 +865,7 @@ mod audit_invitations_integration_tests {
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = serde_json::json!({
             "username": "newuser",
@@ -894,7 +894,7 @@ mod audit_invitations_integration_tests {
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = serde_json::json!({
             "username": "newuser",

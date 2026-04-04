@@ -84,3 +84,25 @@ fn test_validate_token() {
     assert!(!CsrfProtection::validate_token("", ""));
     assert!(!CsrfProtection::validate_token("token123", ""));
 }
+
+#[test]
+fn test_csrf_cookie_path_is_root() {
+    unsafe {
+        std::env::set_var("VAULT_ENV", "local");
+    }
+    let cookie = CsrfProtection::build_cookie("value");
+    assert_eq!(cookie.path(), Some("/"));
+    assert_eq!(cookie.name(), "csrf_token");
+    assert_eq!(cookie.value(), "value");
+}
+
+#[test]
+fn test_csrf_cookie_max_age() {
+    unsafe {
+        std::env::set_var("VAULT_ENV", "local");
+    }
+    let cookie = CsrfProtection::build_cookie("tok");
+    let max_age = cookie.max_age().expect("max_age should be set");
+    // 24 hours = 86400 seconds
+    assert_eq!(max_age.whole_seconds(), 86400);
+}

@@ -46,7 +46,7 @@ mod users_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter
         let login_response = login_user(&server, "test@example.com", "password123").await;
@@ -83,7 +83,7 @@ mod users_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Essayer de récupérer les infos sans authentification
         let response = server.get("/v1/users/me").await;
@@ -110,7 +110,7 @@ mod users_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter
         let login_response = login_user(&server, "test@example.com", "password123").await;
@@ -170,7 +170,7 @@ mod users_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter
         let login_response = login_user(&server, "test@example.com", "password123").await;
@@ -218,7 +218,7 @@ mod users_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Essayer de mettre à jour sans authentification
         let payload = UpdatePayload {
@@ -255,7 +255,7 @@ mod users_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Se connecter
         let login_response = login_user(&server, "test@example.com", "password123").await;
@@ -294,7 +294,7 @@ mod users_integration_tests {
         let state = create_test_state(pool, database_url);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Test: Essayer de supprimer sans authentification
         let response = server.delete("/v1/users/me").await;

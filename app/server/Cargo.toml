@@ -36,7 +36,7 @@ chrono = { version = "0.4.41", features = ["serde"] }
 sha2 = "0.10.9"
 validator = { version = "0.20.0", features = ["derive"] }
 tower-cookies = "0.11.0"
-jsonwebtoken = "10.0.0"
+jsonwebtoken = { version = "10.0.0", features = ["rust_crypto"] }
 regex = "1.11.1"
 ulid = { version = "1.2.1", features = ["serde", "postgres"] }
 vaultrs = "0.8.0"

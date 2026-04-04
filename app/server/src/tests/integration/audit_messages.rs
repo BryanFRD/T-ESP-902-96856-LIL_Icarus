@@ -66,7 +66,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "list_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -111,7 +111,7 @@ mod audit_messages_integration_tests {
         insert_audit_client(&pool, &audit.id, &client.id);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "audit_client@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -156,7 +156,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "unauthorized@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -200,7 +200,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "create_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -248,7 +248,7 @@ mod audit_messages_integration_tests {
         insert_audit_client(&pool, &audit.id, &client.id);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "message_client@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -295,7 +295,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "empty_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -339,7 +339,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "create_unauthorized@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -397,7 +397,7 @@ mod audit_messages_integration_tests {
         .unwrap();
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "archived_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -446,7 +446,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "workflow_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -529,7 +529,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "attach_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -595,7 +595,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "attach_unauth_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -659,7 +659,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "admin_create@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -696,7 +696,7 @@ mod audit_messages_integration_tests {
         let _team = create_team_with_owner(&pool, &owner);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "nonexist_owner@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -740,7 +740,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "max_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -789,7 +789,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "exceed_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -836,7 +836,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "emoji_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -889,7 +889,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "page_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -971,7 +971,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "large_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1019,7 +1019,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "resp_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1074,7 +1074,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "struct_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1145,7 +1145,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "attach_struct_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1216,7 +1216,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "delete_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1280,7 +1280,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         // Create message as member
         let login_response = login_user(&server, "download_member@test.com", "password").await;
@@ -1341,7 +1341,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "get_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1404,7 +1404,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "del_unauth_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1467,7 +1467,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "notfound_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1511,7 +1511,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "empty_audit_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1556,7 +1556,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "order_member@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -1620,7 +1620,7 @@ mod audit_messages_integration_tests {
         let audit = insert_test_audit(&pool, "Test Audit", None, &team.id, &company.id, None);
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "arch_del_member@test.com", "password").await;
         let cookies = login_response.cookies();

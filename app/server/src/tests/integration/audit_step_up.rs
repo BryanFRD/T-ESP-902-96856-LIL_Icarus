@@ -47,7 +47,7 @@ mod audit_step_up_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "stepup@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -84,7 +84,7 @@ mod audit_step_up_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "wrongpass@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -120,7 +120,7 @@ mod audit_step_up_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "emptypass@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -147,7 +147,7 @@ mod audit_step_up_integration_tests {
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let payload = VerifyAccessPayload {
             password: "password".to_string(),
@@ -177,7 +177,7 @@ mod audit_step_up_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "checkacc@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -224,7 +224,7 @@ mod audit_step_up_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "notoken@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -249,7 +249,7 @@ mod audit_step_up_integration_tests {
         let state = create_test_state(pool.clone(), "test_db".to_string());
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let response = server.get("/v1/audits/check-access").await;
 
@@ -271,7 +271,7 @@ mod audit_step_up_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "struct@test.com", "password").await;
         let cookies = login_response.cookies();
@@ -310,7 +310,7 @@ mod audit_step_up_integration_tests {
         );
 
         let app = create_test_router(state);
-        let server = TestServer::new(app).expect("Failed to create test server");
+        let server = TestServer::new(app);
 
         let login_response = login_user(&server, "checkstruct@test.com", "password").await;
         let cookies = login_response.cookies();
