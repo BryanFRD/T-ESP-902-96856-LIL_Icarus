@@ -1,6 +1,8 @@
 use crate::middlewares::CsrfProtection;
+use serial_test::serial;
 
 #[test]
+#[serial]
 fn test_csrf_cookie_local() {
     unsafe {
         std::env::set_var("VAULT_ENV", "local");
@@ -25,6 +27,7 @@ fn test_csrf_cookie_local() {
 }
 
 #[test]
+#[serial]
 fn test_csrf_cookie_dev() {
     unsafe {
         std::env::set_var("VAULT_ENV", "dev");
@@ -45,6 +48,7 @@ fn test_csrf_cookie_dev() {
 }
 
 #[test]
+#[serial]
 fn test_csrf_cookie_prod() {
     unsafe {
         std::env::set_var("VAULT_ENV", "prod");
@@ -86,6 +90,7 @@ fn test_validate_token() {
 }
 
 #[test]
+#[serial]
 fn test_csrf_cookie_path_is_root() {
     unsafe {
         std::env::set_var("VAULT_ENV", "local");
@@ -97,6 +102,7 @@ fn test_csrf_cookie_path_is_root() {
 }
 
 #[test]
+#[serial]
 fn test_csrf_cookie_max_age() {
     unsafe {
         std::env::set_var("VAULT_ENV", "local");

@@ -211,4 +211,33 @@ mod tests {
         let err = PacketError::DecodingError("test".to_string());
         assert!(format!("{err}").contains("test"));
     }
+
+    #[test]
+    fn serialized_bytes_start_with_correct_packet_code() {
+        // Verify the wire format: first byte must be the packet code,
+        // followed by the bincode-encoded payload.
+        let heartbeat_bytes = Heartbeat::new().serialize().unwrap();
+        assert_eq!(heartbeat_bytes[0], Heartbeat::packet_code());
+
+        let stream_bytes = StreamData { stream_id: 1, data: vec![0xFF] }.serialize().unwrap();
+        assert_eq!(stream_bytes[0], StreamData::packet_code());
+
+        let ctrl_bytes = AgentControl::pause().serialize().unwrap();
+        assert_eq!(ctrl_bytes[0], AgentControl::packet_code());
+    }
+
+    #[test]
+    #[should_panic]
+    fn from_packet_bytes_panics_on_empty_input() {
+        // An empty slice has no packet code byte, so indexing data[0] should panic.
+        let _ = from_packet_bytes(&[]);
+    }
+
+    #[test]
+    fn from_packet_bytes_fails_on_valid_code_but_truncated_payload() {
+        // A packet code with no payload data should fail deserialization,
+        // not silently produce garbage.
+        let result = from_packet_bytes(&[0x0A]); // SystemInfo code, zero payload bytes
+        assert!(result.is_err());
+    }
 }
