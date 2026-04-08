@@ -115,4 +115,38 @@ mod tests {
     fn packet_code_is_correct() {
         assert_eq!(AgentControl::packet_code(), 0x0B);
     }
+
+    #[test]
+    fn all_instruction_variants_survive_roundtrip() {
+        // Exercise every AgentInstruction variant through serialize/deserialize
+        // to catch any bincode encoding issues with the enum discriminants.
+        let cases = vec![
+            AgentControl::shutdown("maintenance window".to_string()),
+            AgentControl::restart("config reload".to_string()),
+            AgentControl::request_system_info(),
+            AgentControl::pause(),
+            AgentControl::resume(),
+        ];
+        for ctrl in &cases {
+            let bytes = ctrl.serialize().unwrap();
+            let decoded = AgentControl::deserialize(&bytes[1..]).unwrap();
+            // Verify the discriminant matches by checking Debug output
+            assert_eq!(
+                format!("{:?}", ctrl.instruction),
+                format!("{:?}", decoded.instruction),
+            );
+        }
+    }
+
+    #[test]
+    fn shutdown_with_unicode_reason_roundtrips() {
+        let reason = "\u{1F525} critical failure \u{26A0}\u{FE0F} — shutting down".to_string();
+        let ctrl = AgentControl::shutdown(reason.clone());
+        let bytes = ctrl.serialize().unwrap();
+        let decoded = AgentControl::deserialize(&bytes[1..]).unwrap();
+        match decoded.instruction {
+            AgentInstruction::Shutdown { reason: r } => assert_eq!(r, reason),
+            other => panic!("expected Shutdown, got {other:?}"),
+        }
+    }
 }
