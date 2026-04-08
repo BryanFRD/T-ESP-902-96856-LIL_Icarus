@@ -1,35 +1,4 @@
 {
-  "name": "vite-project",
-  "private": true,
-  "version": "1.35.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite --mode development",
-    "local": "vite --mode sandbox",
-    "prod": "vite --mode production",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "type:check": "tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "i18n:check": "tsx scripts/check-i18n.ts",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "validate": "pnpm run --parallel type:check i18n:check test:run format:check lint",
-    "prepare": "husky install || true",
-    "commitlint": "commitlint --edit",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
-    "postinstall": "pnpm dlx playwright install"
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint --edit $HUSKY_GIT_PARAMS"
-    }
-  },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
     "@dnd-kit/core": "^6.3.1",
@@ -114,11 +83,42 @@
     "vite": "^8.0.0",
     "vitest": "^3.1.4"
   },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint --edit $HUSKY_GIT_PARAMS"
+    }
+  },
+  "name": "vite-project",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@swc/core",
       "esbuild",
       "msw"
     ]
-  }
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "build-storybook": "storybook build",
+    "commitlint": "commitlint --edit",
+    "dev": "vite --mode development",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "i18n:check": "tsx scripts/check-i18n.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "local": "vite --mode sandbox",
+    "postinstall": "pnpm dlx playwright install",
+    "prepare": "husky install || true",
+    "preview": "vite preview",
+    "prod": "vite --mode production",
+    "storybook": "storybook dev -p 6006",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:run": "vitest run",
+    "type:check": "tsc --noEmit",
+    "validate": "pnpm run --parallel type:check i18n:check test:run format:check lint"
+  },
+  "type": "module",
+  "version": "1.35.1"
 }

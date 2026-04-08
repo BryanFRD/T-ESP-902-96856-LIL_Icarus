@@ -5,6 +5,14 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.35.1] - 2026-04-08
+
+### Bug Fixes
+
+- fix(web): add theme-color meta tag
+- fix(web): add meta description and disable pipelines for ferrflow testing
+- fix(ci): update ferrflow config and release job for self-hosted GitLab
+
 ## [1.33.2](https://git.icarus-cyber.fr/icarus/web/compare/v1.33.1...v1.33.2) (2026-03-29)
 
 
