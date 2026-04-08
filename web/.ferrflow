@@ -1,10 +1,9 @@
 {
   "$schema": "https://ferrflow.com/schema/ferrflow.json",
   "workspace": {
+    "forge": "gitlab",
     "tagTemplate": "v{version}",
     "skipCi": true,
-    "releaseCommitMode": "pr",
-    "autoMergeReleases": true,
     "branches": [
       { "name": "main", "channel": false },
       { "name": "feat/*", "channel": "dev", "prereleaseIdentifier": "short-hash" }
