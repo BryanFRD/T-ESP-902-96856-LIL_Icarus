@@ -252,6 +252,8 @@ stages:
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
+    - if: '$CI_COMMIT_BRANCH =~ /^feat\//'
+      when: on_success
     - if: '$CI_PIPELINE_SOURCE == "web"'
       when: on_success
 
