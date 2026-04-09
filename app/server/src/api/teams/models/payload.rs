@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 use crate::api::teams::TeamRole;
 use crate::api::{
     teams::{CompanyReturn, Team},
-    users::User,
+    users::UserResponse,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
@@ -63,7 +63,7 @@ impl TeamReturn {
 pub struct TeamMemberWithRole {
     pub team_role: TeamRole,
     #[serde(flatten)]
-    pub user: User,
+    pub user: UserResponse,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]

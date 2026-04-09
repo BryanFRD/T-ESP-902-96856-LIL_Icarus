@@ -66,6 +66,61 @@ pub async fn create_agent(
 
 #[utoipa::path(
     get,
+    path = "/v1/audits/{audit_id}/agents/download",
+    tag = "Agents",
+    responses(
+        (status = 200, description = "Agent binary downloaded", content_type = "application/octet-stream"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden - must be team owner or admin"),
+        (status = 404, description = "Audit or binary not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+)]
+pub async fn download_agent(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    headers: http::HeaderMap,
+    Path(audit_id): Path<Ulid>,
+) -> impl IntoResponse {
+    let host_header = headers
+        .get(http::header::HOST)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("localhost");
+    let server_host = host_header.split(':').next().unwrap_or(host_header);
+
+    match super::services::download_agent(
+        &state,
+        &audit_id.to_string(),
+        &jwt_user.sub.to_string(),
+        jwt_user.is_admin(),
+        server_host,
+    ) {
+        Ok(binary) => {
+            let headers = [
+                (
+                    http::header::CONTENT_TYPE,
+                    "application/octet-stream".to_string(),
+                ),
+                (
+                    http::header::CONTENT_DISPOSITION,
+                    "attachment; filename=\"agent.exe\"".to_string(),
+                ),
+            ];
+            (StatusCode::OK, headers, binary).into_response()
+        }
+        Err(AgentError::BinaryNotFound) => not_found_error("error.agent.binaryNotFound"),
+        Err(AgentError::MustBeOwnerOrAdmin) => forbidden_error("error.agent.mustBeOwnerOrAdmin"),
+        Err(AgentError::Audit(crate::api::audits::AuditError::NotFound)) => {
+            not_found_error("error.audit.notFound")
+        }
+        Err(e) => internal_error("Failed to download agent", e),
+    }
+}
+
+#[utoipa::path(
+    get,
     path = "/v1/audits/{audit_id}/agents",
     tag = "Agents",
     responses(

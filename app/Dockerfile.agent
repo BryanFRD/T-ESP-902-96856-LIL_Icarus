@@ -1,0 +1,8 @@
+FROM rust:1.91.0-bookworm AS builder
+WORKDIR /app
+COPY . .
+RUN cargo build --release -p agent
+
+FROM debian:bookworm-slim
+COPY --from=builder /app/target/release/agent /agent
+CMD ["/agent"]

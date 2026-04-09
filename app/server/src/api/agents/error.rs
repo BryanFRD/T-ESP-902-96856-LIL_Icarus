@@ -37,4 +37,10 @@ pub enum AgentError {
 
     #[error("Failed to send keylogger request: {0}")]
     KeyloggerRequestFailed(String),
+
+    #[error("Agent binary not found on server")]
+    BinaryNotFound,
+
+    #[error("Failed to read agent binary: {0}")]
+    BinaryReadError(String),
 }

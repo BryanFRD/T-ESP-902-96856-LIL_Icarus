@@ -37,7 +37,7 @@ pub fn spawn_shell(shell_type: ShellType) -> Result<ShellSession, NetworkError> 
         }
     };
 
-    eprintln!("Spawning Windows shell: {}", shell_cmd);
+    eprintln!("Spawning Windows shell: {shell_cmd}");
 
     let mut command = Command::new(shell_cmd);
     for arg in args {

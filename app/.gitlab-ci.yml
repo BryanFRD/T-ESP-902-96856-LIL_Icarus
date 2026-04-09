@@ -15,6 +15,9 @@ stages:
   - deploy
   - mirror
 
+variables:
+  CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
+
 # ================= NOTIFY =================
 
 🔔_notify_discord_reviewer:
@@ -86,15 +89,15 @@ stages:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   cache:
-    - key: cargo-$CI_COMMIT_REF_SLUG
+    - key: cargo-check-$CI_COMMIT_REF_SLUG
       paths:
-        - target/
-        - $CARGO_HOME/registry/
+        - target/debug/
+        - .cargo/registry/
       policy: pull-push
-    - key: cargo-main
+    - key: cargo-check-main
       paths:
-        - target/
-        - $CARGO_HOME/registry/
+        - target/debug/
+        - .cargo/registry/
       policy: pull
   script:
     - echo "Running cargo check..."
@@ -109,15 +112,15 @@ stages:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   cache:
-    - key: cargo-$CI_COMMIT_REF_SLUG
+    - key: cargo-clippy-$CI_COMMIT_REF_SLUG
       paths:
-        - target/
-        - $CARGO_HOME/registry/
+        - target/debug/
+        - .cargo/registry/
       policy: pull-push
-    - key: cargo-main
+    - key: cargo-clippy-main
       paths:
-        - target/
-        - $CARGO_HOME/registry/
+        - target/debug/
+        - .cargo/registry/
       policy: pull
   script:
     - echo "Running cargo clippy ..."
@@ -136,12 +139,10 @@ stages:
   services:
     - postgres:17
   variables:
-    # PostgreSQL service configuration for integration tests
     POSTGRES_DB: testdb
     POSTGRES_USER: testuser
     POSTGRES_PASSWORD: testpass
     DATABASE_URL: postgres://testuser:testpass@postgres:5432/testdb
-    # Flag to indicate we're in CI (use service instead of testcontainers)
     CI_DATABASE: 'true'
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -149,15 +150,15 @@ stages:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   cache:
-    - key: cargo-$CI_COMMIT_REF_SLUG
+    - key: cargo-test-$CI_COMMIT_REF_SLUG
       paths:
-        - target/
-        - $CARGO_HOME/registry/
+        - target/debug/
+        - .cargo/registry/
       policy: pull-push
-    - key: cargo-main
+    - key: cargo-test-main
       paths:
-        - target/
-        - $CARGO_HOME/registry/
+        - target/debug/
+        - .cargo/registry/
       policy: pull
   before_script:
     - echo "Installing test dependencies..."
@@ -230,8 +231,7 @@ stages:
 🎉_ferrflow_release:
   stage: release
   image:
-    name: ghcr.io/ferrflow-org/ferrflow:latest
-    pull_policy: always
+    name: ghcr.io/ferrflow-org/ferrflow:2.20.0
   variables:
     GIT_DEPTH: 0
   before_script:

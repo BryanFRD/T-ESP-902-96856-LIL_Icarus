@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 use validator::Validate;
 
 use crate::api::teams::companies::models::CompanyReturn;
-use crate::api::users::User;
+use crate::api::users::{User, map_avatar_url};
 
 #[derive(
     Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Insertable, ToSchema,
@@ -151,6 +151,7 @@ pub struct ClientUser {
     pub email: String,
     pub first_name: String,
     pub last_name: String,
+    pub avatar_url: Option<String>,
 }
 
 impl From<User> for ClientUser {
@@ -161,6 +162,7 @@ impl From<User> for ClientUser {
             email: user.email,
             first_name: user.first_name,
             last_name: user.last_name,
+            avatar_url: map_avatar_url(user.avatar_url),
         }
     }
 }

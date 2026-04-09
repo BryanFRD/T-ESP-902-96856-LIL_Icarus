@@ -224,6 +224,7 @@ pub fn query_audit_logs(
                     email: u.email.clone(),
                     first_name: u.first_name.clone(),
                     last_name: u.last_name.clone(),
+                    avatar_url: crate::api::users::map_avatar_url(u.avatar_url.clone()),
                 });
 
             EventLogResponse {

@@ -8,7 +8,7 @@ use super::handler;
 ///
 /// This runs in a loop accepting connections and spawning a handler task for each.
 pub async fn start_tcp_listener(state: GlobalState) {
-    let listener = match TcpListener::bind("0.0.0.0:1337").await {
+    let listener = match TcpListener::bind("[::]:1337").await {
         Ok(l) => {
             info!("Agent TCP listener started on {}", l.local_addr().unwrap());
             l

