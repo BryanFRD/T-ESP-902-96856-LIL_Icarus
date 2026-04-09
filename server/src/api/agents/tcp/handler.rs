@@ -70,6 +70,10 @@ pub async fn handle_agent_connection(
     let (shutdown_tx, mut shutdown_rx) = tokio::sync::watch::channel(false);
     let last_heartbeat: Arc<std::sync::Mutex<Option<DateTime<Utc>>>> =
         Arc::new(std::sync::Mutex::new(Some(Utc::now())));
+    let latency_ms: Arc<std::sync::Mutex<Option<u64>>> =
+        Arc::new(std::sync::Mutex::new(None));
+    let shell_stream_id: Arc<std::sync::Mutex<Option<u32>>> =
+        Arc::new(std::sync::Mutex::new(None));
     let system_info: Arc<std::sync::Mutex<Option<SystemInfo>>> =
         Arc::new(std::sync::Mutex::new(None));
     {
@@ -79,6 +83,8 @@ pub async fn handle_agent_connection(
             addr,
             shutdown: shutdown_tx,
             last_heartbeat: last_heartbeat.clone(),
+            latency_ms: latency_ms.clone(),
+            shell_stream_id: shell_stream_id.clone(),
             system_info: system_info.clone(),
             writer: writer.clone(),
             shared_secret,
@@ -101,6 +107,8 @@ pub async fn handle_agent_connection(
         &shared_secret,
         &mut shutdown_rx,
         &last_heartbeat,
+        &latency_ms,
+        &shell_stream_id,
         &system_info,
         state.io_opt(),
         &agent.audit_id,
@@ -318,12 +326,15 @@ async fn authenticate_agent(
 /// Main multiplex loop: receives encrypted packets and dispatches them.
 /// Runs until the connection closes or the agent is shut down (revoked).
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_lines)]
 async fn multiplex_loop(
     mut reader: OwnedReadHalf,
     writer: &Arc<Mutex<OwnedWriteHalf>>,
     shared_secret: &[u8; 32],
     shutdown_rx: &mut tokio::sync::watch::Receiver<bool>,
     last_heartbeat: &Arc<std::sync::Mutex<Option<DateTime<Utc>>>>,
+    latency_ms: &Arc<std::sync::Mutex<Option<u64>>>,
+    shell_stream_id: &Arc<std::sync::Mutex<Option<u32>>>,
     system_info: &Arc<std::sync::Mutex<Option<SystemInfo>>>,
     io: Option<&SocketIo>,
     audit_id: &str,
@@ -339,12 +350,16 @@ async fn multiplex_loop(
                     }
                     Ok(data) => {
                         match from_packet_bytes(&data) {
-                            Ok(Packets::Heartbeat(_)) => {
+                            Ok(Packets::Heartbeat(received_hb)) => {
                                 if let Ok(mut hb) = last_heartbeat.lock() {
                                     *hb = Some(Utc::now());
                                 }
-                                let hb = shared::packets::Heartbeat::new();
-                                send_encrypted_packet(writer, shared_secret, &hb.serialize()?).await?;
+                                if received_hb.latency_ms > 0 && let Ok(mut lat) = latency_ms.lock() {
+                                    *lat = Some(received_hb.latency_ms);
+                                }
+                                // Echo back with the same sent_at_ms so the agent can measure RTT
+                                let echo = shared::packets::Heartbeat::with_timing(received_hb.sent_at_ms, 0);
+                                send_encrypted_packet(writer, shared_secret, &echo.serialize()?).await?;
                             }
                             Ok(Packets::SystemInfo(info)) => {
                                 info!(
@@ -356,7 +371,7 @@ async fn multiplex_loop(
                                     info.total_memory_bytes / 1_048_576,
                                 );
                                 if let Ok(mut si) = system_info.lock() {
-                                    *si = Some(info);
+                                    *si = Some(*info);
                                 }
                             }
                             Ok(Packets::StreamData(stream_data)) => {
@@ -372,6 +387,10 @@ async fn multiplex_loop(
                                 }
                             }
                             Ok(Packets::StreamClose(close)) => {
+                                // Clear shell stream if it's the one being closed
+                                if let Ok(mut sid) = shell_stream_id.lock() && *sid == Some(close.stream_id) {
+                                    *sid = None;
+                                }
                                 if let Some(io) = io {
                                     crate::api::ws::events::agent::emit_agent_stream_closed(
                                         io,
@@ -394,7 +413,10 @@ async fn multiplex_loop(
                                 }
                             }
                             Ok(Packets::StreamOpen(open)) => {
-                                tracing::debug!("Agent opened stream: {}", open.stream_id);
+                                tracing::debug!("Agent opened shell stream: {}", open.stream_id);
+                                if let Ok(mut sid) = shell_stream_id.lock() {
+                                    *sid = Some(open.stream_id);
+                                }
                             }
                             Ok(packet) => {
                                 tracing::debug!("Received packet: {packet:?}");

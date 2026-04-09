@@ -146,7 +146,7 @@ pub fn get_user_teams(state: &GlobalState, user_id: &str) -> Result<Vec<TeamRetu
             .or_default()
             .push(TeamMemberWithRole {
                 team_role: tm.role,
-                user,
+                user: user.into(),
             });
     }
 

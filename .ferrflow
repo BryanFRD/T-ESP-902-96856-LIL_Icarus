@@ -6,7 +6,7 @@
     "skipCi": true,
     "branches": [
       { "name": "main", "channel": false },
-      { "name": "feat/*", "channel": "dev" }
+      { "name": "*", "channel": "dev", "prereleaseIdentifier": "short-hash" }
     ]
   },
   "package": [

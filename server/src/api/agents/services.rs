@@ -2,6 +2,8 @@ use super::{
     AgentError, AgentResponse, AgentTokenResponse, AuditAgent, CreateAgentPayload,
     KeyloggerRequestPayload, KeyloggerResponse, ShellRequestPayload, ShellStreamResponse,
 };
+
+const CONFIG_MARKER: &[u8] = b"\n###ICARUS_CONFIG###\n";
 use crate::{
     api::audits::{self, AuditError},
     middlewares::auth,
@@ -10,7 +12,7 @@ use crate::{
 use axum::{
     Router,
     middleware::from_fn,
-    routing::{delete, post},
+    routing::{delete, get, post},
 };
 use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
 use sha2::{Digest, Sha256};
@@ -25,6 +27,10 @@ pub fn get_routes() -> Router<GlobalState> {
         .route(
             "/{audit_id}/agents",
             post(endpoints::create_agent).get(endpoints::list_agents),
+        )
+        .route(
+            "/{audit_id}/agents/download",
+            get(endpoints::download_agent),
         )
         .route(
             "/{audit_id}/agents/{agent_id}",
@@ -108,6 +114,55 @@ pub fn create_agent(
     })
 }
 
+/// Download agent binary with embedded config for an audit
+///
+/// # Errors
+/// Returns `AgentError` if binary not found, agent creation fails, or IO error
+pub fn download_agent(
+    state: &GlobalState,
+    audit_id: &str,
+    user_id: &str,
+    is_admin: bool,
+    server_host: &str,
+) -> Result<Vec<u8>, AgentError> {
+    let agent_path = std::env::var("AGENT_BINARY_PATH").unwrap_or_else(|_| "agent.exe".to_string());
+    let path = std::path::Path::new(&agent_path);
+
+    if !path.exists() {
+        return Err(AgentError::BinaryNotFound);
+    }
+
+    // Count existing agents to generate a unique name
+    let count = {
+        use crate::schema::audit_agents;
+        let mut conn = state.get_db_conn()?;
+        audit_agents::table
+            .filter(audit_agents::audit_id.eq(audit_id))
+            .count()
+            .get_result::<i64>(&mut conn)?
+    };
+
+    let name = format!("agent-{}", count + 1);
+    let payload = CreateAgentPayload { name };
+
+    let token_response = create_agent(state, audit_id, user_id, payload, is_admin)?;
+
+    let server_addr = format!("{server_host}:1337");
+    let config_json = serde_json::json!({
+        "audit_id": audit_id,
+        "token": token_response.token,
+        "server_addr": server_addr,
+    });
+
+    let mut binary =
+        std::fs::read(path).map_err(|e| AgentError::BinaryReadError(e.to_string()))?;
+
+    binary.extend_from_slice(CONFIG_MARKER);
+    binary.extend_from_slice(config_json.to_string().as_bytes());
+
+    Ok(binary)
+}
+
 /// List all agents for an audit
 ///
 /// # Errors
@@ -135,7 +190,7 @@ pub fn list_agents(
     let responses = agents
         .into_iter()
         .map(|agent| {
-            let (is_online, last_hb, sys_info) = match &registry {
+            let (is_online, latency, last_hb, sys_info) = match &registry {
                 Some(reg) => match reg.get(&agent.id) {
                     Some(handle) => {
                         let online = handle.is_online(30);
@@ -145,17 +200,22 @@ pub fn list_agents(
                             .ok()
                             .and_then(|hb| *hb)
                             .map(|ts| ts.to_rfc3339());
+                        let lat = handle
+                            .latency_ms
+                            .lock()
+                            .ok()
+                            .and_then(|l| *l);
                         let si = handle
                             .system_info
                             .lock()
                             .ok()
                             .and_then(|si| si.clone())
                             .map(super::SystemInfoResponse::from);
-                        (online, hb, si)
+                        (online, lat, hb, si)
                     }
-                    None => (false, None, None),
+                    None => (false, None, None, None),
                 },
-                None => (false, None, None),
+                None => (false, None, None, None),
             };
             AgentResponse {
                 id: agent.id,
@@ -163,6 +223,7 @@ pub fn list_agents(
                 name: agent.name,
                 is_revoked: agent.is_revoked,
                 is_online,
+                latency_ms: latency,
                 last_connected_at: agent.last_connected_at.map(|d| d.to_string()),
                 last_heartbeat: last_hb,
                 system_info: sys_info,

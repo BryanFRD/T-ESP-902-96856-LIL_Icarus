@@ -23,6 +23,8 @@ pub struct AgentHandle {
     pub addr: SocketAddr,
     pub shutdown: tokio::sync::watch::Sender<bool>,
     pub last_heartbeat: Arc<std::sync::Mutex<Option<DateTime<Utc>>>>,
+    pub latency_ms: Arc<std::sync::Mutex<Option<u64>>>,
+    pub shell_stream_id: Arc<std::sync::Mutex<Option<u32>>>,
     pub system_info: Arc<std::sync::Mutex<Option<shared::packets::SystemInfo>>>,
     pub writer: Arc<Mutex<OwnedWriteHalf>>,
     pub shared_secret: [u8; 32],

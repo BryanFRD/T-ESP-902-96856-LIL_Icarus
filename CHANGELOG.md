@@ -4,6 +4,20 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.2.4] - 2026-04-09
+
+### Bug Fixes
+
+- fix: resolve remaining clippy collapsible_if in linux-only code paths
+- fix(ci): move CARGO_HOME inside project dir for cache compatibility
+- fix: resolve clippy pedantic warnings
+- fix(ci): cache target/debug instead of full target directory
+- fix(api): add avatar_url to team members, audit clients, and event log users
+- fix(ci): fix cache keys to avoid parallel job conflicts and define CARGO_HOME
+- fix(ci): pin ferrflow to v2.20.0
+- fix: merge feat/agent-system-info-and-shell and feat/audit into main
+- fix(ci): use wildcard branch for ferrflow dev channel
+
 ## [1.2.3] - 2026-04-09
 
 ### Bug Fixes

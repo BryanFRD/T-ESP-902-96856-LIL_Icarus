@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use shared::packets::{AgentControl, Packet, StreamData, StreamOpen};
+use shared::packets::{AgentControl, Packet, StreamData};
 use socketioxide::extract::{Data, SocketRef, State};
 use tokio::io::AsyncWriteExt;
 use tracing::{error, info, warn};
@@ -328,53 +328,98 @@ pub async fn on_agent_command(
             return;
         }
 
-        (handle.writer.clone(), handle.shared_secret)
+        (handle.writer.clone(), handle.shared_secret, handle.shell_stream_id.clone())
     };
 
-    let (writer, shared_secret) = agent_writer_info;
+    let (writer, shared_secret, shell_stream_id) = agent_writer_info;
 
-    // Open a new stream: use a simple incrementing stream ID based on timestamp
-    let stream_id = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_or(1, |d| (d.as_millis() & 0xFFFF_FFFF) as u32)
-        | shared::multiplexing::MIN_DATA_STREAM_ID;
+    // Helper to encrypt a packet for sending
+    let encrypt_packet =
+        |data: &[u8]| -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
+            let (encrypted, nonce) = shared::encryption::encrypt(&shared_secret, data)?;
+            #[allow(clippy::cast_possible_truncation)]
+            let len = encrypted.len() as u32;
+            let total_size = 4 + nonce.len() + encrypted.len();
+            let mut buf = vec![0u8; total_size];
+            buf[0..4].copy_from_slice(&len.to_be_bytes());
+            buf[4..16].copy_from_slice(&nonce);
+            buf[16..].copy_from_slice(&encrypted);
+            Ok(buf)
+        };
 
-    // Helper to encrypt and send a packet
-    let send = |data: &[u8]| -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
-        let (encrypted, nonce) = shared::encryption::encrypt(&shared_secret, data)?;
-        #[allow(clippy::cast_possible_truncation)]
-        let len = encrypted.len() as u32;
-        let total_size = 4 + nonce.len() + encrypted.len();
-        let mut buf = vec![0u8; total_size];
-        buf[0..4].copy_from_slice(&len.to_be_bytes());
-        buf[4..16].copy_from_slice(&nonce);
-        buf[16..].copy_from_slice(&encrypted);
-        Ok(buf)
-    };
+    // Check if a shell session already exists for this agent
+    let existing_stream = shell_stream_id
+        .lock()
+        .ok()
+        .and_then(|sid| *sid);
 
-    // Send StreamOpen
-    let open_packet = StreamOpen { stream_id };
-    let open_buf = match open_packet.serialize().and_then(|d| {
-        send(&d).map_err(|e| shared::packets::PacketError::EncodingError(e.to_string()))
-    }) {
-        Ok(buf) => buf,
-        Err(e) => {
+    let stream_id;
+
+    if let Some(sid) = existing_stream {
+        // Shell already open, send command on existing stream
+        stream_id = sid;
+    } else {
+        // No shell session yet — send ShellRequest to spawn one
+        let shell_req = shared::packets::ShellRequest::auto();
+        let shell_buf = match shell_req.serialize().and_then(|d| {
+            encrypt_packet(&d)
+                .map_err(|e| shared::packets::PacketError::EncodingError(e.to_string()))
+        }) {
+            Ok(buf) => buf,
+            Err(e) => {
+                emit_error(
+                    &socket,
+                    "INTERNAL_ERROR",
+                    &format!("Failed to prepare shell request: {e}"),
+                );
+                return;
+            }
+        };
+
+        let mut w = writer.lock().await;
+        if let Err(e) = w.write_all(&shell_buf).await {
             emit_error(
                 &socket,
-                "INTERNAL_ERROR",
-                &format!("Failed to prepare stream open: {e}"),
+                "SEND_FAILED",
+                &format!("Failed to send shell request: {e}"),
             );
             return;
         }
-    };
+        if let Err(e) = w.flush().await {
+            emit_error(&socket, "SEND_FAILED", &format!("Failed to flush: {e}"));
+            return;
+        }
+        drop(w);
 
-    // Send StreamData
+        // Wait briefly for the agent to open the shell stream and send StreamOpen back
+        // The TCP handler will store the stream_id in shell_stream_id
+        for _ in 0..50 {
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+            if let Ok(sid) = shell_stream_id.lock() && sid.is_some() {
+                break;
+            }
+        }
+
+        let Some(sid) = shell_stream_id.lock().ok().and_then(|sid| *sid) else {
+            emit_error(
+                &socket,
+                "SHELL_TIMEOUT",
+                "Agent did not open shell in time",
+            );
+            return;
+        };
+        stream_id = sid;
+    }
+
+    // Send the command as StreamData on the shell stream
+    let command_with_newline = format!("{}\n", payload.command);
     let data_packet = StreamData {
         stream_id,
-        data: payload.command.into_bytes(),
+        data: command_with_newline.into_bytes(),
     };
     let data_buf = match data_packet.serialize().and_then(|d| {
-        send(&d).map_err(|e| shared::packets::PacketError::EncodingError(e.to_string()))
+        encrypt_packet(&d)
+            .map_err(|e| shared::packets::PacketError::EncodingError(e.to_string()))
     }) {
         Ok(buf) => buf,
         Err(e) => {
@@ -387,16 +432,7 @@ pub async fn on_agent_command(
         }
     };
 
-    // Send both packets (lock the writer once)
     let mut w = writer.lock().await;
-    if let Err(e) = w.write_all(&open_buf).await {
-        emit_error(
-            &socket,
-            "SEND_FAILED",
-            &format!("Failed to open stream: {e}"),
-        );
-        return;
-    }
     if let Err(e) = w.write_all(&data_buf).await {
         emit_error(
             &socket,

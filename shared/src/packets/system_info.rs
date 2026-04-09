@@ -12,6 +12,19 @@ pub struct SystemInfo {
     pub total_memory_bytes: u64,
     pub used_memory_bytes: u64,
     pub uptime_secs: u64,
+    pub agent_version: String,
+    pub gpu_name: Option<String>,
+    pub username: String,
+    pub is_elevated: bool,
+    pub arch: String,
+    pub locale: Option<String>,
+    pub local_ips: Vec<String>,
+    pub mac_address: Option<String>,
+    pub domain: Option<String>,
+    pub total_disk_bytes: u64,
+    pub used_disk_bytes: u64,
+    pub antivirus: Vec<String>,
+    pub firewall_enabled: Option<bool>,
 }
 
 #[cfg(test)]
@@ -30,6 +43,19 @@ mod tests {
             total_memory_bytes: 32_000_000_000,
             used_memory_bytes: 16_000_000_000,
             uptime_secs: 86400,
+            agent_version: "1.1.0".to_string(),
+            gpu_name: Some("NVIDIA GeForce RTX 4090".to_string()),
+            username: "root".to_string(),
+            is_elevated: true,
+            arch: "x86_64".to_string(),
+            locale: Some("en_US.UTF-8".to_string()),
+            local_ips: vec!["192.168.1.10".to_string(), "10.0.0.5".to_string()],
+            mac_address: Some("AA:BB:CC:DD:EE:FF".to_string()),
+            domain: None,
+            total_disk_bytes: 500_000_000_000,
+            used_disk_bytes: 200_000_000_000,
+            antivirus: vec!["ClamAV".to_string()],
+            firewall_enabled: Some(true),
         };
         let bytes = info.serialize().unwrap();
         let decoded = SystemInfo::deserialize(&bytes[1..]).unwrap();

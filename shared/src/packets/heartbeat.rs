@@ -5,18 +5,38 @@ use bincode::{Decode, Encode};
 #[packet(code = 0x07)]
 pub struct Heartbeat {
     pub alive: bool,
+    /// Timestamp in milliseconds (epoch) set by the sender.
+    /// Used to measure round-trip time: agent sets it on send,
+    /// server echoes it back unchanged.
+    pub sent_at_ms: u64,
+    /// Round-trip latency in ms measured by the agent from the
+    /// previous heartbeat echo. 0 means no measurement yet.
+    pub latency_ms: u64,
 }
 
 impl Heartbeat {
     #[must_use]
     pub fn new() -> Self {
-        Heartbeat { alive: true }
+        Heartbeat {
+            alive: true,
+            sent_at_ms: 0,
+            latency_ms: 0,
+        }
+    }
+
+    #[must_use]
+    pub fn with_timing(sent_at_ms: u64, latency_ms: u64) -> Self {
+        Heartbeat {
+            alive: true,
+            sent_at_ms,
+            latency_ms,
+        }
     }
 }
 
 impl Default for Heartbeat {
     fn default() -> Self {
-        Heartbeat { alive: true }
+        Self::new()
     }
 }
 
@@ -39,11 +59,12 @@ mod tests {
 
     #[test]
     fn serialize_deserialize_roundtrip() {
-        let hb = Heartbeat::new();
+        let hb = Heartbeat::with_timing(1_000_000, 42);
         let bytes = hb.serialize().unwrap();
-        // serialize() prepends packet code, deserialize() expects raw data
         let decoded = Heartbeat::deserialize(&bytes[1..]).unwrap();
         assert!(decoded.alive);
+        assert_eq!(decoded.sent_at_ms, 1_000_000);
+        assert_eq!(decoded.latency_ms, 42);
     }
 
     #[test]

@@ -426,6 +426,7 @@ pub struct EventLogUser {
     pub email: String,
     pub first_name: String,
     pub last_name: String,
+    pub avatar_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, ToSchema)]

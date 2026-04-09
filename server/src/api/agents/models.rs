@@ -52,6 +52,19 @@ pub struct SystemInfoResponse {
     pub total_memory_bytes: u64,
     pub used_memory_bytes: u64,
     pub uptime_secs: u64,
+    pub agent_version: String,
+    pub gpu_name: Option<String>,
+    pub username: String,
+    pub is_elevated: bool,
+    pub arch: String,
+    pub locale: Option<String>,
+    pub local_ips: Vec<String>,
+    pub mac_address: Option<String>,
+    pub domain: Option<String>,
+    pub total_disk_bytes: u64,
+    pub used_disk_bytes: u64,
+    pub antivirus: Vec<String>,
+    pub firewall_enabled: Option<bool>,
 }
 
 impl From<shared::packets::SystemInfo> for SystemInfoResponse {
@@ -65,6 +78,19 @@ impl From<shared::packets::SystemInfo> for SystemInfoResponse {
             total_memory_bytes: info.total_memory_bytes,
             used_memory_bytes: info.used_memory_bytes,
             uptime_secs: info.uptime_secs,
+            agent_version: info.agent_version,
+            gpu_name: info.gpu_name,
+            username: info.username,
+            is_elevated: info.is_elevated,
+            arch: info.arch,
+            locale: info.locale,
+            local_ips: info.local_ips,
+            mac_address: info.mac_address,
+            domain: info.domain,
+            total_disk_bytes: info.total_disk_bytes,
+            used_disk_bytes: info.used_disk_bytes,
+            antivirus: info.antivirus,
+            firewall_enabled: info.firewall_enabled,
         }
     }
 }
@@ -77,6 +103,7 @@ pub struct AgentResponse {
     pub name: String,
     pub is_revoked: bool,
     pub is_online: bool,
+    pub latency_ms: Option<u64>,
     pub last_connected_at: Option<String>,
     pub last_heartbeat: Option<String>,
     pub system_info: Option<SystemInfoResponse>,
