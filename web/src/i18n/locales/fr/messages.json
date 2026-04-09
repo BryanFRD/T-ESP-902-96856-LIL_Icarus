@@ -11,6 +11,7 @@
     "cancellingInvitation": "Annulation de l'invitation..."
   },
   "success": {
+    "resetPassword": "Mot de passe réinitialisé avec succès !",
     "teamCreated": "Équipe créée avec succès !",
     "teamUpdated": "Équipe mise à jour avec succès !",
     "teamDeleted": "Équipe supprimée avec succès !",
@@ -23,6 +24,10 @@
     "invitationCancelled": "Invitation annulée avec succès !"
   },
   "error": {
+    "validToken": "Ce lien de réinitialisation est invalide ou a expiré.",
+    "invalidToken": "Ce lien de vérification d'email est invalide ou a expiré.",
+    "confirmEmailFailed": "Échec de la vérification de votre email. Veuillez réessayer.",
+    "resetPasswordFailed": "Échec de la réinitialisation. Veuillez réessayer.",
     "teamCreationFailed": "Échec de la création de l'équipe. Veuillez réessayer.",
     "teamUpdateFailed": "Échec de la mise à jour de l'équipe. Veuillez réessayer.",
     "teamDeletionFailed": "Échec de la suppression de l'équipe. Veuillez réessayer.",

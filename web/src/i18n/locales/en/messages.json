@@ -11,6 +11,7 @@
     "cancellingInvitation": "Cancelling invitation..."
   },
   "success": {
+    "resetPassword": "Password reset successfully!",
     "teamCreated": "Team created successfully!",
     "teamUpdated": "Team updated successfully!",
     "teamDeleted": "Team deleted successfully!",
@@ -23,6 +24,10 @@
     "invitationCancelled": "Invitation cancelled successfully!"
   },
   "error": {
+    "validToken": "This password reset link is invalid or has expired.",
+    "invalidToken": "This email verification link is invalid or has expired.",
+    "confirmEmailFailed": "Failed to verify your email. Please try again.",
+    "resetPasswordFailed": "Failed to reset password. Please try again.",
     "teamCreationFailed": "Failed to create team. Please try again.",
     "teamUpdateFailed": "Failed to update team. Please try again.",
     "teamDeletionFailed": "Failed to delete team. Please try again.",

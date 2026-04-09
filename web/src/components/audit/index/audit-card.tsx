@@ -82,8 +82,9 @@ export function AuditCard({ audit }: AuditCardProps) {
                     <img
                       key={client.id}
                       src={
-                        client.avatarUrl ||
-                        `https://ui-avatars.com/api/?name=${client.firstName}+${client.lastName}`
+                        client.avatarUrl
+                          ? buildAvatarUrl(client.avatarUrl)
+                          : `https://ui-avatars.com/api/?name=${client.firstName}+${client.lastName}`
                       }
                       alt={client.username}
                       className='ring-background size-6 rounded-full ring-2'

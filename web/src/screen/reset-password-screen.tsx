@@ -1,20 +1,23 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { KeyRound } from 'lucide-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import toast from 'react-hot-toast'
+import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
-import InputField from '@/components/oldUi/InputField.tsx'
-import Button from '@/components/oldUi/button/Button.tsx'
-import { useUserContext } from '@/context/user-context.tsx'
-import { getNewPasswordSchema } from '@/domain/validation/reset-password-schema.ts'
-import { useResetPassword } from '@/hooks/auth/use-send-password-reset-request.ts'
-import useRedirect from '@/hooks/common/use-redirect.ts'
-import ROUTES, { getRoutePath } from '@/router/routes-name.ts'
-import type { ApiError } from '@/utils/api-utils.ts'
-import { validToken } from '@/utils/string-utils.ts'
+import { Button } from '@/components/ui/button'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel
+} from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { useUserContext } from '@/context/user-context'
+import { getNewPasswordSchema } from '@/domain/validation/reset-password-schema'
+import { useResetPassword } from '@/hooks/auth/use-send-password-reset-request'
+import useRedirect from '@/hooks/common/use-redirect'
+import ROUTES, { getRoutePath } from '@/router/routes-name'
+import { validToken } from '@/utils/string-utils'
 
 type FormValues = { newPassword: string }
 
@@ -26,15 +29,11 @@ const ResetPasswordScreen = () => {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
-  const { mutateAsync } = useResetPassword()
-  const [isLoading, setIsLoading] = useState(false)
+  const { mutateAsync, isPending } = useResetPassword()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<FormValues>({
-    resolver: zodResolver(getNewPasswordSchema(t))
+  const form = useForm<FormValues>({
+    resolver: zodResolver(getNewPasswordSchema(t as (key: string) => string)),
+    defaultValues: { newPassword: '' }
   })
 
   const token = new URLSearchParams(location.search).get('token')
@@ -46,23 +45,12 @@ const ResetPasswordScreen = () => {
       return
     }
 
-    setIsLoading(true)
-
     try {
-      await toast.promise(
-        mutateAsync({ newPassword: data.newPassword, token: token! }).then(
-          () => {
-            navigate(getRoutePath(ROUTES.LOGIN))
-          }
-        ),
-        {
-          loading: t('messages:loading.resetPassword'),
-          success: t('messages:success.resetPassword'),
-          error: (err: ApiError) => t(err.errorKey)
-        }
-      )
-    } finally {
-      setIsLoading(false)
+      await mutateAsync({ newPassword: data.newPassword, token: token! })
+      toast.success(t('messages:success.resetPassword'))
+      navigate(getRoutePath(ROUTES.LOGIN))
+    } catch {
+      toast.error(t('messages:error.resetPasswordFailed'))
     }
   }
 
@@ -72,42 +60,50 @@ const ResetPasswordScreen = () => {
         <div className='rounded-lg bg-white p-8 shadow-md dark:bg-gray-800'>
           <header className='mb-8 text-center'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
-              {t('auth:password.resettitle')}
+              {t('auth:password.resetTitle')}
             </h1>
             <p className='mt-2 text-sm text-gray-600 dark:text-gray-400'>
-              {t('auth:password.resetsubtitle')}
+              {t('auth:password.resetSubtitle')}
             </p>
           </header>
 
           {tokenIsValid ? (
-            <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-              <InputField
-                label={t('auth:password.resetlabel')}
-                type='password'
-                name='newPassword'
-                icon={KeyRound}
-                placeholder={t('auth:password.resetnewPasswordPlaceholder')}
-                register={register}
-                error={errors.newPassword?.message}
-                autoComplete='new-password'
-              />
+            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+              <FieldGroup>
+                <Controller
+                  control={form.control}
+                  name='newPassword'
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        {t('auth:password.resetLabel')}
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        id={field.name}
+                        type='password'
+                        aria-invalid={fieldState.invalid}
+                        placeholder={t('auth:password.resetPlaceholder')}
+                        autoComplete='new-password'
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
 
               <div className='flex flex-col gap-3'>
-                <Button
-                  type='submit'
-                  variant='primary'
-                  isLoading={isLoading}
-                  loadingText={t('messages:loading.resetPassword')}
-                  className='w-full'
-                >
-                  {t('auth:password.resetsubmit')}
+                <Button type='submit' className='w-full' disabled={isPending}>
+                  {t('auth:password.resetSubmit')}
                 </Button>
 
                 <Button
                   type='button'
-                  variant='ghost'
-                  onClick={() => navigate(getRoutePath(ROUTES.LOGIN))}
+                  variant='outline'
                   className='w-full'
+                  onClick={() => navigate(getRoutePath(ROUTES.LOGIN))}
                 >
                   {t('common:actions.cancel')}
                 </Button>
@@ -123,9 +119,8 @@ const ResetPasswordScreen = () => {
 
               <Button
                 type='button'
-                onClick={() => navigate(getRoutePath(ROUTES.LOGIN))}
-                variant='primary'
                 className='w-full'
+                onClick={() => navigate(getRoutePath(ROUTES.LOGIN))}
               >
                 {t('common:actions.goLogin')}
               </Button>

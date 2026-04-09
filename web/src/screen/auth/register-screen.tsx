@@ -26,7 +26,7 @@ export default function RegisterScreen() {
         <div className='space-x-1 text-center text-sm'>
           <span>{t('register.login.prompt')}</span>
           <Button size='none' variant='link' asChild>
-            <Link to='/login'>{t('register.login.link')}</Link>
+            <Link to='/'>{t('register.login.link')}</Link>
           </Button>
         </div>
 

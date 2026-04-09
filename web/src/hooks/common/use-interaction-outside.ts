@@ -23,7 +23,9 @@ function useInteractionOutside<T extends HTMLElement = HTMLElement>(
   })
 
   const handleInteractOutside = useCallback((event: Event) => {
-    if (ref.current && !ref.current.contains(event.target as Node)) {
+    const target = event.target as Node
+    if (!document.documentElement.contains(target)) return
+    if (ref.current && !ref.current.contains(target)) {
       callbackRef.current()
     }
   }, [])

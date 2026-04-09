@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { ForgotPasswordDialog } from '@/components/auth/login/forgot-password-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import {
@@ -95,9 +96,16 @@ export function LoginForm(props: React.ComponentProps<typeof Card>) {
               )}
             />
 
-            <Button size='sm' variant='link' className='w-min self-end'>
-              Forgot password?
-            </Button>
+            <ForgotPasswordDialog>
+              <Button
+                size='sm'
+                variant='link'
+                type='button'
+                className='w-min self-end'
+              >
+                {t('forgotPassword.button')}
+              </Button>
+            </ForgotPasswordDialog>
           </FieldGroup>
         </CardContent>
 

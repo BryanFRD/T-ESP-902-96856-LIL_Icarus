@@ -8,6 +8,7 @@ import {
   EmptyTitle
 } from '@/components/ui/empty'
 import type { Client } from '@/domain/types/audit.ts'
+import { buildAvatarUrl } from '@/utils/string-utils'
 
 interface AuditClientsContentProps {
   clients: Client[]
@@ -38,8 +39,9 @@ export function AuditClientsContent({ clients }: AuditClientsContentProps) {
         >
           <img
             src={
-              client.avatarUrl ||
-              `https://ui-avatars.com/api/?name=${client.firstName}+${client.lastName}`
+              client.avatarUrl
+                ? buildAvatarUrl(client.avatarUrl)
+                : `https://ui-avatars.com/api/?name=${client.firstName}+${client.lastName}`
             }
             alt={client.username}
             className='size-10 rounded-full'

@@ -89,7 +89,7 @@ stages:
     HUSKY: '0'
   before_script:
     - corepack enable
-    - corepack prepare pnpm@latest --activate
+    - corepack install
     - pnpm install --frozen-lockfile
   cache:
     - key: pnpm-$CI_COMMIT_REF_SLUG
@@ -129,9 +129,8 @@ stages:
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '0'
   before_script:
     - corepack enable
-    - corepack prepare pnpm@latest --activate
+    - corepack install
     - pnpm install --frozen-lockfile
-    - pnpm exec playwright install --with-deps
   script:
     - pnpm run test:run --coverage
   artifacts:
@@ -172,9 +171,7 @@ stages:
 
 🎉_ferrflow_release:
   stage: release
-  image:
-    name: ghcr.io/ferrflow-org/ferrflow:latest
-    pull_policy: always
+  image: ghcr.io/ferrflow-org/ferrflow:2.20.0
   variables:
     HUSKY: '0'
     GIT_DEPTH: 0
@@ -197,6 +194,8 @@ stages:
       when: never
     - if: '$CI_COMMIT_MESSAGE =~ /\[skip ci\]/ && $CI_PIPELINE_SOURCE != "web"'
       when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
     - if: '$CI_COMMIT_BRANCH =~ /^feat\//'
