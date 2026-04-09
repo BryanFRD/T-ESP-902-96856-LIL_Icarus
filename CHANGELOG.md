@@ -4,6 +4,12 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.2.1] - 2026-04-09
+
+### Bug Fixes
+
+- fix: ws cors
+
 ## [1.2.0] - 2026-04-08
 
 ### Features
