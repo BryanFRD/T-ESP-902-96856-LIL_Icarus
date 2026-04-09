@@ -11,8 +11,8 @@ use super::types::{InvitationReceivedPayload, UserNotificationPayload};
 pub async fn emit_notification(io: &SocketIo, user_id: &str, payload: &UserNotificationPayload) {
     let room_id = format!("user:{user_id}");
     if let Err(e) = io
-        .of("/v1/ws")
-        .expect("namespace /v1/ws not found")
+        .of("/")
+        .expect("namespace / not found")
         .to(room_id)
         .emit("user:notification", payload)
         .await
@@ -30,8 +30,8 @@ pub async fn emit_invitation_received(
 ) {
     let room_id = format!("user:{user_id}");
     if let Err(e) = io
-        .of("/v1/ws")
-        .expect("namespace /v1/ws not found")
+        .of("/")
+        .expect("namespace / not found")
         .to(room_id)
         .emit("user:invitation_received", payload)
         .await
