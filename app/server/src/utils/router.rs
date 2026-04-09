@@ -29,6 +29,8 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
     // Initialize Prometheus metrics recorder
     metrics::install_recorder(state.clone());
 
+    tracing::info!("CORS origins from Vault: {:?}", secrets.origin_cors);
+
     let allowed_origins: Vec<HeaderValue> = secrets
         .origin_cors
         .split(',')
@@ -39,6 +41,8 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
             tracing::error!("Invalid CORS origin: {}", e);
             panic!("Invalid CORS origin");
         });
+
+    tracing::info!("Parsed CORS origins: {:?}", allowed_origins);
 
     let cors = CorsLayer::new()
         .allow_origin(allowed_origins)
