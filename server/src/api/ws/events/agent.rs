@@ -25,8 +25,8 @@ pub async fn emit_agent_output(
         data: STANDARD.encode(data),
     };
     if let Err(e) = io
-        .of("/v1/ws")
-        .expect("namespace /v1/ws not found")
+        .of("/")
+        .expect("namespace / not found")
         .to(room_id)
         .emit("agent:output", &payload)
         .await
@@ -43,8 +43,8 @@ pub async fn emit_agent_status(io: &SocketIo, audit_id: &str, agent_id: &str, on
         online,
     };
     if let Err(e) = io
-        .of("/v1/ws")
-        .expect("namespace /v1/ws not found")
+        .of("/")
+        .expect("namespace / not found")
         .to(room_id)
         .emit("agent:status", &payload)
         .await
@@ -66,8 +66,8 @@ pub async fn emit_agent_stream_closed(
         stream_id,
     };
     if let Err(e) = io
-        .of("/v1/ws")
-        .expect("namespace /v1/ws not found")
+        .of("/")
+        .expect("namespace / not found")
         .to(room_id)
         .emit("agent:stream_closed", &payload)
         .await
@@ -93,8 +93,8 @@ pub async fn emit_agent_keylogger(
         data: STANDARD.encode(data),
     };
     if let Err(e) = io
-        .of("/v1/ws")
-        .expect("namespace /v1/ws not found")
+        .of("/")
+        .expect("namespace / not found")
         .to(room_id)
         .emit("agent:keylogger", &payload)
         .await

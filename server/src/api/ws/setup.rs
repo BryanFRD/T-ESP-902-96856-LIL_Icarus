@@ -10,8 +10,8 @@ use super::rooms::handlers;
 
 /// Register the Socket.IO namespace, authentication middleware, and event handlers.
 pub fn setup_ws(io: &SocketIo) {
-    info!("Setting up Socket.IO namespace /v1/ws");
-    io.ns("/v1/ws", on_connect.with(auth_middleware));
+    info!("Setting up Socket.IO namespace /");
+    io.ns("/", on_connect.with(auth_middleware));
 }
 
 /// Called once a socket has passed the authentication middleware.

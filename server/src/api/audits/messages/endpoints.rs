@@ -102,8 +102,8 @@ pub async fn create_message(
             if let Some(io) = state.io_opt() {
                 let room_id = format!("audit:{audit_id}");
                 if let Err(e) = io
-                    .of("/v1/ws")
-                    .expect("namespace /v1/ws not found")
+                    .of("/")
+                    .expect("namespace / not found")
                     .to(room_id)
                     .emit("audit:message", &message)
                     .await
@@ -194,8 +194,8 @@ pub async fn upload_attachment(
             if let Some(io) = state.io_opt() {
                 let room_id = format!("audit:{audit_id}");
                 if let Err(e) = io
-                    .of("/v1/ws")
-                    .expect("namespace /v1/ws not found")
+                    .of("/")
+                    .expect("namespace / not found")
                     .to(room_id)
                     .emit("audit:message_attachment", &attachment)
                     .await

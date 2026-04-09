@@ -97,7 +97,7 @@ pub fn mark_as_read(
 pub fn emit_new_notification(io: &SocketIo, user_id: &str, notification: &Notification) {
     // Emit to the user's room (all their connected sockets)
     if let Err(e) = io
-        .of("/v1/ws")
+        .of("/")
         .unwrap()
         .to(user_id)
         .emit("notification:new", notification)
