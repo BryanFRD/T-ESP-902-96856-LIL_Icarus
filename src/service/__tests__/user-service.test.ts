@@ -5,7 +5,6 @@ import { getAxiosClient } from '@/configuration/api/axios-client.ts'
 import {
   createUser,
   deleteUser,
-  getAvatar,
   getUser,
   getUsers,
   patchUser,
@@ -106,18 +105,5 @@ describe('user-service', () => {
       { headers: { 'Content-Type': 'multipart/form-data' } }
     )
     expect(result).toBe('avatar-url.png')
-  })
-
-  it('getAvatar should GET /users/avatars/:filename as blob', async () => {
-    const mockBlob = new Blob(['image'])
-    mockClient.get.mockResolvedValue({ data: mockBlob })
-    const mockUrl = 'blob:http://localhost/abc'
-    vi.spyOn(URL, 'createObjectURL').mockReturnValue(mockUrl)
-    const result = await getAvatar('avatar.png')
-    expect(mockClient.get).toHaveBeenCalledWith('/users/avatars/avatar.png', {
-      responseType: 'blob'
-    })
-    expect(result).toBe(mockUrl)
-    vi.restoreAllMocks()
   })
 })

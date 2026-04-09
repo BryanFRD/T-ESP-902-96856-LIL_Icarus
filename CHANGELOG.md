@@ -5,6 +5,28 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.35.3] - 2026-04-09
+
+### Bug Fixes
+
+- fix(tests): update use-get-avatar and use-interaction-outside tests to match current hooks
+- fix(ci): pin pnpm version via packageManager field to avoid network fetch
+- fix: enforce LF line endings and add .gitattributes
+
+## [1.35.2] - 2026-04-09
+
+### Bug Fixes
+
+- fix(loader): update refresh-loader test to match current component classes
+- fix(ci): remove unused playwright install from test job
+- fix(ci): run ferrflow release on MR pipelines for deploy version
+- fix(ci): add optional flag to ferrflow release job dependency
+- fix: avatar URL now uses static path directly from server
+- fix: adjust grid layout for login screen responsiveness
+- fix: update email verification messages and improve ui feedback
+- fix: i18n translations and modal close bug
+- fix(auth): reset password missing
+
 ## [1.35.1] - 2026-04-08
 
 ### Bug Fixes

@@ -11,7 +11,7 @@ export default function LoginScreen() {
   useRedirect({ when: isAuthenticated })
 
   return (
-    <div className='grid min-h-screen grid-cols-2 items-center gap-x-12 p-12'>
+    <div className='grid min-h-screen items-center gap-x-12 p-12 md:grid-cols-2'>
       <BrandingSection />
 
       <LoginSection className='w-full max-w-2xl justify-self-center' />

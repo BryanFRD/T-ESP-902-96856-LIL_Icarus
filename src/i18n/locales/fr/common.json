@@ -1,4 +1,14 @@
 {
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "edit": "Modifier",
+  "delete": "Supprimer",
+  "edited": "modifié",
+  "confirmAction": {
+    "typeToConfirm": "Tapez pour confirmer",
+    "pleaseType": "Veuillez taper",
+    "toContinue": "pour continuer"
+  },
   "actions": {
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -9,7 +19,8 @@
     "confirm": "Confirmer",
     "back": "Retour",
     "create": "Créer",
-    "close": "Fermer"
+    "close": "Fermer",
+    "goLogin": "Aller à la connexion"
   },
   "ui": {
     "imageCropper": {

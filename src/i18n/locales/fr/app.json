@@ -4,6 +4,7 @@
     "sidebar": {
       "items": {
         "dashboard": "Tableau de bord",
+        "audits": "Audits",
         "teams": "Équipes"
       },
       "footer": {

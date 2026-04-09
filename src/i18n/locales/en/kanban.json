@@ -1,0 +1,114 @@
+{
+  "loading": "Loading...",
+  "board": "Board",
+  "createTicket": "Create Ticket",
+  "editTicket": "Edit Ticket",
+  "addTicket": "Add ticket",
+  "emptyColumn": "No tickets",
+  "labels": "Labels",
+  "comments": "Comments",
+  "subtasks": "Subtasks",
+  "attachments": "Attachments",
+  "ticket": {
+    "details": "Details",
+    "activity": "Activity",
+    "title": "Title",
+    "titlePlaceholder": "Enter ticket title",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter a description...",
+    "noDescription": "No description",
+    "assignee": "Assignee",
+    "assigneePlaceholder": "Select an assignee",
+    "unassigned": "Unassigned",
+    "priority": "Priority",
+    "priorityPlaceholder": "Select a priority",
+    "dueDate": "Due date",
+    "dueDatePlaceholder": "Select a due date",
+    "noDueDate": "No due date",
+    "createdBy": "Created by",
+    "createdTicket": "created this ticket",
+    "updated": "Ticket updated",
+    "deleteTitle": "Delete ticket",
+    "deleteDescription": "This action is irreversible. All data related to this ticket will be permanently deleted.",
+    "deleteConfirmMatch": "DELETE"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "label": {
+    "add": "Add label..."
+  },
+  "attachment": {
+    "title": "Attachments",
+    "add": "Add",
+    "preview": "Preview before upload",
+    "upload": "Upload",
+    "noAttachments": "No attachments",
+    "fileTooLarge": "File is too large (max 10 MB)",
+    "delete": "Delete attachment",
+    "deleteConfirm": "Are you sure you want to delete this attachment?",
+    "confirmDelete": "DELETE"
+  },
+  "comment": {
+    "title": "Comments",
+    "placeholder": "Write a comment...",
+    "add": "Comment",
+    "noComments": "No comments yet",
+    "delete": "Delete comment",
+    "deleteConfirm": "Are you sure you want to delete this comment?",
+    "confirmDelete": "DELETE"
+  },
+  "column": {
+    "create": "New column",
+    "edit": "Edit column",
+    "name": "Column name",
+    "namePlaceholder": "e.g. In Progress"
+  },
+  "emptyState": {
+    "title": "No board yet",
+    "description": "Set up your first board to start managing your tickets.",
+    "info": "Add columns to organise your workflow"
+  },
+  "onboarding": {
+    "title": "Set up your board",
+    "subtitle": "Create the columns of your kanban board",
+    "columnsTitle": "Columns",
+    "columnsDescription": "Add the columns that match your workflow",
+    "addColumn": "Add a column",
+    "removeColumn": "Remove column",
+    "columnPlaceholder": "Column name",
+    "defaultColumns": {
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "review": "Review",
+      "done": "Done"
+    },
+    "createBoard": "Create board",
+    "success": "Board created successfully!",
+    "error": "Failed to create board. Please try again.",
+    "tip": "Tip: You can reorder and rename columns later.",
+    "validation": {
+      "minOneColumn": "At least one column is required."
+    }
+  },
+  "tooltips": {
+    "comments": "Comments",
+    "attachments": "Attachments",
+    "subtasks": "Subtasks"
+  },
+  "error": {
+    "loadFailed": "Failed to load the board.",
+    "noPermission": "You do not have permission to access this board."
+  },
+  "validation": {
+    "column": {
+      "name": {
+        "required": "Column name is required.",
+        "max": "Column name must be at most 50 characters."
+      }
+    }
+  }
+}

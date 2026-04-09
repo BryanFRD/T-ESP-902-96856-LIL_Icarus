@@ -31,6 +31,7 @@ import {
   useSidebar
 } from '@/components/ui/sidebar'
 import { useUserContext } from '@/context/user-context.tsx'
+import { buildAvatarUrl } from '@/utils/string-utils'
 
 export function AppSidebarFooter() {
   const { t } = useTranslation('app')
@@ -58,7 +59,10 @@ export function AppSidebarFooter() {
                 className='group-data-[collapsible=icon]:rounded-full'
               >
                 <Avatar>
-                  <AvatarImage src={user?.avatarUrl} alt={user?.firstName} />
+                  <AvatarImage
+                    src={buildAvatarUrl(user?.avatarUrl)}
+                    alt={user?.firstName}
+                  />
                   <AvatarFallback>{user?.firstName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className='flex flex-1 flex-col items-start truncate'>

@@ -1,4 +1,14 @@
 {
+  "save": "Save",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "delete": "Delete",
+  "edited": "edited",
+  "confirmAction": {
+    "typeToConfirm": "Type to confirm",
+    "pleaseType": "Please type",
+    "toContinue": "to continue"
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
@@ -9,7 +19,8 @@
     "confirm": "Confirm",
     "back": "Back",
     "create": "Create",
-    "close": "Close"
+    "close": "Close",
+    "goLogin": "Go to Login"
   },
   "ui": {
     "imageCropper": {

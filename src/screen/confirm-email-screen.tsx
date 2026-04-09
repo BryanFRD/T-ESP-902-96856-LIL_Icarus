@@ -1,9 +1,8 @@
-import { CheckCircle, XCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { BrandingSection } from '@/components/auth/login/branding-section'
 import { I18nToggle } from '@/components/i18n-toggle'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
@@ -39,7 +38,10 @@ const ConfirmEmailScreen = () => {
       })
       .catch((err: unknown) => {
         setStatus('error')
-        const message = getErrorMessage(err, 'confirmEmail.errorMessage')
+        const message = getErrorMessage(
+          err,
+          'messages:error.confirmEmailFailed'
+        )
         setErrorMessage(t(message))
       })
       .finally(() => {
@@ -50,34 +52,37 @@ const ConfirmEmailScreen = () => {
   }, [token, mutateAsync, navigate, t])
 
   return (
-    <div className='grid min-h-screen grid-cols-2 items-center gap-x-12 p-12'>
-      <BrandingSection />
-
-      <div className='w-full max-w-2xl justify-self-center'>
+    <div className='flex min-h-screen w-full items-center justify-center p-12'>
+      <div className='w-full max-w-2xl'>
         <Card>
-          <CardHeader className='items-center text-center'>
-            {status === 'loading' && (
-              <Spinner className='text-primary size-12' />
-            )}
-            {status === 'success' && (
-              <CheckCircle className='size-12 text-green-500' />
-            )}
-            {status === 'error' && (
-              <XCircle className='text-destructive size-12' />
-            )}
+          <CardHeader>
+            <div className='flex flex-col items-center gap-4 text-center'>
+              {status === 'loading' && (
+                <Spinner className='text-primary size-12' />
+              )}
+              {status === 'success' && (
+                <CheckCircle className='size-12 text-green-500' />
+              )}
+              {status === 'error' && (
+                <AlertCircle className='text-destructive size-12' />
+              )}
 
-            <h1 className='text-2xl font-bold'>
-              {status === 'loading' && t('auth:email.confirmverifying')}
-              {status === 'success' && t('auth:email.confirmsuccess')}
-              {status === 'error' && t('auth:email.confirmerror')}
-            </h1>
+              <div className='flex flex-col gap-1'>
+                <h1 className='text-2xl font-bold'>
+                  {status === 'loading' && t('auth:email.confirmverifying')}
+                  {status === 'success' && t('auth:email.confirmsuccess')}
+                  {status === 'error' && t('auth:email.confirmerror')}
+                </h1>
 
-            <p className='text-muted-foreground text-sm'>
-              {status === 'loading' && t('auth:email.confirmpleaseWait')}
-              {status === 'success' && t('auth:email.confirmsuccessMessage')}
-              {status === 'error' &&
-                (errorMessage || t('auth:email.confirmerrorMessage'))}
-            </p>
+                <p className='text-muted-foreground text-sm'>
+                  {status === 'loading' && t('auth:email.confirmpleaseWait')}
+                  {status === 'success' &&
+                    t('auth:email.confirmsuccessMessage')}
+                  {status === 'error' &&
+                    (errorMessage || t('auth:email.confirmerrorMessage'))}
+                </p>
+              </div>
+            </div>
           </CardHeader>
 
           {status !== 'loading' && (

@@ -1,12 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+import { buildAvatarUrl } from '@/utils/string-utils'
 
-import { getAvatar } from '@/service/user-service.ts'
-
-export const useGetAvatar = (filename: string | undefined) => {
-  return useQuery({
-    queryKey: ['user', 'avatar', filename],
-    queryFn: () => getAvatar(filename ?? ''),
-    enabled: !!filename,
-    staleTime: 5 * 60 * 1000
-  })
+export const useGetAvatar = (avatarPath: string | null | undefined) => {
+  return { data: buildAvatarUrl(avatarPath) }
 }

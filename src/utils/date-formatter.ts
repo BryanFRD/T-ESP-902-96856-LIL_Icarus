@@ -13,7 +13,7 @@ const getTimeSeparator = (lang: string): string => {
 export const formatter = (lang: string) => ({
   /*
    * Formats date in a short format
-   * Example: "01/01/2023"
+   * Example: "01 /01/2023"
    */
   date: (date: Date | string) => {
     return new Intl.DateTimeFormat(lang, {

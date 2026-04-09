@@ -27,6 +27,7 @@ import {
   useUpdateTicket
 } from '@/hooks/kanban/use-ticket-mutation.ts'
 import { useTicket } from '@/hooks/kanban/use-ticket.ts'
+import { buildAvatarUrl } from '@/utils/string-utils'
 
 import TicketLabelBadge from './ticket-label-badge.tsx'
 import TicketPriorityBadge from './ticket-priority-badge.tsx'
@@ -178,7 +179,7 @@ const TicketModal = ({
                     <div className='flex items-center gap-2'>
                       {ticket.assignee.avatarUrl ? (
                         <img
-                          src={ticket.assignee.avatarUrl}
+                          src={buildAvatarUrl(ticket.assignee.avatarUrl)}
                           alt={`${ticket.assignee.firstName} ${ticket.assignee.lastName}`}
                           className='h-5 w-5 rounded-full'
                         />

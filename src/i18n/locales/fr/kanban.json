@@ -1,0 +1,114 @@
+{
+  "loading": "Chargement...",
+  "board": "Tableau",
+  "createTicket": "Créer un ticket",
+  "editTicket": "Modifier le ticket",
+  "addTicket": "Ajouter un ticket",
+  "emptyColumn": "Aucun ticket",
+  "labels": "Étiquettes",
+  "comments": "Commentaires",
+  "subtasks": "Sous-tâches",
+  "attachments": "Pièces jointes",
+  "ticket": {
+    "details": "Détails",
+    "activity": "Activité",
+    "title": "Titre",
+    "titlePlaceholder": "Entrez le titre du ticket",
+    "description": "Description",
+    "descriptionPlaceholder": "Entrez une description...",
+    "noDescription": "Aucune description",
+    "assignee": "Assigné à",
+    "assigneePlaceholder": "Sélectionner un assigné",
+    "unassigned": "Non assigné",
+    "priority": "Priorité",
+    "priorityPlaceholder": "Sélectionner une priorité",
+    "dueDate": "Date d'échéance",
+    "dueDatePlaceholder": "Sélectionner une date",
+    "noDueDate": "Aucune date",
+    "createdBy": "Créé par",
+    "createdTicket": "a créé ce ticket",
+    "updated": "Ticket mis à jour",
+    "deleteTitle": "Supprimer le ticket",
+    "deleteDescription": "Cette action est irréversible. Toutes les données liées à ce ticket seront définitivement supprimées.",
+    "deleteConfirmMatch": "SUPPRIMER"
+  },
+  "priority": {
+    "low": "Faible",
+    "medium": "Moyenne",
+    "high": "Haute",
+    "critical": "Critique"
+  },
+  "label": {
+    "add": "Ajouter une étiquette..."
+  },
+  "attachment": {
+    "title": "Pièces jointes",
+    "add": "Ajouter",
+    "preview": "Aperçu avant envoi",
+    "upload": "Envoyer",
+    "noAttachments": "Aucune pièce jointe",
+    "fileTooLarge": "Le fichier est trop volumineux (max 10 Mo)",
+    "delete": "Supprimer la pièce jointe",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette pièce jointe ?",
+    "confirmDelete": "SUPPRIMER"
+  },
+  "comment": {
+    "title": "Commentaires",
+    "placeholder": "Écrire un commentaire...",
+    "add": "Commenter",
+    "noComments": "Aucun commentaire",
+    "delete": "Supprimer le commentaire",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
+    "confirmDelete": "SUPPRIMER"
+  },
+  "column": {
+    "create": "Nouvelle colonne",
+    "edit": "Modifier la colonne",
+    "name": "Nom de la colonne",
+    "namePlaceholder": "ex. En cours"
+  },
+  "emptyState": {
+    "title": "Aucun tableau",
+    "description": "Créez votre premier tableau pour commencer à gérer vos tickets.",
+    "info": "Ajoutez des colonnes pour organiser votre flux de travail"
+  },
+  "onboarding": {
+    "title": "Configurer votre tableau",
+    "subtitle": "Créez les colonnes de votre tableau kanban",
+    "columnsTitle": "Colonnes",
+    "columnsDescription": "Ajoutez les colonnes qui correspondent à votre flux de travail",
+    "addColumn": "Ajouter une colonne",
+    "removeColumn": "Supprimer la colonne",
+    "columnPlaceholder": "Nom de la colonne",
+    "defaultColumns": {
+      "todo": "À faire",
+      "inProgress": "En cours",
+      "review": "En révision",
+      "done": "Terminé"
+    },
+    "createBoard": "Créer le tableau",
+    "success": "Tableau créé avec succès !",
+    "error": "Échec de la création du tableau. Veuillez réessayer.",
+    "tip": "Astuce : Vous pouvez réorganiser et renommer les colonnes plus tard.",
+    "validation": {
+      "minOneColumn": "Au moins une colonne est requise."
+    }
+  },
+  "tooltips": {
+    "comments": "Commentaires",
+    "attachments": "Pièces jointes",
+    "subtasks": "Sous-tâches"
+  },
+  "error": {
+    "loadFailed": "Impossible de charger le tableau.",
+    "noPermission": "Vous n'avez pas la permission d'accéder à ce tableau."
+  },
+  "validation": {
+    "column": {
+      "name": {
+        "required": "Le nom de la colonne est requis.",
+        "max": "Le nom de la colonne ne doit pas dépasser 50 caractères."
+      }
+    }
+  }
+}

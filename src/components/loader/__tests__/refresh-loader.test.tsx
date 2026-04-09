@@ -44,11 +44,14 @@ describe('RefreshLoader components', () => {
     expect(logo.className).toContain('w-8')
   })
 
-  it('has the correct dark mode classes', () => {
+  it('has the correct layout classes', () => {
     render(<RefreshLoader />)
 
     const container = screen.getByText('Compiling the circuit').parentElement
-    expect(container?.className).toContain('bg-white')
-    expect(container?.className).toContain('dark:bg-gray-900')
+    expect(container?.className).toContain('fixed')
+    expect(container?.className).toContain('inset-0')
+    expect(container?.className).toContain('flex-col')
+    expect(container?.className).toContain('items-center')
+    expect(container?.className).toContain('justify-center')
   })
 })

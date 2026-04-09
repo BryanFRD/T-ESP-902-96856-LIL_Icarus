@@ -62,13 +62,3 @@ export const uploadAvatar = async (payload: UploadAvatarFile) => {
     })
     .then(res => res.data)
 }
-
-export const getAvatar = async (filename: string): Promise<string> => {
-  return getAxiosClient()
-    .get(`/users/avatars/${filename}`, {
-      responseType: 'blob'
-    })
-    .then(res => {
-      return URL.createObjectURL(res.data)
-    })
-}

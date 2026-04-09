@@ -19,3 +19,10 @@ export const validToken = (token: string | null | undefined): boolean => {
   const pattern = /^[A-Za-z0-9-_]+(?:\.[A-Za-z0-9-_]+){0,2}$/
   return pattern.test(trimmed)
 }
+
+export const buildAvatarUrl = (
+  path: string | null | undefined
+): string | undefined => {
+  if (!path) return undefined
+  return `${__CONFIG__.ICARUS_API_URL}${path}`
+}

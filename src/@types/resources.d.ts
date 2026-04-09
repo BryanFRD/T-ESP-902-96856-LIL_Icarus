@@ -125,6 +125,36 @@ interface Resources {
     }
   }
   auth: {
+    forgotPassword: {
+      button: 'Forgot password?'
+      dialog: {
+        description: "Enter your email address and we'll send you a link to reset your password."
+        fields: {
+          email: {
+            label: 'Email'
+            placeholder: 'Enter your email address'
+          }
+        }
+        submit: 'Send reset link'
+        title: 'Reset your password'
+        toast: {
+          error: 'Failed to send reset link. Please try again.'
+          success: 'Reset link sent! Check your inbox.'
+        }
+      }
+    }
+    password: {
+      resetLabel: 'New Password'
+      resetPlaceholder: 'Enter your new password'
+      resetSubtitle: 'Enter your new password below to complete the reset.'
+      resetSubmit: 'Reset Password'
+      resetTitle: 'Reset your password'
+    }
+    validation: {
+      emailInvalid: 'Please enter a valid email address.'
+      emailRequired: 'Email is required.'
+      passwordMin: 'Password must be at least 8 characters.'
+    }
     login: {
       branding: {
         features: {
@@ -284,6 +314,7 @@ interface Resources {
       delete: 'Delete'
       done: 'Done'
       edit: 'Edit'
+      goLogin: 'Go to Login'
       more: 'More options'
       save: 'Save'
     }
@@ -307,9 +338,11 @@ interface Resources {
       invitationCreationFailed: 'Failed to create invitation. Please try again.'
       memberRemovalFailed: 'Failed to remove member. Please try again.'
       memberRoleUpdateFailed: 'Failed to update member role. Please try again.'
+      resetPasswordFailed: 'Failed to reset password. Please try again.'
       teamCreationFailed: 'Failed to create team. Please try again.'
       teamDeletionFailed: 'Failed to delete team. Please try again.'
       teamUpdateFailed: 'Failed to update team. Please try again.'
+      validToken: 'This password reset link is invalid or has expired.'
     }
     loading: {
       cancellingInvitation: 'Cancelling invitation...'
@@ -330,6 +363,7 @@ interface Resources {
       invitationCreated: 'Invitation created successfully!'
       memberRemoved: 'Member removed successfully!'
       memberRoleUpdated: 'Member role updated successfully!'
+      resetPassword: 'Password reset successfully!'
       teamCreated: 'Team created successfully!'
       teamDeleted: 'Team deleted successfully!'
       teamUpdated: 'Team updated successfully!'

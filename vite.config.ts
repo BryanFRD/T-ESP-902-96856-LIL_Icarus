@@ -47,7 +47,6 @@ export default defineConfig(async ({ mode }) => {
           'src/**/*.spec.ts',
           'src/**/*.spec.tsx',
           'src/**/*.d.ts',
-          'src/**/*.stories.tsx',
           'src/configuration/test/**'
         ]
       }
