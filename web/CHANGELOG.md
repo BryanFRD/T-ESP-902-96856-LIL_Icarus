@@ -5,6 +5,26 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.38.0-dev.1-dev.1] - 2026-04-10
+
+### Features
+
+- feat(audits): messages
+- feat(audits): messages
+
+## [1.37.0-dev.1-dev.1] - 2026-04-10
+
+### Features
+
+- feat(audits): enhance messaging functionality with loading state and empty messages
+
+## [1.36.0-dev.1] - 2026-04-10
+
+### Features
+
+- feat(audit): implement real-time messaging for audit discussions
+- feat: add messaging feature to audit section
+
 ## [1.35.4] - 2026-04-09
 
 ### Bug Fixes

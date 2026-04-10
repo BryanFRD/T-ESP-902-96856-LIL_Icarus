@@ -195,7 +195,7 @@ stages:
     - if: '$CI_COMMIT_MESSAGE =~ /\[skip ci\]/ && $CI_PIPELINE_SOURCE != "web"'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: on_success
+      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
     - if: '$CI_COMMIT_BRANCH =~ /^feat\//'
@@ -211,12 +211,14 @@ stages:
   needs:
     - job: 🎉_ferrflow_release
       artifacts: true
+      optional: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: manual
   script:
+    - VERSION="${VERSION:-latest}"
     - echo "Building and deploying DEV web image ${VERSION}..."
     - buildah build --build-arg BUILD_MODE=development --storage-driver=vfs -t web-dev:${VERSION} -t web-dev:latest .
     - echo "$DOCKER_REGISTRY_PASSWORD_DEV" | buildah login --storage-driver=vfs --username "$DOCKER_REGISTRY_USERNAME_DEV" --password-stdin $DOCKER_REGISTRY

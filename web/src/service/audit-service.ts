@@ -1,7 +1,12 @@
 import { HttpStatusCode } from 'axios'
 
 import { getAxiosClient } from '@/configuration/api/axios-client.ts'
-import type { AuditCheckAccess, UserAudit } from '@/domain/types/audit.ts'
+import type {
+  AuditCheckAccess,
+  AuditMessage,
+  PaginatedAuditMessages,
+  UserAudit
+} from '@/domain/types/audit.ts'
 import type { CreateAuditSchemaType } from '@/domain/validation/audit-schema.ts'
 
 export const checkAuditsAccess = async () => {
@@ -25,5 +30,23 @@ export const createAudit = async (data: CreateAuditSchemaType) => {
 export const getUserAudits = async () => {
   return getAxiosClient()
     .get<UserAudit[]>('/audits/me')
+    .then(res => res.data)
+}
+
+export const getAuditMessages = async (
+  auditId: string,
+  limit = 100,
+  offset = 0
+) => {
+  return getAxiosClient()
+    .get<PaginatedAuditMessages>(`/audits/${auditId}/messages`, {
+      params: { limit, offset }
+    })
+    .then(res => res.data)
+}
+
+export const sendAuditMessage = async (auditId: string, content: string) => {
+  return getAxiosClient()
+    .post<AuditMessage>(`/audits/${auditId}/messages`, { content })
     .then(res => res.data)
 }

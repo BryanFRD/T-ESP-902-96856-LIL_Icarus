@@ -20,7 +20,13 @@
     "tabs": {
       "kanban": "Kanban",
       "clients": "Clients",
-      "invitations": "Invitations"
+      "invitations": "Invitations",
+      "messages": "Messages"
+    },
+    "messages": {
+      "placeholder": "Write a message...",
+      "loading": "Loading messages...",
+      "empty": "No messages yet. Be the first to write one!"
     },
     "clients": {
       "empty": "No clients on this audit yet."
