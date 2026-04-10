@@ -32,7 +32,7 @@ pub async fn list_my_audits(
     State(state): State<GlobalState>,
     jwt_user: JwtClaims,
 ) -> impl IntoResponse {
-    match super::list_user_audits(&state, &jwt_user.sub.to_string()) {
+    match super::list_user_audits(&state, &jwt_user.sub.to_string(), &jwt_user.role) {
         Ok(audits) => (StatusCode::OK, Json(audits)).into_response(),
         Err(e) => internal_error("Failed to list audits", e),
     }
