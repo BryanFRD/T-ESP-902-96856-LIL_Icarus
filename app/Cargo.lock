@@ -4402,7 +4402,11 @@ dependencies = [
 
 [[package]]
 name = "server"
+<<<<<<< HEAD
 version = "1.2.3"
+=======
+version = "1.2.2"
+>>>>>>> cfdadc7 (test logs)
 dependencies = [
  "aes-gcm",
  "argon2",
@@ -4480,7 +4484,11 @@ dependencies = [
 
 [[package]]
 name = "shared"
+<<<<<<< HEAD
 version = "1.2.3"
+=======
+version = "1.2.2"
+>>>>>>> cfdadc7 (test logs)
 dependencies = [
  "aes-gcm",
  "bincode",

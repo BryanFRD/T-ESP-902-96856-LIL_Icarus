@@ -4,6 +4,12 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.0] - 2026-04-10
+
+### Features
+
+- feat: add user metrics endpoint
+
 ## [1.3.0] - 2026-04-10
 
 ### Features

@@ -16,7 +16,7 @@ mod tests;
 #[tokio::main]
 async fn main() {
     utils::start_logger();
-    tracing::info!("Starting server...");
+    tracing::info!("Starting server test...");
 
     let state = utils::init::get_state().await;
     let app = utils::router::get_router_with_state(&state);
