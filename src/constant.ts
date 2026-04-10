@@ -11,7 +11,11 @@ import { ROUTES, getRoutePath } from '@/router/routes-name.ts'
 import type { MenuItem, RouteType } from '@/types/global'
 
 export const MENU_ITEMS: MenuItem[] = [
-  { icon: LayoutDashboardIcon, label: 'Dashboard', href: '/dashboard' },
+  {
+    icon: LayoutDashboardIcon,
+    label: 'Dashboard',
+    href: getRoutePath(ROUTES.DASHBOARD)
+  },
   { icon: Shield, label: 'Audits', href: '/audits' },
   { icon: Users, label: 'Teams', href: getRoutePath(ROUTES.TEAMS) }
 ]

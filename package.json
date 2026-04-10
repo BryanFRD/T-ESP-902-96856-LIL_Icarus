@@ -108,5 +108,5 @@
     "validate": "pnpm run --parallel type:check i18n:check test:run format:check lint"
   },
   "type": "module",
-  "version": "1.35.3"
+  "version": "1.35.4"
 }
