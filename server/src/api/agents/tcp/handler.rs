@@ -287,8 +287,9 @@ async fn read_encrypted_packet_stream(
     Ok(decrypted)
 }
 
-/// Authenticate the agent by reading an encrypted `AgentAuth` packet and verifying
-/// the token against the database.
+/// Authenticate the agent by reading an encrypted `AgentAuth` packet.
+/// First tries to verify as an existing agent token, then as a deployment token
+/// (which auto-registers a new agent).
 async fn authenticate_agent(
     stream: &mut TcpStream,
     shared_secret: &[u8; 32],
@@ -303,19 +304,48 @@ async fn authenticate_agent(
         return Err("Expected AgentAuth packet".into());
     };
 
-    // Verify token
-    match super::super::services::verify_agent_token(
+    // Try 1: Verify as existing agent token
+    if let Ok(agent) = super::super::services::verify_agent_token(
         state,
         &auth_packet.audit_id,
         &auth_packet.token,
     ) {
-        Ok(agent) => {
-            let resp = AgentAuthResponse::new(true, "Authenticated".to_string());
+        let resp = AgentAuthResponse::with_agent(
+            true,
+            "Authenticated".to_string(),
+            String::new(),
+            agent.id.clone(),
+        );
+        send_encrypted_packet_stream(stream, shared_secret, &resp.serialize()?).await?;
+        return Ok(agent);
+    }
+
+    // Try 2: Register new agent via deployment token
+    match super::super::services::register_agent_with_deployment_token(
+        state,
+        &auth_packet.audit_id,
+        &auth_packet.token,
+        &auth_packet.hostname,
+    ) {
+        Ok((agent, agent_token)) => {
+            info!(
+                "New agent '{}' registered via deployment token for audit {}",
+                agent.name, agent.audit_id
+            );
+            let resp = AgentAuthResponse::with_agent(
+                true,
+                "Registered".to_string(),
+                agent_token,
+                agent.id.clone(),
+            );
             send_encrypted_packet_stream(stream, shared_secret, &resp.serialize()?).await?;
             Ok(agent)
         }
         Err(e) => {
-            warn!("Agent auth failed for audit {}: {e}", auth_packet.audit_id);
+            warn!(
+                "Agent auth failed for audit {}: {e}",
+                auth_packet.audit_id
+            );
             let resp = AgentAuthResponse::new(false, format!("{e}"));
             send_encrypted_packet_stream(stream, shared_secret, &resp.serialize()?).await?;
             Err(e.into())

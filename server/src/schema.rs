@@ -1,6 +1,17 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    audit_deployment_tokens (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        token_hash -> Varchar,
+        created_by -> Varchar,
+        is_revoked -> Bool,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     audit_agents (id) {
         id -> Varchar,
         audit_id -> Varchar,
@@ -241,6 +252,8 @@ diesel::table! {
 }
 
 diesel::joinable!(audit_agents -> audits (audit_id));
+diesel::joinable!(audit_deployment_tokens -> audits (audit_id));
+diesel::joinable!(audit_deployment_tokens -> users (created_by));
 diesel::joinable!(audit_message_attachments -> audit_messages (message_id));
 diesel::joinable!(audit_message_attachments -> users (uploaded_by));
 diesel::joinable!(audit_messages -> audits (audit_id));
@@ -271,6 +284,7 @@ diesel::joinable!(tickets_labels -> tickets (ticket_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     audit_agents,
+    audit_deployment_tokens,
     audit_message_attachments,
     audit_messages,
     audits,

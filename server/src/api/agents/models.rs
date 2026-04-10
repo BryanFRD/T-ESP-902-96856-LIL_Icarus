@@ -33,6 +33,32 @@ impl AuditAgent {
     }
 }
 
+#[derive(Debug, Clone, Queryable, Identifiable, Selectable, Insertable)]
+#[diesel(table_name = crate::schema::audit_deployment_tokens)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct DeploymentToken {
+    pub id: String,
+    pub audit_id: String,
+    pub token_hash: String,
+    pub created_by: String,
+    pub is_revoked: bool,
+    pub created_at: NaiveDateTime,
+}
+
+impl DeploymentToken {
+    #[must_use]
+    pub fn new(audit_id: String, token_hash: String, created_by: String) -> Self {
+        Self {
+            id: Ulid::new().to_string(),
+            audit_id,
+            token_hash,
+            created_by,
+            is_revoked: false,
+            created_at: chrono::Utc::now().naive_utc(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAgentPayload {

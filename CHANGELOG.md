@@ -4,6 +4,13 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.2] - 2026-04-10
+
+### Bug Fixes
+
+- fix(ci): auto-deploy dev on main push
+- fix(ci): ferrflow 2.20.3, enable on MRs, skip pipelines on non-main commits
+
 ## [1.4.1] - 2026-04-10
 
 ### Bug Fixes
