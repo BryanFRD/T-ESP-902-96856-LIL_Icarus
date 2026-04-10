@@ -1,12 +1,12 @@
 # Build stage
 FROM node:22-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for corepack
 COPY package.json pnpm-lock.yaml ./
+
+RUN corepack enable && corepack install
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile

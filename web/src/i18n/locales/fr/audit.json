@@ -24,7 +24,8 @@
       "kanban": "Kanban",
       "clients": "Clients",
       "invitations": "Invitations",
-      "messages": "Messages"
+      "messages": "Messages",
+      "agents": "Agents"
     },
     "messages": {
       "placeholder": "Écrire un message...",
@@ -37,6 +38,76 @@
     "invitations": {
       "empty": "Aucune invitation pour cet audit pour l'instant.",
       "create": "Nouvelle invitation"
+    },
+    "agents": {
+      "empty": "Aucun agent déployé pour cet audit pour l'instant.",
+      "download": "Télécharger l'agent",
+      "online": "En ligne",
+      "offline": "Hors ligne",
+      "revoked": "Révoqué",
+      "lastConnected": "Vu il y a {{time}}",
+      "never": "Jamais connecté",
+      "revokeDialog": {
+        "title": "Révoquer l'agent",
+        "description": "Êtes-vous sûr de vouloir révoquer \"{{name}}\" ? L'agent sera déconnecté immédiatement.",
+        "cancel": "Annuler",
+        "confirm": "Révoquer"
+      },
+      "toast": {
+        "revoked": "Agent révoqué",
+        "revokeError": "Impossible de révoquer l'agent"
+      },
+      "controlPanel": {
+        "tabs": {
+          "shell": "Shell",
+          "keylogger": "Keylogger",
+          "info": "Informations"
+        },
+        "shell": {
+          "placeholder": "Tapez une commande...",
+          "offlineNotice": "L'agent est hors ligne. Le shell est indisponible."
+        },
+        "keylogger": {
+          "start": "Démarrer",
+          "stop": "Arrêter",
+          "empty": "Aucune donnée de keylogger. Cliquez sur Démarrer pour commencer.",
+          "offlineNotice": "L'agent est hors ligne. Le keylogger est indisponible."
+        },
+        "info": {
+          "sections": {
+            "identity": "Identité",
+            "system": "Système",
+            "network": "Réseau",
+            "security": "Sécurité",
+            "agent": "Agent"
+          },
+          "hostname": "Nom d'hôte",
+          "username": "Utilisateur",
+          "elevated": "admin",
+          "domain": "Domaine",
+          "arch": "Architecture",
+          "locale": "Langue",
+          "os": "Système d'exploitation",
+          "cpu": "Processeur",
+          "gpu": "Carte graphique",
+          "memory": "Mémoire",
+          "disk": "Disque",
+          "uptime": "Temps de fonctionnement",
+          "localIps": "IPs locales",
+          "macAddress": "Adresse MAC",
+          "antivirus": "Antivirus / EDR",
+          "firewall": "Pare-feu",
+          "none": "Aucun détecté",
+          "unknown": "Inconnu",
+          "enabled": "Activé",
+          "disabled": "Désactivé",
+          "agentVersion": "Version",
+          "lastHeartbeat": "Dernier battement",
+          "lastConnected": "Dernière connexion",
+          "createdAt": "Créé le",
+          "noData": "Aucune information système disponible. L'agent ne s'est pas encore connecté."
+        }
+      }
     },
     "actions": {
       "edit": "Modifier",

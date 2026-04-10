@@ -4,6 +4,7 @@ import KanbanBoard from '@/components/kanban/kanban-board.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { UserAudit } from '@/domain/types/audit.ts'
 
+import { AuditAgentsContent } from './agents/audit-agents-content'
 import { AuditClientsContent } from './clients/audit-clients-content'
 import { AuditInvitationsContent } from './invitations/audit-invitations-content'
 import { AuditMessagesContent } from './messages/audit-messages-content'
@@ -19,7 +20,8 @@ export function AuditTabs({ audit }: AuditTabsProps) {
     { value: 'kanban', label: t('show.tabs.kanban') },
     { value: 'clients', label: t('show.tabs.clients') },
     { value: 'invitations', label: t('show.tabs.invitations') },
-    { value: 'messages', label: t('show.tabs.messages') }
+    { value: 'messages', label: t('show.tabs.messages') },
+    { value: 'agents', label: t('show.tabs.agents') }
   ]
 
   return (
@@ -46,6 +48,10 @@ export function AuditTabs({ audit }: AuditTabsProps) {
 
       <TabsContent value='messages'>
         <AuditMessagesContent auditId={audit.id} />
+      </TabsContent>
+
+      <TabsContent value='agents'>
+        <AuditAgentsContent auditId={audit.id} />
       </TabsContent>
     </Tabs>
   )
