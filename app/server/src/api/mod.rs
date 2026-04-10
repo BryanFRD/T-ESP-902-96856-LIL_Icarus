@@ -2,6 +2,7 @@ pub mod agents;
 pub mod audits;
 pub mod auth;
 pub mod csrf;
+pub mod dashboard;
 pub mod events;
 pub mod metrics;
 pub mod status;

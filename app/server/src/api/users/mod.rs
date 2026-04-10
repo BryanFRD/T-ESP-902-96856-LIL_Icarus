@@ -1,5 +1,6 @@
 pub mod endpoints;
 mod error;
+pub mod metrics;
 mod models;
 mod services;
 

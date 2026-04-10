@@ -12,7 +12,7 @@ use tracing::Level;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::api::{audits, auth, events, metrics, status, teams, users, ws};
+use crate::api::{audits, auth, dashboard, events, metrics, status, teams, users, ws};
 use crate::middlewares::{CsrfProtection, event_logging_middleware, metrics_middleware};
 use crate::state::GlobalState;
 use crate::utils::init::get_state;
@@ -79,6 +79,7 @@ pub fn get_router_with_state(state: &GlobalState) -> Router {
         .nest("/events", events::get_routes(state))
         .nest("/auth", auth::get_routes(state.clone()))
         .nest("/status", status::get_routes(state.clone()))
+        .nest("/dashboard", dashboard::get_routes(state))
         .route("/csrf", get(crate::api::csrf::get_csrf));
 
     let main_router = Router::new()

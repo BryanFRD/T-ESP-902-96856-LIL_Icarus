@@ -324,19 +324,15 @@ variables:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   script:
-    - echo "Importing and pushing production image..."
-    - VERSION="${VERSION:-latest}"
+    - echo "Importing and pushing production image ${VERSION}..."
     - buildah pull --storage-driver=vfs oci-archive:app-latest.tar
     - IMAGE_ID=$(buildah images --storage-driver=vfs --format "{{.ID}}" | head -n 1)
     - buildah tag --storage-driver=vfs $IMAGE_ID app:latest
     - echo $DOCKER_REGISTRY_PASSWORD_PROD | buildah login --storage-driver=vfs --username $DOCKER_REGISTRY_USERNAME_PROD --password-stdin $DOCKER_REGISTRY
+    - buildah tag --storage-driver=vfs app:latest $DOCKER_REGISTRY/app:${VERSION}
     - buildah tag --storage-driver=vfs app:latest $DOCKER_REGISTRY/app:latest
+    - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app:${VERSION}
     - buildah push --storage-driver=vfs $DOCKER_REGISTRY/app:latest
-    - |
-      if [ "$VERSION" != "latest" ]; then
-        buildah tag --storage-driver=vfs app:latest $DOCKER_REGISTRY/app:$VERSION
-        buildah push --storage-driver=vfs $DOCKER_REGISTRY/app:$VERSION
-      fi
 
 # ================= MIRROR TO GITHUB =================
 

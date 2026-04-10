@@ -33,6 +33,7 @@ use super::endpoints::{
     delete_avatar, delete_me, delete_user_admin, get_user_admin, list_users_admin, me, update_me,
     update_user_admin, upload_avatar,
 };
+use super::metrics::me_metrics;
 use super::models::UpdatePayload;
 
 pub fn get_routes(state: &GlobalState) -> Router {
@@ -42,6 +43,7 @@ pub fn get_routes(state: &GlobalState) -> Router {
         .route("/me", delete(delete_me))
         .route("/me/avatar", post(upload_avatar))
         .route("/me/avatar", delete(delete_avatar))
+        .route("/me/metrics", get(me_metrics))
         .layer(from_fn(auth::middleware))
         .with_state(state.clone())
         .merge(get_admin_routes(state))
