@@ -5,6 +5,33 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.40.0] - 2026-04-10
+
+### Features
+
+- feat(audits): messages
+- feat(audits): messages
+
+### Bug Fixes
+
+- fix(ci): auto-deploy dev on main push
+- fix(ci): ferrflow 2.20.3, enable on MRs, skip pipelines on non-main commits
+- fix: add xterm dependencies and fix Dockerfile corepack setup
+- fix: add agent i18n types to resources.d.ts and fix afterEach import
+- fix(agents): restore agent control panel files and translations
+- fix(audit): restore agents tab in audit view
+
+## [1.39.0-dev.1-dev.1] - 2026-04-10
+
+### Features
+
+- feat(audits): messages
+- feat(audits): messages
+
+### Bug Fixes
+
+- fix(audit): restore agents tab in audit view
+
 ## [1.38.0-dev.1-dev.1] - 2026-04-10
 
 ### Features

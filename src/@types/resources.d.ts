@@ -123,10 +123,81 @@ interface Resources {
         archived: 'Archived'
       }
       tabs: {
+        agents: 'Agents'
         clients: 'Clients'
         invitations: 'Invitations'
         kanban: 'Kanban'
         messages: 'Messages'
+      }
+      agents: {
+        empty: 'No agents deployed for this audit yet.'
+        download: 'Download Agent'
+        online: 'Online'
+        offline: 'Offline'
+        revoked: 'Revoked'
+        lastConnected: 'Last seen {{time}}'
+        never: 'Never connected'
+        revokeDialog: {
+          title: 'Revoke Agent'
+          description: 'Are you sure you want to revoke "{{name}}"? The agent will be disconnected immediately.'
+          cancel: 'Cancel'
+          confirm: 'Revoke'
+        }
+        toast: {
+          revoked: 'Agent revoked'
+          revokeError: 'Failed to revoke agent'
+        }
+        controlPanel: {
+          tabs: {
+            shell: 'Shell'
+            keylogger: 'Keylogger'
+            info: 'Information'
+          }
+          shell: {
+            placeholder: 'Type a command...'
+            offlineNotice: 'Agent is offline. Shell is unavailable.'
+          }
+          keylogger: {
+            start: 'Start'
+            stop: 'Stop'
+            empty: 'No keylogger data yet. Click Start to begin capturing.'
+            offlineNotice: 'Agent is offline. Keylogger is unavailable.'
+          }
+          info: {
+            sections: {
+              identity: 'Identity'
+              system: 'System'
+              network: 'Network'
+              security: 'Security'
+              agent: 'Agent'
+            }
+            hostname: 'Hostname'
+            username: 'User'
+            elevated: 'admin'
+            domain: 'Domain'
+            arch: 'Architecture'
+            locale: 'Locale'
+            os: 'Operating System'
+            cpu: 'CPU'
+            gpu: 'GPU'
+            memory: 'Memory'
+            disk: 'Disk'
+            uptime: 'Uptime'
+            localIps: 'Local IPs'
+            macAddress: 'MAC Address'
+            antivirus: 'Antivirus / EDR'
+            firewall: 'Firewall'
+            none: 'None detected'
+            unknown: 'Unknown'
+            enabled: 'Enabled'
+            disabled: 'Disabled'
+            agentVersion: 'Version'
+            lastHeartbeat: 'Last Heartbeat'
+            lastConnected: 'Last Connected'
+            createdAt: 'Created'
+            noData: 'No system information available. Agent has not connected yet.'
+          }
+        }
       }
     }
   }
