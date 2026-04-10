@@ -11,11 +11,16 @@ use network::{Client, MultiplexManager};
 use shared::packets::{Heartbeat, Packet};
 
 const CONFIG_MARKER: &[u8] = b"\n###ICARUS_CONFIG###\n";
+const SAVED_TOKEN_FILE: &str = ".icarus-agent";
 
 struct EmbeddedConfig {
     audit_id: String,
     token: String,
     server_addr: String,
+}
+
+struct SavedAgent {
+    agent_token: String,
 }
 
 fn read_embedded_config() -> Option<EmbeddedConfig> {
@@ -38,9 +43,46 @@ fn read_embedded_config() -> Option<EmbeddedConfig> {
     })
 }
 
+fn saved_token_path() -> std::path::PathBuf {
+    std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(|d| d.join(SAVED_TOKEN_FILE)))
+        .unwrap_or_else(|| std::path::PathBuf::from(SAVED_TOKEN_FILE))
+}
+
+fn read_saved_agent() -> Option<SavedAgent> {
+    let path = saved_token_path();
+    let data = std::fs::read_to_string(&path).ok()?;
+    let parsed: serde_json::Value = serde_json::from_str(&data).ok()?;
+    Some(SavedAgent {
+        agent_token: parsed.get("agent_token")?.as_str()?.to_string(),
+    })
+}
+
+fn save_agent_token(agent_token: &str) {
+    let path = saved_token_path();
+    let json = serde_json::json!({ "agent_token": agent_token });
+    if let Err(e) = std::fs::write(&path, json.to_string()) {
+        eprintln!("Failed to save agent token: {e}");
+    }
+}
+
+fn get_hostname() -> String {
+    #[cfg(target_os = "windows")]
+    {
+        std::env::var("COMPUTERNAME").unwrap_or_else(|_| "unknown".to_string())
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        std::fs::read_to_string("/etc/hostname")
+            .map(|s| s.trim().to_string())
+            .unwrap_or_else(|_| "unknown".to_string())
+    }
+}
+
 #[allow(clippy::too_many_lines)]
 fn main() {
-    let (audit_id, agent_token, server_addr) = if let Some(config) = read_embedded_config() {
+    let (audit_id, deploy_token, server_addr) = if let Some(config) = read_embedded_config() {
         println!("Using embedded configuration");
         (config.audit_id, config.token, config.server_addr)
     } else {
@@ -52,6 +94,18 @@ fn main() {
         (audit_id, agent_token, server_addr)
     };
 
+    // Use saved agent token if available, otherwise use deployment token
+    let token = if let Some(saved) = read_saved_agent() {
+        println!("Using saved agent token");
+        saved.agent_token
+    } else {
+        println!("No saved token, using deployment token");
+        deploy_token
+    };
+
+    let hostname = get_hostname();
+    println!("Hostname: {hostname}");
+
     let mut client = loop {
         if let Ok(client) = Client::new(&server_addr) {
             break client;
@@ -61,9 +115,16 @@ fn main() {
     };
     println!("Connected to server successfully!");
 
-    // Authenticate with audit credentials
-    match client.authenticate(&audit_id, &agent_token) {
-        Ok(()) => println!("Authentication successful for audit {audit_id}"),
+    // Authenticate with audit credentials + hostname
+    match client.authenticate(&audit_id, &token, &hostname) {
+        Ok((agent_token, agent_id)) => {
+            println!("Authentication successful for audit {audit_id} (agent: {agent_id})");
+            // If server assigned a new agent token, save it for future reconnections
+            if !agent_token.is_empty() {
+                println!("Saving assigned agent token");
+                save_agent_token(&agent_token);
+            }
+        }
         Err(e) => {
             eprintln!("Authentication failed: {e}");
             return;

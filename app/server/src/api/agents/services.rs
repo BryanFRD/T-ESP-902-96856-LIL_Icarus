@@ -1,6 +1,7 @@
 use super::{
     AgentError, AgentResponse, AgentTokenResponse, AuditAgent, CreateAgentPayload,
-    KeyloggerRequestPayload, KeyloggerResponse, ShellRequestPayload, ShellStreamResponse,
+    DeploymentToken, KeyloggerRequestPayload, KeyloggerResponse, ShellRequestPayload,
+    ShellStreamResponse,
 };
 
 const CONFIG_MARKER: &[u8] = b"\n###ICARUS_CONFIG###\n";
@@ -14,7 +15,10 @@ use axum::{
     middleware::from_fn,
     routing::{delete, get, post},
 };
-use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper};
+use diesel::{
+    ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
+    TextExpressionMethods,
+};
 use sha2::{Digest, Sha256};
 use shared::multiplexing::MIN_DATA_STREAM_ID;
 use shared::packets::{KeyloggerRequest, Packet, ShellRequest};
@@ -114,10 +118,11 @@ pub fn create_agent(
     })
 }
 
-/// Download agent binary with embedded config for an audit
+/// Download agent binary with embedded deployment token for an audit.
+/// Does NOT create an agent record — agents self-register on first connection.
 ///
 /// # Errors
-/// Returns `AgentError` if binary not found, agent creation fails, or IO error
+/// Returns `AgentError` if binary not found or IO error
 pub fn download_agent(
     state: &GlobalState,
     audit_id: &str,
@@ -125,6 +130,13 @@ pub fn download_agent(
     is_admin: bool,
     server_host: &str,
 ) -> Result<Vec<u8>, AgentError> {
+    use crate::schema::audit_deployment_tokens;
+
+    let audit = audits::get_audit(state, audit_id)?;
+    if !audits::can_modify_audit(state, &audit, user_id, is_admin)? {
+        return Err(AgentError::MustBeOwnerOrAdmin);
+    }
+
     let agent_path = std::env::var("AGENT_BINARY_PATH").unwrap_or_else(|_| "agent.exe".to_string());
     let path = std::path::Path::new(&agent_path);
 
@@ -132,25 +144,21 @@ pub fn download_agent(
         return Err(AgentError::BinaryNotFound);
     }
 
-    // Count existing agents to generate a unique name
-    let count = {
-        use crate::schema::audit_agents;
-        let mut conn = state.get_db_conn()?;
-        audit_agents::table
-            .filter(audit_agents::audit_id.eq(audit_id))
-            .count()
-            .get_result::<i64>(&mut conn)?
-    };
+    // Create a deployment token (not an agent)
+    let raw_token = generate_token();
+    let token_hash = hash_token(&raw_token);
+    let deployment_token =
+        DeploymentToken::new(audit_id.to_string(), token_hash, user_id.to_string());
 
-    let name = format!("agent-{}", count + 1);
-    let payload = CreateAgentPayload { name };
-
-    let token_response = create_agent(state, audit_id, user_id, payload, is_admin)?;
+    let mut conn = state.get_db_conn()?;
+    diesel::insert_into(audit_deployment_tokens::table)
+        .values(&deployment_token)
+        .execute(&mut conn)?;
 
     let server_addr = format!("{server_host}:1337");
     let config_json = serde_json::json!({
         "audit_id": audit_id,
-        "token": token_response.token,
+        "token": raw_token,
         "server_addr": server_addr,
     });
 
@@ -161,6 +169,83 @@ pub fn download_agent(
     binary.extend_from_slice(config_json.to_string().as_bytes());
 
     Ok(binary)
+}
+
+/// Register a new agent using a deployment token.
+/// Called during TCP authentication when the token matches a deployment token.
+///
+/// # Errors
+/// Returns `AgentError` if deployment token invalid or database error
+pub fn register_agent_with_deployment_token(
+    state: &GlobalState,
+    audit_id: &str,
+    deployment_token_raw: &str,
+    hostname: &str,
+) -> Result<(AuditAgent, String), AgentError> {
+    use crate::schema::{audit_agents, audit_deployment_tokens};
+
+    let token_hash = hash_token(deployment_token_raw);
+    let mut conn = state.get_db_conn()?;
+
+    // Verify deployment token
+    let dt = audit_deployment_tokens::table
+        .filter(audit_deployment_tokens::audit_id.eq(audit_id))
+        .filter(audit_deployment_tokens::token_hash.eq(&token_hash))
+        .select(DeploymentToken::as_select())
+        .first::<DeploymentToken>(&mut conn)
+        .optional()?
+        .ok_or(AgentError::InvalidToken)?;
+
+    if dt.is_revoked {
+        return Err(AgentError::Revoked);
+    }
+
+    // Check audit is valid
+    let audit = audits::get_audit(state, audit_id).map_err(|e| match e {
+        AuditError::NotFound => AgentError::NotFound,
+        other => AgentError::Audit(other),
+    })?;
+
+    if audit.is_archived {
+        return Err(AgentError::NotFound);
+    }
+
+    // Generate unique agent name from hostname
+    let base_name = if hostname.is_empty() {
+        "agent".to_string()
+    } else {
+        hostname.to_string()
+    };
+
+    // Check if name already exists, append suffix if needed
+    let existing_count = audit_agents::table
+        .filter(audit_agents::audit_id.eq(audit_id))
+        .filter(audit_agents::name.like(format!("{base_name}%")))
+        .count()
+        .get_result::<i64>(&mut conn)?;
+
+    let agent_name = if existing_count == 0 {
+        base_name
+    } else {
+        format!("{base_name}-{}", existing_count + 1)
+    };
+
+    // Create agent with its own unique token
+    let raw_agent_token = generate_token();
+    let agent_token_hash = hash_token(&raw_agent_token);
+    let agent = AuditAgent::new(audit_id.to_string(), agent_name, agent_token_hash);
+
+    diesel::insert_into(audit_agents::table)
+        .values(&agent)
+        .execute(&mut conn)?;
+
+    // Update last_connected_at
+    let now = chrono::Utc::now().naive_utc();
+    diesel::update(audit_agents::table.filter(audit_agents::id.eq(&agent.id)))
+        .set(audit_agents::last_connected_at.eq(now))
+        .execute(&mut conn)?;
+
+    Ok((agent, raw_agent_token))
 }
 
 /// List all agents for an audit

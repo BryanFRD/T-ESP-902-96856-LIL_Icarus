@@ -145,7 +145,7 @@ mod tests {
 
     #[test]
     fn from_packet_bytes_agent_auth() {
-        let pkt = AgentAuth::new("audit".to_string(), "token".to_string());
+        let pkt = AgentAuth::new("audit".to_string(), "token".to_string(), "host".to_string());
         let bytes = to_wire(&pkt);
         assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::AgentAuth(_))));
     }

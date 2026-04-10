@@ -45,7 +45,7 @@ dependencies = [
 
 [[package]]
 name = "agent"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "aes-gcm",
  "crossbeam",
@@ -4402,7 +4402,7 @@ dependencies = [
 
 [[package]]
 name = "server"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "aes-gcm",
  "argon2",
@@ -4480,7 +4480,7 @@ dependencies = [
 
 [[package]]
 name = "shared"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "aes-gcm",
  "bincode",

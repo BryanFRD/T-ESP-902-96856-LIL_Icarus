@@ -82,10 +82,16 @@ impl Client {
         Ok(decrypted_data)
     }
 
-    /// Authenticate with the server by sending `audit_id` and token.
-    /// Must be called after handshake and before entering multiplex mode.
-    pub fn authenticate(&mut self, audit_id: &str, token: &str) -> Result<(), NetworkError> {
-        let auth_packet = AgentAuth::new(audit_id.to_string(), token.to_string());
+    /// Authenticate with the server by sending `audit_id`, token, and hostname.
+    /// Returns the agent token and agent ID assigned by the server (if new registration).
+    pub fn authenticate(
+        &mut self,
+        audit_id: &str,
+        token: &str,
+        hostname: &str,
+    ) -> Result<(String, String), NetworkError> {
+        let auth_packet =
+            AgentAuth::new(audit_id.to_string(), token.to_string(), hostname.to_string());
         let serialized = auth_packet.serialize()?;
         self.send(&serialized)?;
 
@@ -95,7 +101,7 @@ impl Client {
         match packet {
             Packets::AgentAuthResponse(resp) => {
                 if resp.success {
-                    Ok(())
+                    Ok((resp.agent_token, resp.agent_id))
                 } else {
                     Err(NetworkError::AuthenticationFailed(resp.message))
                 }

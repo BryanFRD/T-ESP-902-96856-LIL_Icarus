@@ -2,9 +2,9 @@ workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"'
     - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
       when: never
-    - if: '$CI_COMMIT_BRANCH'
 
 stages:
   - notify
@@ -231,7 +231,7 @@ variables:
 🎉_ferrflow_release:
   stage: release
   image:
-    name: ghcr.io/ferrflow-org/ferrflow:2.20.0
+    name: ghcr.io/ferrflow-org/ferrflow:2.20.3
   variables:
     GIT_DEPTH: 0
   before_script:
@@ -250,6 +250,8 @@ variables:
       when: never
     - if: '$CI_COMMIT_MESSAGE =~ /\[skip ci\]/ && $CI_PIPELINE_SOURCE != "web"'
       when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
     - if: '$CI_COMMIT_BRANCH =~ /^feat\//'
@@ -299,7 +301,7 @@ variables:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: manual
+      when: on_success
   script:
     - echo "Importing and pushing dev image ${VERSION}..."
     - buildah pull --storage-driver=vfs oci-archive:app-dev-latest.tar
