@@ -1,3 +1,5 @@
+use crate::api::dashboard;
+use crate::api::dashboard::{DashboardMetrics};
 use crate::api::agents;
 use crate::api::agents::{
     AgentResponse, AgentTokenResponse, CreateAgentPayload, SystemInfoResponse,
@@ -132,6 +134,7 @@ use utoipa::OpenApi;
         users::endpoints::delete_user_admin,
         users::endpoints::upload_avatar,
         users::endpoints::delete_avatar,
+        users::metrics::me_metrics,
         teams::endpoints::create_team,
         teams::endpoints::get_my_teams,
         teams::endpoints::update_team,
@@ -148,6 +151,7 @@ use utoipa::OpenApi;
         teams::companies::endpoints::update_company,
         teams::companies::endpoints::delete_company,
         status::endpoints::get_status,
+        dashboard::endpoints::get_dashboard,
     ),
     components(
         schemas(
@@ -167,6 +171,18 @@ use utoipa::OpenApi;
             AttachmentResponse,
             AuditMessageResponse, PaginatedAuditMessageResponse, CreateAuditMessagePayload,
             AuditMessageAttachmentResponse, AuditMessageAttachmentForm,
+            users::metrics::UserDashboardMetrics,
+            users::metrics::UserTeamMetrics, users::metrics::UserAuditMetrics,
+            users::metrics::UserTicketMetrics, users::metrics::UserTicketsByPriority,
+            users::metrics::UserMessageMetrics, users::metrics::UserCommentMetrics,
+            users::metrics::UserEventMetrics,
+            DashboardMetrics,
+            dashboard::models::UserMetrics, dashboard::models::UsersByRole,
+            dashboard::models::TeamMetrics, dashboard::models::AuditMetrics,
+            dashboard::models::TicketMetrics, dashboard::models::TicketsByPriority,
+            dashboard::models::MessageMetrics, dashboard::models::EventMetrics,
+            dashboard::models::AgentMetrics, dashboard::models::InvitationMetrics,
+            dashboard::models::InvitationStats, dashboard::models::CompanyMetrics,
         ),
     ),
     tags(
@@ -185,6 +201,7 @@ use utoipa::OpenApi;
         (name = "Ticket Attachments", description = "Ticket attachment management endpoints"),
         (name = "Audit Messages", description = "Audit message management endpoints"),
         (name = "Audit Message Attachments", description = "Audit message attachment management endpoints"),
+        (name = "Dashboard", description = "Dashboard metrics endpoints"),
     ),
     security(
         ("cookieAuth" = [])
