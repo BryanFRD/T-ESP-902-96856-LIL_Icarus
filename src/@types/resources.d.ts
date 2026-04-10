@@ -111,6 +111,11 @@ interface Resources {
         create: 'New Invitation'
         empty: 'No invitations for this audit yet.'
       }
+      messages: {
+        empty: 'No messages yet. Be the first to write one!'
+        loading: 'Loading messages...'
+        placeholder: 'Write a message...'
+      }
       notFound: 'Audit not found'
       notFoundDescription: "This audit doesn't exist or you don't have access to it."
       status: {
@@ -121,6 +126,7 @@ interface Resources {
         clients: 'Clients'
         invitations: 'Invitations'
         kanban: 'Kanban'
+        messages: 'Messages'
       }
     }
   }

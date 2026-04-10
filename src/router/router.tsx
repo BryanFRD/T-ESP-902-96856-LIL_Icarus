@@ -8,9 +8,13 @@ import { useUserContext } from '@/context/user-context.tsx'
 import routes from './routes'
 
 const Router = () => {
-  const { user } = useUserContext()
+  const { user, loading } = useUserContext()
 
   const isUserAuthenticated = !!user
+
+  if (loading) {
+    return <RefreshLoader />
+  }
 
   const publicRoutes = routes.filter(route => {
     if (route.isAuthRequired) return false

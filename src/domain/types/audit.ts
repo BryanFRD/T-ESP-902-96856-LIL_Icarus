@@ -1,5 +1,29 @@
 import type { Company } from '@/domain/types/company.ts'
 
+export type AuditMessageAuthor = {
+  id: string
+  username: string
+  firstName: string
+  lastName: string
+  avatarUrl?: string
+}
+
+export type AuditMessage = {
+  id: string
+  auditId: string
+  author: AuditMessageAuthor
+  content: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type PaginatedAuditMessages = {
+  data: AuditMessage[]
+  total: number
+  limit: number
+  offset: number
+}
+
 export type AuditCheckAccess = {
   hasAccess: boolean
   expiresAt: string

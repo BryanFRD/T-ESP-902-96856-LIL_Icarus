@@ -6,6 +6,7 @@ import type { UserAudit } from '@/domain/types/audit.ts'
 
 import { AuditClientsContent } from './clients/audit-clients-content'
 import { AuditInvitationsContent } from './invitations/audit-invitations-content'
+import { AuditMessagesContent } from './messages/audit-messages-content'
 
 interface AuditTabsProps {
   audit: UserAudit
@@ -17,7 +18,8 @@ export function AuditTabs({ audit }: AuditTabsProps) {
   const tabs = [
     { value: 'kanban', label: t('show.tabs.kanban') },
     { value: 'clients', label: t('show.tabs.clients') },
-    { value: 'invitations', label: t('show.tabs.invitations') }
+    { value: 'invitations', label: t('show.tabs.invitations') },
+    { value: 'messages', label: t('show.tabs.messages') }
   ]
 
   return (
@@ -40,6 +42,10 @@ export function AuditTabs({ audit }: AuditTabsProps) {
 
       <TabsContent value='invitations'>
         <AuditInvitationsContent />
+      </TabsContent>
+
+      <TabsContent value='messages'>
+        <AuditMessagesContent auditId={audit.id} />
       </TabsContent>
     </Tabs>
   )
