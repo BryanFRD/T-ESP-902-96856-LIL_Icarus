@@ -4,6 +4,13 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.1] - 2026-04-10
+
+### Bug Fixes
+
+- fix: client dans le list_user_audits
+- fix clippy
+
 ## [1.4.0] - 2026-04-10
 
 ### Features

@@ -5,7 +5,7 @@ use super::{
 use crate::{
     api::{
         teams::{companies::models::Company, does_team_exist, is_team_owner},
-        users::User,
+        users::{User, UserRole},
     },
     middlewares::{audit_step_up_middleware, auth},
     state::GlobalState,
@@ -219,31 +219,55 @@ fn is_client_in_audit(
 pub fn list_user_audits(
     state: &GlobalState,
     user_id: &str,
+    role: &UserRole,
 ) -> Result<Vec<AuditResponse>, AuditError> {
     use crate::schema::{audits, audits_clients, companies, users};
 
-    let team_ids = get_user_team_ids(state, user_id)?;
-
-    if team_ids.is_empty() {
-        return Ok(Vec::new());
-    }
-
     let mut conn = state.get_db_conn()?;
-
-    // Batch archive expired audits for performance
     let now = chrono::Utc::now().naive_utc();
-    diesel::update(audits::table)
-        .filter(audits::team_id.eq_any(&team_ids))
-        .filter(audits::end_date.lt(now))
-        .filter(audits::is_archived.eq(false))
-        .set(audits::is_archived.eq(true))
-        .execute(&mut conn)?;
 
-    let audits_with_companies: Vec<(Audit, Company)> = audits::table
-        .filter(audits::team_id.eq_any(&team_ids))
-        .inner_join(companies::table.on(audits::company_id.eq(companies::id)))
-        .select((Audit::as_select(), Company::as_select()))
-        .load::<(Audit, Company)>(&mut conn)?;
+    let audits_with_companies: Vec<(Audit, Company)> = if matches!(role, UserRole::Client) {
+        let client_audit_ids: Vec<String> = audits_clients::table
+            .filter(audits_clients::user_id.eq(user_id))
+            .select(audits_clients::audit_id)
+            .load::<String>(&mut conn)?;
+
+        if client_audit_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        diesel::update(audits::table)
+            .filter(audits::id.eq_any(&client_audit_ids))
+            .filter(audits::end_date.lt(now))
+            .filter(audits::is_archived.eq(false))
+            .set(audits::is_archived.eq(true))
+            .execute(&mut conn)?;
+
+        audits::table
+            .filter(audits::id.eq_any(&client_audit_ids))
+            .inner_join(companies::table.on(audits::company_id.eq(companies::id)))
+            .select((Audit::as_select(), Company::as_select()))
+            .load::<(Audit, Company)>(&mut conn)?
+    } else {
+        let team_ids = get_user_team_ids(state, user_id)?;
+
+        if team_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        diesel::update(audits::table)
+            .filter(audits::team_id.eq_any(&team_ids))
+            .filter(audits::end_date.lt(now))
+            .filter(audits::is_archived.eq(false))
+            .set(audits::is_archived.eq(true))
+            .execute(&mut conn)?;
+
+        audits::table
+            .filter(audits::team_id.eq_any(&team_ids))
+            .inner_join(companies::table.on(audits::company_id.eq(companies::id)))
+            .select((Audit::as_select(), Company::as_select()))
+            .load::<(Audit, Company)>(&mut conn)?
+    };
 
     let audit_ids: Vec<String> = audits_with_companies
         .iter()
