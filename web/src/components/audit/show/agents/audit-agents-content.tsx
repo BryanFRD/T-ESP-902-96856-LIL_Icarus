@@ -60,14 +60,20 @@ export function AuditAgentsContent({ auditId }: Props) {
 
       {agents && agents.length > 0 ? (
         <div className='space-y-3'>
-          {agents.map(agent => (
-            <AgentCard
-              key={agent.id}
-              agent={agent}
-              auditId={auditId}
-              onSelect={() => setSelectedAgent(agent)}
-            />
-          ))}
+          {[...agents]
+            .sort((a, b) => {
+              if (a.isOnline !== b.isOnline) return a.isOnline ? -1 : 1
+              if (a.isRevoked !== b.isRevoked) return a.isRevoked ? 1 : -1
+              return a.name.localeCompare(b.name)
+            })
+            .map(agent => (
+              <AgentCard
+                key={agent.id}
+                agent={agent}
+                auditId={auditId}
+                onSelect={() => setSelectedAgent(agent)}
+              />
+            ))}
         </div>
       ) : (
         <Empty>

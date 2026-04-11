@@ -1,9 +1,13 @@
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, fr } from 'date-fns/locale'
+import { Loader2, RefreshCw } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import type { Agent } from '@/domain/types/agent.ts'
+import { updateAgent } from '@/service/agent-service.ts'
 
 const LOCALES: Record<string, typeof enUS> = { fr, en: enUS }
 
@@ -30,6 +34,7 @@ function formatUptime(secs: number): string {
 
 interface Props {
   agent: Agent
+  auditId: string
 }
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -49,10 +54,31 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function InfoTab({ agent }: Props) {
+export function InfoTab({ agent, auditId }: Props) {
   const { t, i18n } = useTranslation('audit')
+  const [isUpdating, setIsUpdating] = useState(false)
   const locale = LOCALES[i18n.language] ?? enUS
   const si = agent.systemInfo
+
+  const isDev = __CONFIG__.CURRENT_MODE !== 'production'
+  const canUpdate =
+    agent.isOnline &&
+    !agent.isRevoked &&
+    (isDev ||
+      (si?.agentVersion &&
+        agent.serverVersion &&
+        si.agentVersion !== agent.serverVersion))
+
+  const handleUpdate = async () => {
+    setIsUpdating(true)
+    try {
+      await updateAgent(auditId, agent.id)
+    } catch {
+      // Agent will disconnect and reconnect
+    } finally {
+      setIsUpdating(false)
+    }
+  }
 
   if (!si) {
     return (
@@ -156,7 +182,29 @@ export function InfoTab({ agent }: Props) {
 
       {/* Agent */}
       <SectionTitle>{t(`${p}.sections.agent`)}</SectionTitle>
-      <InfoRow label={t(`${p}.agentVersion`)} value={si.agentVersion} />
+      {canUpdate ? (
+        <div className='flex items-center justify-between py-2'>
+          <span className='text-muted-foreground shrink-0 text-sm'>
+            {t(`${p}.agentVersion`)}
+          </span>
+          <Button
+            variant='outline'
+            size='xs'
+            onClick={handleUpdate}
+            disabled={isUpdating}
+            className='border-amber-500/50 text-amber-500 hover:bg-amber-500/10'
+          >
+            {isUpdating ? (
+              <Loader2 className='mr-1 h-3 w-3 animate-spin' />
+            ) : (
+              <RefreshCw className='mr-1 h-3 w-3' />
+            )}
+            v{si.agentVersion} → v{agent.serverVersion ?? si.agentVersion}
+          </Button>
+        </div>
+      ) : (
+        <InfoRow label={t(`${p}.agentVersion`)} value={si.agentVersion} />
+      )}
       {agent.lastHeartbeat && (
         <InfoRow
           label={t(`${p}.lastHeartbeat`)}
@@ -169,10 +217,15 @@ export function InfoTab({ agent }: Props) {
       {agent.lastConnectedAt && (
         <InfoRow
           label={t(`${p}.lastConnected`)}
-          value={formatDistanceToNow(new Date(agent.lastConnectedAt), {
-            addSuffix: true,
-            locale
-          })}
+          value={formatDistanceToNow(
+            new Date(
+              agent.lastConnectedAt.includes('T') ||
+                agent.lastConnectedAt.includes('+')
+                ? agent.lastConnectedAt
+                : `${agent.lastConnectedAt}Z`
+            ),
+            { addSuffix: true, locale }
+          )}
         />
       )}
       <InfoRow

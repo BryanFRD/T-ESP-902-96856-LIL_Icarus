@@ -38,6 +38,7 @@ export function ShellTab({ socket, agent, auditId }: Props) {
       cursorStyle: 'bar',
       cursorInactiveStyle: 'none',
       disableStdin: true,
+      convertEol: true,
       fontSize: 13,
       fontFamily: 'monospace',
       theme: {

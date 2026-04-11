@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import type { Agent } from '@/domain/types/agent.ts'
 import { updateAgent } from '@/service/agent-service.ts'
 
@@ -66,7 +67,15 @@ export function AgentCard({ agent, auditId, onSelect }: Props) {
 
   const lastSeen = agent.lastConnectedAt
     ? t('show.agents.lastConnected', {
-        time: formatDistanceToNow(new Date(agent.lastConnectedAt), { locale })
+        time: formatDistanceToNow(
+          new Date(
+            agent.lastConnectedAt.includes('T') ||
+              agent.lastConnectedAt.includes('+')
+              ? agent.lastConnectedAt
+              : `${agent.lastConnectedAt}Z`
+          ),
+          { locale }
+        )
       })
     : t('show.agents.never')
 
@@ -78,8 +87,8 @@ export function AgentCard({ agent, auditId, onSelect }: Props) {
 
   return (
     <>
-      <div
-        className='ring-foreground/10 hover:ring-foreground/20 bg-card flex cursor-pointer items-center gap-4 rounded-2xl p-4 ring-1 transition-shadow'
+      <Card
+        className='cursor-pointer flex-row items-center gap-3 p-4 transition-shadow hover:shadow-md'
         onClick={onSelect}
       >
         <div className='bg-muted flex size-10 items-center justify-center rounded-full'>
@@ -96,31 +105,31 @@ export function AgentCard({ agent, auditId, onSelect }: Props) {
           <p className='text-muted-foreground text-xs'>{lastSeen}</p>
         </div>
 
-        <div className='flex items-center gap-2'>
-          {agentVersion && (
-            <Badge
-              variant='outline'
-              className={`text-[10px] ${needsUpdate ? 'border-amber-500/50 text-amber-500' : 'text-muted-foreground'}`}
-            >
-              v{agentVersion}
-            </Badge>
-          )}
-          {needsUpdate && (
-            <Button
-              variant='outline'
-              size='xs'
-              onClick={handleUpdate}
-              disabled={isUpdating}
-              className='border-amber-500/50 text-amber-500 hover:bg-amber-500/10'
-            >
-              {isUpdating ? (
-                <Loader2 className='mr-1 h-3 w-3 animate-spin' />
-              ) : (
-                <RefreshCw className='mr-1 h-3 w-3' />
-              )}
-              v{agent.serverVersion}
-            </Button>
-          )}
+        <div className='flex shrink-0 items-center gap-2'>
+          {agentVersion &&
+            (needsUpdate ? (
+              <Button
+                variant='outline'
+                size='xs'
+                onClick={handleUpdate}
+                disabled={isUpdating}
+                className='border-amber-500/50 text-amber-500 hover:bg-amber-500/10'
+              >
+                {isUpdating ? (
+                  <Loader2 className='mr-1 h-3 w-3 animate-spin' />
+                ) : (
+                  <RefreshCw className='mr-1 h-3 w-3' />
+                )}
+                v{agentVersion} → v{agent.serverVersion ?? agentVersion}
+              </Button>
+            ) : (
+              <Badge
+                variant='outline'
+                className='text-muted-foreground text-[10px]'
+              >
+                v{agentVersion}
+              </Badge>
+            ))}
           {agent.isOnline && agent.latencyMs != null && (
             <span className='text-muted-foreground text-xs'>
               {agent.latencyMs} ms
@@ -141,7 +150,7 @@ export function AgentCard({ agent, auditId, onSelect }: Props) {
             </Button>
           )}
         </div>
-      </div>
+      </Card>
 
       <RevokeAgentDialog
         open={revokeOpen}

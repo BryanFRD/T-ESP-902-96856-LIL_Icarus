@@ -5,6 +5,26 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.49.0] - 2026-04-11
+
+### Features
+
+- feat(agents): fix socket.io room join, shell terminal, update button, timestamps, card layout
+- feat(agents): add update button to info tab, simplify card version display
+
+### Bug Fixes
+
+- fix(agents): update button in info tab, sort agents list, fix card overflow
+- fix: resolve merge conflict on info-tab
+- fix(agents): replace version text with update button in info tab
+- fix(logs): add explicit null check for metadata to satisfy strict TS
+
+## [1.48.1] - 2026-04-11
+
+### Bug Fixes
+
+- fix(logs): add explicit null check for metadata to satisfy strict TS
+
 ## [1.48.0] - 2026-04-11
 
 ### Features

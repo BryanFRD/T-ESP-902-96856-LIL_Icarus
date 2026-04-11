@@ -76,7 +76,7 @@ export function AgentControlView({ agent, auditId, onBack }: Props) {
           <KeyloggerTab socket={socket} agent={agent} auditId={auditId} />
         </TabsContent>
         <TabsContent value='info' className='min-h-0 flex-1'>
-          <InfoTab agent={agent} />
+          <InfoTab agent={agent} auditId={auditId} />
         </TabsContent>
       </Tabs>
     </div>
