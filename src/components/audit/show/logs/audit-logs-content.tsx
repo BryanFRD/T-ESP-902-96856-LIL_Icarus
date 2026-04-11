@@ -1,6 +1,7 @@
 import {
   Activity,
   AlertCircle,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Filter,
@@ -177,69 +178,161 @@ function formatTimestamp(timestamp: string) {
   })
 }
 
+function isValidChanges(changes: unknown): changes is {
+  before?: Record<string, unknown>
+  after?: Record<string, unknown>
+} {
+  return (
+    typeof changes === 'object' &&
+    changes !== null &&
+    !Array.isArray(changes) &&
+    ('before' in changes || 'after' in changes)
+  )
+}
+
+function isValidMetadata(
+  metadata: unknown
+): metadata is Record<string, unknown> {
+  return (
+    typeof metadata === 'object' &&
+    metadata !== null &&
+    !Array.isArray(metadata)
+  )
+}
+
+function ChangesPanel({
+  changes
+}: {
+  changes: { before?: Record<string, unknown>; after?: Record<string, unknown> }
+}) {
+  const before =
+    changes.before && typeof changes.before === 'object' ? changes.before : null
+  const after =
+    changes.after && typeof changes.after === 'object' ? changes.after : null
+
+  if (!before && !after) return null
+
+  const allKeys = new Set([
+    ...Object.keys(before ?? {}),
+    ...Object.keys(after ?? {})
+  ])
+
+  return (
+    <div className='bg-muted/30 mt-2 grid grid-cols-2 gap-2 rounded-lg border p-3'>
+      {before && (
+        <div className='space-y-1'>
+          <p className='text-[10px] font-semibold text-red-400'>Before</p>
+          {[...allKeys].map(key =>
+            key in before ? (
+              <div key={key} className='flex items-baseline gap-2'>
+                <span className='text-muted-foreground w-24 shrink-0 text-[10px]'>
+                  {key}
+                </span>
+                <span className='font-mono text-[10px] break-all'>
+                  {String(before[key])}
+                </span>
+              </div>
+            ) : null
+          )}
+        </div>
+      )}
+      {after && (
+        <div className='space-y-1'>
+          <p className='text-[10px] font-semibold text-emerald-400'>After</p>
+          {[...allKeys].map(key =>
+            key in after ? (
+              <div key={key} className='flex items-baseline gap-2'>
+                <span className='text-muted-foreground w-24 shrink-0 text-[10px]'>
+                  {key}
+                </span>
+                <span className='font-mono text-[10px] break-all'>
+                  {String(after[key])}
+                </span>
+              </div>
+            ) : null
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function LogEntry({ entry }: { entry: AuditLogEntry }) {
+  const [expanded, setExpanded] = useState(false)
   const Icon = getActionIcon(entry.action ?? '')
   const actionClasses = getActionBadgeClasses(entry.action ?? '')
   const resourceClasses = getResourceBadgeClasses(entry.resourceType ?? '')
 
+  const hasMetadata =
+    isValidMetadata(entry.metadata) && Object.keys(entry.metadata).length > 0
+  const hasChanges = isValidChanges(entry.changes)
+  const hasDetails = hasMetadata || hasChanges
+
   return (
-    <div className='border-border/50 hover:bg-muted/30 flex items-start gap-3 border-b px-2 py-3 transition-colors last:border-b-0'>
-      <div
-        className={`mt-0.5 ${actionClasses.split(' ').find(c => c.startsWith('text-')) ?? 'text-muted-foreground'}`}
-      >
-        <Icon className='h-4 w-4' />
-      </div>
-
-      <div className='min-w-0 flex-1 space-y-1'>
-        <div className='flex flex-wrap items-center gap-1.5'>
-          <Badge
-            variant='outline'
-            className={`px-1.5 py-0 text-[11px] font-medium ${actionClasses}`}
-          >
-            {formatAction(entry.action)}
-          </Badge>
-          <Badge
-            variant='outline'
-            className={`px-1.5 py-0 text-[11px] ${resourceClasses}`}
-          >
-            {formatResourceType(entry.resourceType)}
-          </Badge>
-          <span
-            className={`font-mono text-[11px] font-semibold ${getMethodColor(entry.requestMethod ?? '')}`}
-          >
-            {entry.requestMethod ?? ''}
-          </span>
+    <div
+      className={`border-border/50 border-b px-2 py-3 transition-colors last:border-b-0 ${hasDetails ? 'hover:bg-muted/30 cursor-pointer' : ''}`}
+      onClick={() => hasDetails && setExpanded(!expanded)}
+    >
+      <div className='flex items-start gap-3'>
+        <div
+          className={`mt-0.5 ${actionClasses.split(' ').find(c => c.startsWith('text-')) ?? 'text-muted-foreground'}`}
+        >
+          <Icon className='h-4 w-4' />
         </div>
 
-        <div className='text-muted-foreground flex items-center gap-2 text-xs'>
-          {entry.user ? (
-            <div className='flex items-center gap-1.5'>
-              <Avatar className='h-4 w-4'>
-                <AvatarFallback className='bg-primary/10 text-primary text-[8px]'>
-                  {(entry.user.firstName ?? '?')[0]}
-                  {(entry.user.lastName ?? '?')[0]}
-                </AvatarFallback>
-              </Avatar>
-              <span className='text-foreground/80 font-medium'>
-                {entry.user.firstName ?? ''} {entry.user.lastName ?? ''}
-              </span>
-            </div>
-          ) : (
-            <div className='flex items-center gap-1'>
-              <User2 className='h-3 w-3' />
-              <span className='italic'>System</span>
-            </div>
-          )}
-          <span className='text-muted-foreground/60'>·</span>
-          <span>{formatTimestamp(entry.createdAt)}</span>
-          <span className='hidden truncate font-mono text-[10px] opacity-40 sm:inline'>
-            {entry.requestPath}
-          </span>
-        </div>
+        <div className='min-w-0 flex-1 space-y-1'>
+          <div className='flex flex-wrap items-center gap-1.5'>
+            <Badge
+              variant='outline'
+              className={`px-1.5 py-0 text-[11px] font-medium ${actionClasses}`}
+            >
+              {formatAction(entry.action)}
+            </Badge>
+            <Badge
+              variant='outline'
+              className={`px-1.5 py-0 text-[11px] ${resourceClasses}`}
+            >
+              {formatResourceType(entry.resourceType)}
+            </Badge>
+            <span
+              className={`font-mono text-[11px] font-semibold ${getMethodColor(entry.requestMethod ?? '')}`}
+            >
+              {entry.requestMethod ?? ''}
+            </span>
+            {hasDetails && (
+              <ChevronDown
+                className={`text-muted-foreground h-3 w-3 transition-transform ${expanded ? 'rotate-180' : ''}`}
+              />
+            )}
+          </div>
 
-        {entry.metadata &&
-          typeof entry.metadata === 'object' &&
-          Object.keys(entry.metadata).length > 0 && (
+          <div className='text-muted-foreground flex items-center gap-2 text-xs'>
+            {entry.user ? (
+              <div className='flex items-center gap-1.5'>
+                <Avatar className='h-4 w-4'>
+                  <AvatarFallback className='bg-primary/10 text-primary text-[8px]'>
+                    {(entry.user.firstName ?? '?')[0]}
+                    {(entry.user.lastName ?? '?')[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <span className='text-foreground/80 font-medium'>
+                  {entry.user.firstName ?? ''} {entry.user.lastName ?? ''}
+                </span>
+              </div>
+            ) : (
+              <div className='flex items-center gap-1'>
+                <User2 className='h-3 w-3' />
+                <span className='italic'>System</span>
+              </div>
+            )}
+            <span className='text-muted-foreground/60'>·</span>
+            <span>{formatTimestamp(entry.createdAt)}</span>
+            <span className='hidden truncate font-mono text-[10px] opacity-40 sm:inline'>
+              {entry.requestPath}
+            </span>
+          </div>
+
+          {expanded && hasMetadata && entry.metadata && (
             <div className='flex flex-wrap gap-1.5'>
               {'response_status' in entry.metadata && (
                 <span
@@ -269,6 +362,18 @@ function LogEntry({ entry }: { entry: AuditLogEntry }) {
               )}
             </div>
           )}
+
+          {expanded && hasChanges && (
+            <ChangesPanel
+              changes={
+                entry.changes as {
+                  before?: Record<string, unknown>
+                  after?: Record<string, unknown>
+                }
+              }
+            />
+          )}
+        </div>
       </div>
     </div>
   )

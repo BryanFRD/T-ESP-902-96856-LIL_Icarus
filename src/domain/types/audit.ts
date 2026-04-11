@@ -70,6 +70,7 @@ export type AuditLogEntry = {
   requestMethod: string
   requestPath: string
   metadata?: Record<string, unknown>
+  changes?: Record<string, unknown>
   createdAt: string
 }
 

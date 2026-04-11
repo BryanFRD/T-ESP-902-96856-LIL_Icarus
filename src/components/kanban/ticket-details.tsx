@@ -179,7 +179,9 @@ const TicketDetails = ({
             <Select
               value={ticket.assignee?.id ?? 'none'}
               onValueChange={v =>
-                handleUpdateField('assigneeId', v === 'none' ? null : v)
+                v === 'none'
+                  ? handleUpdateField('clearAssignee', true)
+                  : handleUpdateField('assigneeId', v)
               }
             >
               <SelectTrigger>
