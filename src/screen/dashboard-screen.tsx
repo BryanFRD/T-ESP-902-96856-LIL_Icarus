@@ -87,27 +87,38 @@ function ActivityCard({
 
 function PriorityBar({
   label,
-  value,
+  assigned,
   total,
-  color
+  maxTotal,
+  color,
+  colorDark
 }: {
   label: string
-  value: number
+  assigned: number
   total: number
+  maxTotal: number
   color: string
+  colorDark: string
 }) {
-  const pct = total > 0 ? (value / total) * 100 : 0
+  const assignedPct = maxTotal > 0 ? (assigned / maxTotal) * 100 : 0
+  const unassignedPct = maxTotal > 0 ? ((total - assigned) / maxTotal) * 100 : 0
 
   return (
     <div className='flex items-center gap-2'>
       <span className='text-muted-foreground w-16 text-xs'>{label}</span>
-      <div className='bg-muted h-2 flex-1 rounded-full'>
+      <div className='bg-muted relative h-2 flex-1 overflow-hidden rounded-full'>
         <div
-          className={`h-2 rounded-full ${color}`}
-          style={{ width: `${String(pct)}%` }}
+          className={`absolute left-0 h-2 ${color}`}
+          style={{ width: `${String(assignedPct + unassignedPct)}%` }}
+        />
+        <div
+          className={`absolute left-0 h-2 ${colorDark}`}
+          style={{ width: `${String(assignedPct)}%` }}
         />
       </div>
-      <span className='w-6 text-right text-xs font-medium'>{value}</span>
+      <span className='w-10 text-right text-xs font-medium'>
+        {assigned}/{total}
+      </span>
     </div>
   )
 }
@@ -159,27 +170,35 @@ function TicketsCard({ metrics }: { metrics: UserDashboardMetrics }) {
             </p>
             <PriorityBar
               label={t('dashboard.priority.critical')}
-              value={metrics.tickets.byPriority.critical}
-              total={total}
-              color='bg-red-500'
+              assigned={metrics.tickets.byPriorityAssigned.critical}
+              total={metrics.tickets.byPriority.critical}
+              maxTotal={total}
+              color='bg-red-500/30'
+              colorDark='bg-red-500'
             />
             <PriorityBar
               label={t('dashboard.priority.high')}
-              value={metrics.tickets.byPriority.high}
-              total={total}
-              color='bg-orange-500'
+              assigned={metrics.tickets.byPriorityAssigned.high}
+              total={metrics.tickets.byPriority.high}
+              maxTotal={total}
+              color='bg-orange-500/30'
+              colorDark='bg-orange-500'
             />
             <PriorityBar
               label={t('dashboard.priority.medium')}
-              value={metrics.tickets.byPriority.medium}
-              total={total}
-              color='bg-yellow-500'
+              assigned={metrics.tickets.byPriorityAssigned.medium}
+              total={metrics.tickets.byPriority.medium}
+              maxTotal={total}
+              color='bg-yellow-500/30'
+              colorDark='bg-yellow-500'
             />
             <PriorityBar
               label={t('dashboard.priority.low')}
-              value={metrics.tickets.byPriority.low}
-              total={total}
-              color='bg-emerald-500'
+              assigned={metrics.tickets.byPriorityAssigned.low}
+              total={metrics.tickets.byPriority.low}
+              maxTotal={total}
+              color='bg-emerald-500/30'
+              colorDark='bg-emerald-500'
             />
           </div>
         </div>

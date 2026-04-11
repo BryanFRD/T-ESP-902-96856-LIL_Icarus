@@ -214,6 +214,9 @@ stages:
       when: on_success
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: on_success
+  before_script:
+    - apk add --no-cache git
+    - git fetch origin $CI_COMMIT_REF_NAME && git reset --hard origin/$CI_COMMIT_REF_NAME || true
   script:
     - VERSION="${VERSION:-latest}"
     - echo "Building and deploying DEV web image ${VERSION}..."
@@ -233,6 +236,9 @@ stages:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "main"'
       when: on_success
+  before_script:
+    - apk add --no-cache git
+    - git fetch origin $CI_COMMIT_REF_NAME && git reset --hard origin/$CI_COMMIT_REF_NAME || true
   script:
     - echo "Building and deploying PRODUCTION web image with ferrflow version..."
     - echo "Version -> $VERSION"

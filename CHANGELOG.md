@@ -5,6 +5,12 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.45.0] - 2026-04-11
+
+### Features
+
+- feat(dashboard): show assigned vs unassigned tickets in priority bars
+
 ## [1.44.0] - 2026-04-11
 
 ### Features
