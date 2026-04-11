@@ -4,6 +4,13 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.7.2] - 2026-04-11
+
+### Bug Fixes
+
+- fix(events): decrypt metadata before returning audit logs
+- fix(ci): skip pipeline on ferrflow release commits, keep tags
+
 ## [1.7.1] - 2026-04-11
 
 ### Bug Fixes
