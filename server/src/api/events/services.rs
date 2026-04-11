@@ -214,7 +214,10 @@ pub fn query_audit_logs(
     let data = rows
         .into_iter()
         .map(|event| {
-            let user = event
+            // Decrypt metadata before building response
+            let decrypted = decrypt_and_redact_event(state, event, true);
+
+            let user = decrypted
                 .user_id
                 .as_ref()
                 .and_then(|uid| users_map.get(uid))
@@ -228,16 +231,16 @@ pub fn query_audit_logs(
                 });
 
             EventLogResponse {
-                id: event.id,
-                user_id: event.user_id,
+                id: decrypted.id,
+                user_id: decrypted.user_id,
                 user,
-                action: event.action,
-                resource_type: event.resource_type,
-                resource_id: event.resource_id,
-                request_method: event.request_method,
-                request_path: event.request_path,
-                metadata: event.metadata,
-                created_at: event.created_at.to_string(),
+                action: decrypted.action,
+                resource_type: decrypted.resource_type,
+                resource_id: decrypted.resource_id,
+                request_method: decrypted.request_method,
+                request_path: decrypted.request_path,
+                metadata: decrypted.metadata,
+                created_at: decrypted.created_at.to_string(),
             }
         })
         .collect();
