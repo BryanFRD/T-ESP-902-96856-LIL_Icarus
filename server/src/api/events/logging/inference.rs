@@ -108,6 +108,21 @@ pub fn infer_post_event(
         (Some("audits"), Some(audit_id), Some("labels"), None, _, _) if audit_id != "me" => {
             event_with_id!(Create, TicketLabel, AUDIT_ID => audit_id)
         }
+        // Agent routes
+        (Some("audits"), Some(audit_id), Some("agents"), Some(agent_id), Some("shell"), _)
+            if audit_id != "me" =>
+        {
+            event_with_id!(AgentCommand, Agent, AUDIT_ID => audit_id, "agent_id" => agent_id)
+        }
+        (Some("audits"), Some(audit_id), Some("agents"), Some(agent_id), Some("keylogger"), _)
+            if audit_id != "me" =>
+        {
+            event_with_id!(AgentCommand, Agent, AUDIT_ID => audit_id, "agent_id" => agent_id)
+        }
+        // Audit messages
+        (Some("audits"), Some(audit_id), Some("messages"), None, _, _) if audit_id != "me" => {
+            event_with_id!(Create, Audit, AUDIT_ID => audit_id)
+        }
         _ => None,
     }
 }
@@ -141,7 +156,7 @@ pub fn infer_get_event(
         }
         // Audit routes
         (Some("audits"), Some("me"), _, _, _) => event!(Read, Audit),
-        (Some("audits"), Some(audit_id), Some("board"), _, _) if audit_id != "me" => {
+        (Some("audits"), Some(audit_id), Some("board" | "messages"), _, _) if audit_id != "me" => {
             event_with_id!(Read, Audit, AUDIT_ID => audit_id)
         }
         (Some("audits"), Some(audit_id), Some("invite"), _, _)
@@ -157,6 +172,13 @@ pub fn infer_get_event(
         }
         (Some("audits"), Some(audit_id), Some("labels"), _, _) if audit_id != "me" => {
             event_with_id!(Read, TicketLabel, AUDIT_ID => audit_id)
+        }
+        // Agent routes
+        (Some("audits"), Some(audit_id), Some("agents"), Some("download"), _) if audit_id != "me" => {
+            event_with_id!(AgentDownload, Agent, AUDIT_ID => audit_id)
+        }
+        (Some("audits"), Some(audit_id), Some("agents"), _, _) if audit_id != "me" => {
+            event_with_id!(Read, Agent, AUDIT_ID => audit_id)
         }
         _ => None,
     }
@@ -305,6 +327,12 @@ pub fn infer_delete_event(
             if audit_id != "me" =>
         {
             event_with_id!(Delete, TicketLabel, AUDIT_ID => audit_id, LABEL_ID => label_id)
+        }
+        // Agent revoke
+        (Some("audits"), Some(audit_id), Some("agents"), Some(agent_id), _, _)
+            if audit_id != "me" =>
+        {
+            event_with_id!(AgentShutdown, Agent, AUDIT_ID => audit_id, "agent_id" => agent_id)
         }
         _ => None,
     }

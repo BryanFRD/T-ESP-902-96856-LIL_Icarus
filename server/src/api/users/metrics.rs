@@ -207,6 +207,17 @@ fn collect_ticket_metrics(
     user_id: &str,
     now: NaiveDateTime,
 ) -> Result<UserTicketMetrics, diesel::result::Error> {
+    // Get audit IDs the user has access to (via team membership)
+    let user_team_ids: Vec<String> = teams_members::table
+        .filter(teams_members::user_id.eq(user_id))
+        .select(teams_members::team_id)
+        .load(conn)?;
+
+    let user_audit_ids: Vec<String> = audits::table
+        .filter(audits::team_id.eq_any(&user_team_ids))
+        .select(audits::id)
+        .load(conn)?;
+
     let assigned: i64 = tickets::table
         .filter(tickets::assignee_id.eq(user_id))
         .count()
@@ -218,32 +229,33 @@ fn collect_ticket_metrics(
         .get_result(conn)?;
 
     let overdue: i64 = tickets::table
-        .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::audit_id.eq_any(&user_audit_ids))
         .filter(tickets::due_date.is_not_null())
         .filter(tickets::due_date.lt(now))
         .count()
         .get_result(conn)?;
 
+    // Count by priority across all user's audits
     let critical: i64 = tickets::table
-        .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::audit_id.eq_any(&user_audit_ids))
         .filter(tickets::priority.eq("CRITICAL"))
         .count()
         .get_result(conn)?;
 
     let high: i64 = tickets::table
-        .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::audit_id.eq_any(&user_audit_ids))
         .filter(tickets::priority.eq("HIGH"))
         .count()
         .get_result(conn)?;
 
     let medium: i64 = tickets::table
-        .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::audit_id.eq_any(&user_audit_ids))
         .filter(tickets::priority.eq("MEDIUM"))
         .count()
         .get_result(conn)?;
 
     let low: i64 = tickets::table
-        .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::audit_id.eq_any(&user_audit_ids))
         .filter(tickets::priority.eq("LOW"))
         .count()
         .get_result(conn)?;

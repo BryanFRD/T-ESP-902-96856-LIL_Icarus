@@ -4,6 +4,25 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.5.0] - 2026-04-11
+
+### Features
+
+- feat(events): include metadata in audit log responses
+- feat(events): add event logging for WebSocket room join
+- feat(events): add AgentDownload event action for agent binary downloads
+- feat(events): add event logging for agent download, shell, keylogger, revoke, and messages
+- feat(agents): decouple agent download from creation with deployment tokens
+
+### Bug Fixes
+
+- fix: resolve clippy match_same_arms in event inference
+- fix(metrics): count ticket priorities across all user audits, not just assigned
+- fix(ci): pin ferrflow to v2.22.1
+- fix(ci): remove unnecessary git checkout from ferrflow job
+- fix(ci): use ferrflow version command, remove git dep from release job
+- fix: resolve clippy map_unwrap_or in agent hostname detection
+
 ## [1.4.2] - 2026-04-10
 
 ### Bug Fixes

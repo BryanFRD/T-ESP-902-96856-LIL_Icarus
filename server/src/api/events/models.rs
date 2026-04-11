@@ -33,6 +33,7 @@ pub enum EventAction {
     AgentDisconnect,
     AgentCommand,
     AgentShutdown,
+    AgentDownload,
 }
 
 impl<DB: Backend> FromSql<Text, DB> for EventAction
@@ -59,6 +60,7 @@ where
             "agent_disconnect" => Ok(Self::AgentDisconnect),
             "agent_command" => Ok(Self::AgentCommand),
             "agent_shutdown" => Ok(Self::AgentShutdown),
+            "agent_download" => Ok(Self::AgentDownload),
             _ => Err("Unrecognized event action".into()),
         }
     }
@@ -88,6 +90,7 @@ where
             Self::AgentDisconnect => "agent_disconnect".to_sql(out),
             Self::AgentCommand => "agent_command".to_sql(out),
             Self::AgentShutdown => "agent_shutdown".to_sql(out),
+            Self::AgentDownload => "agent_download".to_sql(out),
         }
     }
 }
@@ -113,6 +116,7 @@ impl Display for EventAction {
             Self::AgentDisconnect => write!(f, "agent_disconnect"),
             Self::AgentCommand => write!(f, "agent_command"),
             Self::AgentShutdown => write!(f, "agent_shutdown"),
+            Self::AgentDownload => write!(f, "agent_download"),
         }
     }
 }
@@ -415,6 +419,7 @@ pub struct EventLogResponse {
     pub resource_id: Option<String>,
     pub request_method: String,
     pub request_path: String,
+    pub metadata: Option<serde_json::Value>,
     pub created_at: String,
 }
 

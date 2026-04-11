@@ -81,8 +81,23 @@ pub async fn on_room_join(
         "Socket joined room"
     );
 
-    if let Err(e) = socket.emit("room:joined", &RoomJoinedResponse { room: display }) {
+    if let Err(e) = socket.emit("room:joined", &RoomJoinedResponse {
+        room: display.clone(),
+    }) {
         error!("Failed to emit room:joined: {e}");
+    }
+
+    let join_event = NewEvent::new(
+        Some(user_id),
+        EventAction::Read,
+        ResourceType::Audit,
+        Some(room_id),
+        "WS".to_string(),
+        format!("/ws/room:join/{display}"),
+    );
+
+    if let Err(e) = crate::api::events::services::log_event_sync(&state, &join_event) {
+        error!("Failed to log room:join event: {e}");
     }
 }
 
