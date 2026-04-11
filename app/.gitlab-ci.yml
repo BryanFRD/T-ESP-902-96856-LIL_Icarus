@@ -231,16 +231,13 @@ variables:
 🎉_ferrflow_release:
   stage: release
   image:
-    name: ghcr.io/ferrflow-org/ferrflow:2.20.3
+    name: ghcr.io/ferrflow-org/ferrflow:2.22.1
   variables:
     GIT_DEPTH: 0
-  before_script:
-    - apk add --no-cache git
-    - git checkout -B "$CI_COMMIT_REF_NAME"
   script:
     - ferrflow --version
     - ferrflow release
-    - VERSION=$(grep '^version' server/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+    - VERSION=$(ferrflow version app)
     - echo "VERSION=$VERSION" > release.env
   artifacts:
     reports:

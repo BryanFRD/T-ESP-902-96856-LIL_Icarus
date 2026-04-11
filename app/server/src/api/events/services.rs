@@ -236,6 +236,7 @@ pub fn query_audit_logs(
                 resource_id: event.resource_id,
                 request_method: event.request_method,
                 request_path: event.request_path,
+                metadata: event.metadata,
                 created_at: event.created_at.to_string(),
             }
         })
