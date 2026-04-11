@@ -1,6 +1,7 @@
 mod company;
 mod team;
 mod team_member;
+mod ticket;
 mod user;
 
 use crate::api::events::ResourceType;
@@ -10,6 +11,7 @@ use serde_json::Value as JsonValue;
 pub use company::CompanyFetcher;
 pub use team::TeamFetcher;
 pub use team_member::TeamMemberFetcher;
+pub use ticket::TicketFetcher;
 pub use user::UserFetcher;
 
 pub fn parse_resource_id<'a>(resource_id: &'a str, key: &str) -> &'a str {
@@ -38,13 +40,13 @@ impl ResourceFetcherRegistry {
             ResourceType::Team => Some(Box::new(TeamFetcher)),
             ResourceType::Company => Some(Box::new(CompanyFetcher)),
             ResourceType::TeamMember => Some(Box::new(TeamMemberFetcher)),
+            ResourceType::Ticket => Some(Box::new(TicketFetcher)),
             ResourceType::Invitation
             | ResourceType::Auth
             | ResourceType::Avatar
             | ResourceType::Audit
             | ResourceType::AuditClient
             | ResourceType::AuditInvitation
-            | ResourceType::Ticket
             | ResourceType::TicketComment
             | ResourceType::TicketAttachment
             | ResourceType::KanbanColumn

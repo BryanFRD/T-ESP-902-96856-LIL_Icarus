@@ -420,6 +420,7 @@ pub struct EventLogResponse {
     pub request_method: String,
     pub request_path: String,
     pub metadata: Option<serde_json::Value>,
+    pub changes: Option<serde_json::Value>,
     pub created_at: String,
 }
 

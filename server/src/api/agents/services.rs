@@ -312,6 +312,7 @@ pub fn list_agents(
                 last_connected_at: agent.last_connected_at.map(|d| d.to_string()),
                 last_heartbeat: last_hb,
                 system_info: sys_info,
+                server_version: env!("CARGO_PKG_VERSION").to_string(),
                 created_at: agent.created_at.to_string(),
             }
         })
