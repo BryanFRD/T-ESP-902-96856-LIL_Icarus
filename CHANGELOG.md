@@ -5,6 +5,26 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.46.1] - 2026-04-11
+
+### Bug Fixes
+
+- fix(ci): disable skipCi so tag pipelines trigger build/deploy
+
+## [1.46.0] - 2026-04-11
+
+### Features
+
+- feat(agents): add update button with version comparison on agent card
+- feat(agents): show agent version badge on agent card
+
+### Bug Fixes
+
+- fix(ci): move sonar scan to dedicated stage
+- fix(ci): trigger build/deploy on tags only, remove git fetch hack
+- fix(ci): use dnf instead of apk in buildah image
+- fix(ci): git pull latest before docker build to include ferrflow version bump
+
 ## [1.45.0] - 2026-04-11
 
 ### Features
