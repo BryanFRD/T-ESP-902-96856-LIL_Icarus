@@ -178,9 +178,9 @@ function formatTimestamp(timestamp: string) {
 }
 
 function LogEntry({ entry }: { entry: AuditLogEntry }) {
-  const Icon = getActionIcon(entry.action)
-  const actionClasses = getActionBadgeClasses(entry.action)
-  const resourceClasses = getResourceBadgeClasses(entry.resourceType)
+  const Icon = getActionIcon(entry.action ?? '')
+  const actionClasses = getActionBadgeClasses(entry.action ?? '')
+  const resourceClasses = getResourceBadgeClasses(entry.resourceType ?? '')
 
   return (
     <div className='border-border/50 hover:bg-muted/30 flex items-start gap-3 border-b px-2 py-3 transition-colors last:border-b-0'>
@@ -205,9 +205,9 @@ function LogEntry({ entry }: { entry: AuditLogEntry }) {
             {formatResourceType(entry.resourceType)}
           </Badge>
           <span
-            className={`font-mono text-[11px] font-semibold ${getMethodColor(entry.requestMethod)}`}
+            className={`font-mono text-[11px] font-semibold ${getMethodColor(entry.requestMethod ?? '')}`}
           >
-            {entry.requestMethod}
+            {entry.requestMethod ?? ''}
           </span>
         </div>
 
@@ -216,12 +216,12 @@ function LogEntry({ entry }: { entry: AuditLogEntry }) {
             <div className='flex items-center gap-1.5'>
               <Avatar className='h-4 w-4'>
                 <AvatarFallback className='bg-primary/10 text-primary text-[8px]'>
-                  {entry.user.firstName[0]}
-                  {entry.user.lastName[0]}
+                  {(entry.user.firstName ?? '?')[0]}
+                  {(entry.user.lastName ?? '?')[0]}
                 </AvatarFallback>
               </Avatar>
               <span className='text-foreground/80 font-medium'>
-                {entry.user.firstName} {entry.user.lastName}
+                {entry.user.firstName ?? ''} {entry.user.lastName ?? ''}
               </span>
             </div>
           ) : (
@@ -237,36 +237,38 @@ function LogEntry({ entry }: { entry: AuditLogEntry }) {
           </span>
         </div>
 
-        {entry.metadata && Object.keys(entry.metadata).length > 0 && (
-          <div className='flex flex-wrap gap-1.5'>
-            {'response_status' in entry.metadata && (
-              <span
-                className={`rounded px-1 py-0.5 font-mono text-[10px] ${
-                  Number(entry.metadata.response_status) >= 400
-                    ? 'bg-red-500/10 text-red-500'
-                    : 'bg-emerald-500/10 text-emerald-500'
-                }`}
-              >
-                {String(entry.metadata.response_status)}
-              </span>
-            )}
-            {'duration_ms' in entry.metadata && (
-              <span className='text-muted-foreground/60 font-mono text-[10px]'>
-                {String(entry.metadata.duration_ms)}ms
-              </span>
-            )}
-            {'agent_id' in entry.metadata && (
-              <span className='rounded bg-violet-500/10 px-1 py-0.5 font-mono text-[10px] text-violet-500'>
-                agent:{String(entry.metadata.agent_id).slice(0, 8)}
-              </span>
-            )}
-            {'agent_name' in entry.metadata && (
-              <span className='rounded bg-violet-500/10 px-1 py-0.5 text-[10px] text-violet-500'>
-                {String(entry.metadata.agent_name)}
-              </span>
-            )}
-          </div>
-        )}
+        {entry.metadata &&
+          typeof entry.metadata === 'object' &&
+          Object.keys(entry.metadata).length > 0 && (
+            <div className='flex flex-wrap gap-1.5'>
+              {'response_status' in entry.metadata && (
+                <span
+                  className={`rounded px-1 py-0.5 font-mono text-[10px] ${
+                    Number(entry.metadata.response_status) >= 400
+                      ? 'bg-red-500/10 text-red-500'
+                      : 'bg-emerald-500/10 text-emerald-500'
+                  }`}
+                >
+                  {String(entry.metadata.response_status)}
+                </span>
+              )}
+              {'duration_ms' in entry.metadata && (
+                <span className='text-muted-foreground/60 font-mono text-[10px]'>
+                  {String(entry.metadata.duration_ms)}ms
+                </span>
+              )}
+              {'agent_id' in entry.metadata && (
+                <span className='rounded bg-violet-500/10 px-1 py-0.5 font-mono text-[10px] text-violet-500'>
+                  agent:{String(entry.metadata.agent_id).slice(0, 8)}
+                </span>
+              )}
+              {'agent_name' in entry.metadata && (
+                <span className='rounded bg-violet-500/10 px-1 py-0.5 text-[10px] text-violet-500'>
+                  {String(entry.metadata.agent_name)}
+                </span>
+              )}
+            </div>
+          )}
       </div>
     </div>
   )
