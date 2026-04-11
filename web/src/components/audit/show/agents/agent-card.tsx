@@ -51,6 +51,8 @@ export function AgentCard({ agent, auditId, onSelect }: Props) {
     ? `${agent.systemInfo.hostname} - ${agent.systemInfo.osName} - ${formatBytes(agent.systemInfo.totalMemoryBytes)} RAM`
     : null
 
+  const agentVersion = agent.systemInfo?.agentVersion
+
   return (
     <>
       <div
@@ -72,6 +74,14 @@ export function AgentCard({ agent, auditId, onSelect }: Props) {
         </div>
 
         <div className='flex items-center gap-2'>
+          {agentVersion && (
+            <Badge
+              variant='outline'
+              className='text-muted-foreground text-[10px]'
+            >
+              v{agentVersion}
+            </Badge>
+          )}
           {agent.isOnline && agent.latencyMs != null && (
             <span className='text-muted-foreground text-xs'>
               {agent.latencyMs} ms

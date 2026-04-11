@@ -23,6 +23,7 @@ export type UserTicketMetrics = {
   created: number
   overdue: number
   byPriority: TicketsByPriority
+  byPriorityAssigned: TicketsByPriority
 }
 
 export type ActivityMetrics = {
