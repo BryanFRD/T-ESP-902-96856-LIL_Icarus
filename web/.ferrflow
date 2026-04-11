@@ -3,7 +3,7 @@
   "workspace": {
     "forge": "gitlab",
     "tagTemplate": "v{version}",
-    "skipCi": true,
+    "skipCi": false,
     "branches": [
       { "name": "main", "channel": false },
       { "name": "feat/*", "channel": "dev" }
