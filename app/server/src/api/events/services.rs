@@ -123,8 +123,19 @@ pub fn decrypt_and_redact_event(state: &GlobalState, mut event: Event, is_admin:
 
     if let Some(encrypted_changes) = &event.changes {
         if let Some(nonce) = &event.changes_nonce {
-            if let Some(ciphertext) = encrypted_changes.as_str() {
-                match decrypt_json(&state.event_encryption_key, ciphertext, nonce) {
+            // Changes may be stored as a plain string or as {before, after} with encrypted values
+            let ciphertext = encrypted_changes
+                .as_str()
+                .map(String::from)
+                .or_else(|| {
+                    encrypted_changes
+                        .get("after")
+                        .and_then(|v| v.as_str())
+                        .map(String::from)
+                });
+
+            if let Some(ct) = ciphertext {
+                match decrypt_json(&state.event_encryption_key, &ct, nonce) {
                     Ok(mut decrypted) => {
                         redact_json_value(&mut decrypted, is_admin);
                         event.changes = Some(decrypted);
@@ -214,10 +225,8 @@ pub fn query_audit_logs(
     let data = rows
         .into_iter()
         .map(|event| {
-            // Decrypt metadata before building response
-            let decrypted = decrypt_and_redact_event(state, event, true);
-
-            let user = decrypted
+            // Resolve user BEFORE decrypting (decrypt_and_redact redacts user_id)
+            let user = event
                 .user_id
                 .as_ref()
                 .and_then(|uid| users_map.get(uid))
@@ -230,6 +239,9 @@ pub fn query_audit_logs(
                     avatar_url: crate::api::users::map_avatar_url(u.avatar_url.clone()),
                 });
 
+            // Decrypt metadata/changes after user lookup
+            let decrypted = decrypt_and_redact_event(state, event, true);
+
             EventLogResponse {
                 id: decrypted.id,
                 user_id: decrypted.user_id,
@@ -240,6 +252,7 @@ pub fn query_audit_logs(
                 request_method: decrypted.request_method,
                 request_path: decrypted.request_path,
                 metadata: decrypted.metadata,
+                changes: decrypted.changes,
                 created_at: decrypted.created_at.to_string(),
             }
         })

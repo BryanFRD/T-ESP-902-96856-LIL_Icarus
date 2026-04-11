@@ -133,6 +133,7 @@ pub struct AgentResponse {
     pub last_connected_at: Option<String>,
     pub last_heartbeat: Option<String>,
     pub system_info: Option<SystemInfoResponse>,
+    pub server_version: String,
     pub created_at: String,
 }
 

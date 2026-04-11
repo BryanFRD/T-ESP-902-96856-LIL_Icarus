@@ -4,6 +4,23 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.8.0] - 2026-04-11
+
+### Features
+
+- feat(events): add TicketFetcher to capture before state on ticket updates
+- feat(events): include decrypted changes in audit log responses
+
+### Bug Fixes
+
+- fix: resolve clippy match_same_arms in resource fetcher
+- fix(agents): re-add server_version to AgentResponse
+- fix(events): extract ciphertext from changes.after when decrypting
+- fix(events): re-add changes field to EventLogResponse
+- fix(events): resolve user before decrypt to prevent redacted user_id lookup failure
+- fix(events): decrypt metadata before returning audit logs
+- fix(ci): skip pipeline on ferrflow release commits, keep tags
+
 ## [1.7.2] - 2026-04-11
 
 ### Bug Fixes
