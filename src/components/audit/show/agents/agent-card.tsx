@@ -1,12 +1,13 @@
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, fr } from 'date-fns/locale'
-import { BanIcon, MonitorIcon } from 'lucide-react'
+import { BanIcon, Loader2, MonitorIcon, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Agent } from '@/domain/types/agent.ts'
+import { updateAgent } from '@/service/agent-service.ts'
 
 import { RevokeAgentDialog } from './revoke-agent-dialog'
 
@@ -31,7 +32,27 @@ interface Props {
 export function AgentCard({ agent, auditId, onSelect }: Props) {
   const { t, i18n } = useTranslation('audit')
   const [revokeOpen, setRevokeOpen] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
   const locale = LOCALES[i18n.language] ?? enUS
+
+  const needsUpdate =
+    agent.isOnline &&
+    !agent.isRevoked &&
+    agent.systemInfo?.agentVersion &&
+    agent.serverVersion &&
+    agent.systemInfo.agentVersion !== agent.serverVersion
+
+  const handleUpdate = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsUpdating(true)
+    try {
+      await updateAgent(auditId, agent.id)
+    } catch {
+      // Error will show via agent going offline/reconnecting
+    } finally {
+      setIsUpdating(false)
+    }
+  }
 
   const statusBadge = agent.isRevoked ? (
     <Badge variant='destructive'>{t('show.agents.revoked')}</Badge>
@@ -77,10 +98,26 @@ export function AgentCard({ agent, auditId, onSelect }: Props) {
           {agentVersion && (
             <Badge
               variant='outline'
-              className='text-muted-foreground text-[10px]'
+              className={`text-[10px] ${needsUpdate ? 'border-amber-500/50 text-amber-500' : 'text-muted-foreground'}`}
             >
               v{agentVersion}
             </Badge>
+          )}
+          {needsUpdate && (
+            <Button
+              variant='outline'
+              size='xs'
+              onClick={handleUpdate}
+              disabled={isUpdating}
+              className='border-amber-500/50 text-amber-500 hover:bg-amber-500/10'
+            >
+              {isUpdating ? (
+                <Loader2 className='mr-1 h-3 w-3 animate-spin' />
+              ) : (
+                <RefreshCw className='mr-1 h-3 w-3' />
+              )}
+              v{agent.serverVersion}
+            </Button>
           )}
           {agent.isOnline && agent.latencyMs != null && (
             <span className='text-muted-foreground text-xs'>

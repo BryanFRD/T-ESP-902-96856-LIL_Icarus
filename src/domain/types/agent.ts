@@ -32,5 +32,6 @@ export type Agent = {
   lastConnectedAt: string | null
   lastHeartbeat: string | null
   systemInfo: SystemInfo | null
+  serverVersion: string
   createdAt: string
 }
