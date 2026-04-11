@@ -50,3 +50,32 @@ export type Client = {
   username: string
   avatarUrl: string
 }
+
+export type AuditLogUser = {
+  id: string
+  username: string
+  email: string
+  firstName: string
+  lastName: string
+  avatarUrl?: string
+}
+
+export type AuditLogEntry = {
+  id: string
+  userId?: string
+  user?: AuditLogUser
+  action: string
+  resourceType: string
+  resourceId?: string
+  requestMethod: string
+  requestPath: string
+  metadata?: Record<string, unknown>
+  createdAt: string
+}
+
+export type PaginatedAuditLogs = {
+  data: AuditLogEntry[]
+  total: number
+  limit: number
+  offset: number
+}

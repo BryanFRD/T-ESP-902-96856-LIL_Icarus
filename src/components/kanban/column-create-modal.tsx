@@ -1,11 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Columns } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
-import InputField from '@/components/oldUi/InputField'
-import Button from '@/components/oldUi/button/Button'
-import Modal from '@/components/oldUi/modal/Modal'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   type CreateColumnSchemaType,
   createColumnSchema
@@ -33,9 +39,7 @@ const ColumnCreateModal = ({
     formState: { errors }
   } = useForm<CreateColumnSchemaType>({
     resolver: zodResolver(createColumnSchema(t)),
-    defaultValues: {
-      name: ''
-    }
+    defaultValues: { name: '' }
   })
 
   const onSubmit = async (data: CreateColumnSchemaType) => {
@@ -54,38 +58,42 @@ const ColumnCreateModal = ({
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title={t('kanban:column.create')}
-      size='md'
-    >
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-        <InputField
-          type='text'
-          name='name'
-          icon={Columns}
-          register={register}
-          label={t('kanban:column.name')}
-          placeholder={t('kanban:column.namePlaceholder')}
-          error={errors.name?.message}
-        />
+    <Dialog open={isOpen} onOpenChange={open => !open && handleClose()}>
+      <DialogContent className='sm:max-w-md'>
+        <DialogHeader>
+          <DialogTitle>{t('kanban:column.create')}</DialogTitle>
+        </DialogHeader>
 
-        <div className='flex justify-end gap-3 pt-4'>
-          <Button
-            type='button'
-            variant='ghost'
-            onClick={handleClose}
-            disabled={isPending}
-          >
-            {t('common:cancel')}
-          </Button>
-          <Button type='submit' variant='primary' isLoading={isPending}>
-            {t('kanban:column.create')}
-          </Button>
-        </div>
-      </form>
-    </Modal>
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='col-name'>{t('kanban:column.name')}</Label>
+            <Input
+              id='col-name'
+              placeholder={t('kanban:column.namePlaceholder')}
+              {...register('name')}
+            />
+            {errors.name && (
+              <p className='text-destructive text-xs'>{errors.name.message}</p>
+            )}
+          </div>
+
+          <div className='flex justify-end gap-3 pt-2'>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={handleClose}
+              disabled={isPending}
+            >
+              {t('common:actions.cancel')}
+            </Button>
+            <Button type='submit' disabled={isPending}>
+              {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+              {t('kanban:column.create')}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }
 

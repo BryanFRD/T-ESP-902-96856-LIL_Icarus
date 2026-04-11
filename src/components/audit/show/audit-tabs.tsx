@@ -7,6 +7,7 @@ import type { UserAudit } from '@/domain/types/audit.ts'
 import { AuditAgentsContent } from './agents/audit-agents-content'
 import { AuditClientsContent } from './clients/audit-clients-content'
 import { AuditInvitationsContent } from './invitations/audit-invitations-content'
+import { AuditLogsContent } from './logs/audit-logs-content'
 import { AuditMessagesContent } from './messages/audit-messages-content'
 
 interface AuditTabsProps {
@@ -21,11 +22,12 @@ export function AuditTabs({ audit }: AuditTabsProps) {
     { value: 'clients', label: t('show.tabs.clients') },
     { value: 'invitations', label: t('show.tabs.invitations') },
     { value: 'messages', label: t('show.tabs.messages') },
-    { value: 'agents', label: t('show.tabs.agents') }
+    { value: 'agents', label: t('show.tabs.agents') },
+    { value: 'logs', label: t('show.tabs.logs') }
   ]
 
   return (
-    <Tabs defaultValue='kanban' className='w-full'>
+    <Tabs defaultValue='kanban' className='w-full min-w-0 overflow-hidden'>
       <TabsList className='w-full'>
         {tabs.map(tab => (
           <TabsTrigger key={tab.value} value={tab.value}>
@@ -52,6 +54,10 @@ export function AuditTabs({ audit }: AuditTabsProps) {
 
       <TabsContent value='agents'>
         <AuditAgentsContent auditId={audit.id} />
+      </TabsContent>
+
+      <TabsContent value='logs'>
+        <AuditLogsContent auditId={audit.id} />
       </TabsContent>
     </Tabs>
   )

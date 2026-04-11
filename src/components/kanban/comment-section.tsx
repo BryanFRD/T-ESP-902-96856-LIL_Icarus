@@ -6,9 +6,18 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
-import Textarea from '@/components/oldUi/Textarea'
-import Button from '@/components/oldUi/button/Button'
-import ModalConfirm from '@/components/oldUi/modal/ModalConfirm'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { useUserContext } from '@/context/user-context.tsx'
 import { canEditComment } from '@/domain/permissions/kanban-permissions.ts'
 import {
@@ -39,16 +48,9 @@ const CommentSection = ({ auditId, ticketId }: CommentSectionProps) => {
     null
   )
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors }
-  } = useForm<CreateCommentSchemaType>({
+  const { register, handleSubmit, reset } = useForm<CreateCommentSchemaType>({
     resolver: zodResolver(createCommentSchema(t)),
-    defaultValues: {
-      content: ''
-    }
+    defaultValues: { content: '' }
   })
 
   const onSubmit = async (data: CreateCommentSchemaType) => {
@@ -63,18 +65,18 @@ const CommentSection = ({ auditId, ticketId }: CommentSectionProps) => {
   if (isLoading) {
     return (
       <div className='flex items-center justify-center py-8'>
-        <Loader2 className='h-6 w-6 animate-spin text-orange-500' />
+        <Loader2 className='text-primary h-6 w-6 animate-spin' />
       </div>
     )
   }
 
   return (
     <div className='space-y-4'>
-      <h3 className='flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100'>
+      <h3 className='flex items-center gap-2 text-lg font-semibold'>
         <Send className='h-5 w-5' />
         {t('kanban:comment.title')}
         {comments && comments.length > 0 && (
-          <span className='text-sm font-normal text-gray-500'>
+          <span className='text-muted-foreground text-sm font-normal'>
             ({comments.length})
           </span>
         )}
@@ -96,7 +98,7 @@ const CommentSection = ({ auditId, ticketId }: CommentSectionProps) => {
         ))}
 
         {(!comments || comments.length === 0) && (
-          <p className='text-sm text-gray-500 dark:text-gray-400'>
+          <p className='text-muted-foreground text-sm'>
             {t('kanban:comment.noComments')}
           </p>
         )}
@@ -105,18 +107,16 @@ const CommentSection = ({ auditId, ticketId }: CommentSectionProps) => {
       <form onSubmit={handleSubmit(onSubmit)} className='space-y-3'>
         <Textarea
           placeholder={t('kanban:comment.placeholder')}
-          error={errors.content?.message}
           rows={3}
           {...register('content')}
         />
         <div className='flex justify-end'>
-          <Button
-            type='submit'
-            variant='primary'
-            size='sm'
-            isLoading={isCreating}
-          >
-            <Send className='h-4 w-4' />
+          <Button type='submit' size='sm' disabled={isCreating}>
+            {isCreating ? (
+              <Loader2 className='mr-1 h-4 w-4 animate-spin' />
+            ) : (
+              <Send className='mr-1 h-4 w-4' />
+            )}
             {t('kanban:comment.add')}
           </Button>
         </div>
@@ -176,14 +176,8 @@ const CommentItem = ({
     comment.author.avatarUrl || undefined
   )
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm({
-    defaultValues: {
-      content: comment.content
-    }
+  const { register, handleSubmit } = useForm({
+    defaultValues: { content: comment.content }
   })
 
   const onSubmit = async (data: { content: string }) => {
@@ -196,7 +190,7 @@ const CommentItem = ({
   }
 
   return (
-    <div className='rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800'>
+    <div className='bg-card rounded-lg border p-4'>
       <div className='mb-2 flex items-start justify-between'>
         <div className='flex items-center gap-2'>
           {avatarUrl ? (
@@ -206,16 +200,16 @@ const CommentItem = ({
               className='h-8 w-8 rounded-full object-cover'
             />
           ) : (
-            <div className='flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-sm font-semibold text-orange-600 dark:bg-orange-900/20 dark:text-orange-400'>
+            <div className='bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold'>
               {comment.author.firstName[0]}
               {comment.author.lastName[0]}
             </div>
           )}
           <div>
-            <p className='text-sm font-medium text-gray-900 dark:text-gray-100'>
+            <p className='text-sm font-medium'>
               {comment.author.firstName} {comment.author.lastName}
             </p>
-            <p className='text-xs text-gray-500 dark:text-gray-400'>
+            <p className='text-muted-foreground text-xs'>
               {format(new Date(comment.createdAt), 'PPp', { locale: fr })}
               {comment.createdAt !== comment.updatedAt && (
                 <span className='ml-1'>({t('common:edited')})</span>
@@ -225,11 +219,11 @@ const CommentItem = ({
         </div>
         {canEdit && !isEditing && (
           <div className='flex gap-1'>
-            <Button variant='ghost' size='sm' onClick={onEdit}>
+            <Button variant='ghost' size='icon-sm' onClick={onEdit}>
               <Edit2 className='h-4 w-4' />
             </Button>
-            <Button variant='ghost' size='sm' onClick={onDelete}>
-              <Trash2 className='h-4 w-4 text-red-500' />
+            <Button variant='ghost' size='icon-sm' onClick={onDelete}>
+              <Trash2 className='text-destructive h-4 w-4' />
             </Button>
           </div>
         )}
@@ -237,35 +231,25 @@ const CommentItem = ({
 
       {isEditing ? (
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-2'>
-          <Textarea
-            error={errors.content?.message}
-            rows={3}
-            {...register('content')}
-          />
+          <Textarea rows={3} {...register('content')} />
           <div className='flex justify-end gap-2'>
             <Button
               type='button'
-              variant='ghost'
+              variant='outline'
               size='sm'
               onClick={onCancelEdit}
               disabled={isPending}
             >
-              {t('common:cancel')}
+              {t('common:actions.cancel')}
             </Button>
-            <Button
-              type='submit'
-              variant='primary'
-              size='sm'
-              isLoading={isPending}
-            >
-              {t('common:save')}
+            <Button type='submit' size='sm' disabled={isPending}>
+              {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+              {t('common:actions.save')}
             </Button>
           </div>
         </form>
       ) : (
-        <p className='text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300'>
-          {comment.content}
-        </p>
+        <p className='text-sm whitespace-pre-wrap'>{comment.content}</p>
       )}
     </div>
   )
@@ -300,17 +284,29 @@ const DeleteCommentModal = ({
   }
 
   return (
-    <ModalConfirm
-      isOpen
-      onClose={onClose}
-      onConfirm={handleDelete}
-      title={t('kanban:comment.delete')}
-      confirmText={t('common:delete')}
-      isLoading={isPending}
-      variant='danger'
-      description={t('kanban:comment.deleteConfirm')}
-      confirmMatch={t('kanban:comment.confirmDelete')}
-    />
+    <AlertDialog open onOpenChange={open => !open && onClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t('kanban:comment.delete')}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('kanban:comment.deleteConfirm')}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending}>
+            {t('common:actions.cancel')}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isPending}
+            className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+          >
+            {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+            {t('common:actions.delete')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

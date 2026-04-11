@@ -4,6 +4,7 @@ import { getAxiosClient } from '@/configuration/api/axios-client.ts'
 import type {
   AuditCheckAccess,
   AuditMessage,
+  PaginatedAuditLogs,
   PaginatedAuditMessages,
   UserAudit
 } from '@/domain/types/audit.ts'
@@ -48,5 +49,18 @@ export const getAuditMessages = async (
 export const sendAuditMessage = async (auditId: string, content: string) => {
   return getAxiosClient()
     .post<AuditMessage>(`/audits/${auditId}/messages`, { content })
+    .then(res => res.data)
+}
+
+export const getAuditLogs = async (
+  auditId: string,
+  limit = 50,
+  offset = 0,
+  action?: string
+) => {
+  return getAxiosClient()
+    .get<PaginatedAuditLogs>(`/audits/${auditId}/logs`, {
+      params: { limit, offset, include_user: true, ...(action && { action }) }
+    })
     .then(res => res.data)
 }

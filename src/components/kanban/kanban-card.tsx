@@ -6,6 +6,7 @@ import { CheckSquare, Clock, MessageSquare, Paperclip } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { twMerge } from 'tailwind-merge'
 
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import type { TicketSummary } from '@/domain/types/kanban.ts'
 
 import TicketLabelBadge from './ticket-label-badge.tsx'
@@ -62,17 +63,17 @@ const KanbanCard = ({ ticket, onClick, canDrag = true }: KanbanCardProps) => {
       {...attributes}
       {...listeners}
       className={twMerge(
-        'group dark:hover:bg-gray-750 relative flex flex-col gap-2 rounded-[3px] border border-gray-200 bg-white p-3 shadow-[0px_1px_1px_#091e4240] transition-shadow hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:shadow-none',
-        isDragging &&
-          'z-50 rotate-2 opacity-90 shadow-xl ring-2 ring-[#0052CC]',
+        'bg-card hover:ring-foreground/10 group relative flex flex-col gap-2.5 rounded-lg border p-3 transition-all hover:ring-1',
+        isDragging && 'ring-primary z-50 rotate-2 opacity-90 shadow-xl ring-2',
         canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
       )}
       onClick={onClick}
     >
       <div className='flex items-start justify-between gap-2'>
-        <span className='text-[14px] leading-5 font-medium text-[#172B4D] hover:text-[#0052CC] hover:underline dark:text-gray-200'>
+        <span className='hover:text-primary text-sm leading-5 font-medium'>
           {ticket.title}
         </span>
+        <TicketPriorityBadge priority={ticket.priority} variant='icon' />
       </div>
 
       {ticket.labels.length > 0 && (
@@ -83,43 +84,33 @@ const KanbanCard = ({ ticket, onClick, canDrag = true }: KanbanCardProps) => {
         </div>
       )}
 
-      <div className='mt-1 flex items-center justify-between'>
-        <div className='flex items-center gap-3'>
-          <TicketPriorityBadge priority={ticket.priority} variant='icon' />
-
-          {(ticket.subtaskCount > 0 ||
-            ticket.commentCount > 0 ||
-            ticket.attachmentCount > 0) && (
-            <div className='flex items-center gap-3 text-gray-500 dark:text-gray-400'>
-              {ticket.subtaskCount > 0 && (
-                <div
-                  className='flex items-center gap-0.5'
-                  title={t('kanban:tooltips.subtasks')}
-                >
-                  <CheckSquare className='h-3.5 w-3.5' />
-                  <span className='text-xs font-medium'>
-                    {ticket.subtaskCount}
-                  </span>
-                </div>
-              )}
-              {ticket.commentCount > 0 && (
-                <div
-                  className='flex items-center gap-0.5'
-                  title={t('kanban:tooltips.comments')}
-                >
-                  <MessageSquare className='h-3.5 w-3.5' />
-                  <span className='text-xs'>{ticket.commentCount}</span>
-                </div>
-              )}
-              {ticket.attachmentCount > 0 && (
-                <div
-                  className='flex items-center gap-0.5'
-                  title={t('kanban:tooltips.attachments')}
-                >
-                  <Paperclip className='h-3.5 w-3.5' />
-                  <span className='text-xs'>{ticket.attachmentCount}</span>
-                </div>
-              )}
+      <div className='flex items-center justify-between'>
+        <div className='text-muted-foreground flex items-center gap-3'>
+          {ticket.subtaskCount > 0 && (
+            <div
+              className='flex items-center gap-0.5'
+              title={t('kanban:tooltips.subtasks')}
+            >
+              <CheckSquare className='h-3.5 w-3.5' />
+              <span className='text-xs font-medium'>{ticket.subtaskCount}</span>
+            </div>
+          )}
+          {ticket.commentCount > 0 && (
+            <div
+              className='flex items-center gap-0.5'
+              title={t('kanban:tooltips.comments')}
+            >
+              <MessageSquare className='h-3.5 w-3.5' />
+              <span className='text-xs'>{ticket.commentCount}</span>
+            </div>
+          )}
+          {ticket.attachmentCount > 0 && (
+            <div
+              className='flex items-center gap-0.5'
+              title={t('kanban:tooltips.attachments')}
+            >
+              <Paperclip className='h-3.5 w-3.5' />
+              <span className='text-xs'>{ticket.attachmentCount}</span>
             </div>
           )}
         </div>
@@ -128,12 +119,12 @@ const KanbanCard = ({ ticket, onClick, canDrag = true }: KanbanCardProps) => {
           {ticket.dueDate && (
             <div
               className={twMerge(
-                'flex items-center gap-1 rounded-[3px] px-1 py-0.5 text-[11px] font-semibold',
+                'flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium',
                 isOverdue()
-                  ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                  ? 'bg-red-500/10 text-red-500'
                   : isDueSoon()
-                    ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
-                    : 'bg-transparent text-gray-500 dark:text-gray-400'
+                    ? 'bg-amber-500/10 text-amber-500'
+                    : 'text-muted-foreground'
               )}
             >
               {(isOverdue() || isDueSoon()) && <Clock className='h-3 w-3' />}
@@ -144,13 +135,15 @@ const KanbanCard = ({ ticket, onClick, canDrag = true }: KanbanCardProps) => {
           )}
 
           {ticket.assignee && (
-            <div
-              className='flex h-6 w-6 items-center justify-center rounded-full bg-[#0052CC] text-[10px] font-bold text-white shadow-sm ring-1 ring-white dark:ring-gray-700'
+            <Avatar
+              className='h-6 w-6'
               title={`${ticket.assignee.firstName} ${ticket.assignee.lastName}`}
             >
-              {ticket.assignee.firstName[0]}
-              {ticket.assignee.lastName[0]}
-            </div>
+              <AvatarFallback className='bg-primary/15 text-primary text-[10px] font-semibold'>
+                {ticket.assignee.firstName[0]}
+                {ticket.assignee.lastName[0]}
+              </AvatarFallback>
+            </Avatar>
           )}
         </div>
       </div>

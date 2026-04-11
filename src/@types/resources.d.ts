@@ -29,6 +29,49 @@ interface Resources {
       }
     }
     name: 'Icarus'
+    dashboard: {
+      title: 'Dashboard'
+      subtitle: 'Overview of your activity and metrics'
+      last7Days: '7d'
+      last30Days: '30d'
+      teams: {
+        title: 'Teams'
+        owner: 'owner'
+        member: 'member'
+      }
+      audits: {
+        title: 'Audits'
+        active: 'active'
+        archived: 'archived'
+        asTeam: 'as team'
+      }
+      tickets: {
+        title: 'Tickets'
+        assigned: 'assigned to you'
+        created: 'created'
+        overdue: 'overdue'
+        noneOverdue: 'No overdue tickets'
+        byPriority: 'By priority'
+      }
+      priority: {
+        critical: 'Critical'
+        high: 'High'
+        medium: 'Medium'
+        low: 'Low'
+      }
+      access: {
+        title: 'Audit Access'
+      }
+      messages: {
+        title: 'Messages'
+      }
+      comments: {
+        title: 'Comments'
+      }
+      events: {
+        title: 'Activity'
+      }
+    }
   }
   audit: {
     access: {
@@ -127,7 +170,14 @@ interface Resources {
         clients: 'Clients'
         invitations: 'Invitations'
         kanban: 'Kanban'
+        logs: 'Logs'
         messages: 'Messages'
+      }
+      logs: {
+        empty: 'No activity logs for this audit yet.'
+        error: 'Failed to load logs.'
+        total: '{{count}} event'
+        total_other: '{{count}} events'
       }
       agents: {
         empty: 'No agents deployed for this audit yet.'
