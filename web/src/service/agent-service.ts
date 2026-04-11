@@ -10,6 +10,13 @@ export const revokeAgent = async (auditId: string, agentId: string) => {
   await getAxiosClient().delete(`/audits/${auditId}/agents/${agentId}`)
 }
 
+export const updateAgent = async (auditId: string, agentId: string) => {
+  const res = await getAxiosClient().post(
+    `/audits/${auditId}/agents/${agentId}/update`
+  )
+  return res.data
+}
+
 export const toggleKeylogger = async (
   auditId: string,
   agentId: string,
