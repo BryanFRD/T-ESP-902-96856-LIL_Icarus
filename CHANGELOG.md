@@ -4,6 +4,27 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.7.0] - 2026-04-11
+
+### Features
+
+- feat(agents): add self-update via TCP stream with version comparison
+
+### Bug Fixes
+
+- fix(ci): trigger build/deploy on tags only, remove git fetch hack
+- fix(ci): use dnf instead of apk in buildah image, exclude done tickets from metrics
+- fix(metrics): exclude completed tickets (last column) from dashboard counts
+- fix(ci): git pull latest before docker build to include ferrflow version bump
+- fix(tcp): bind agent listener on 0.0.0.0 instead of [::] for IPv4 compatibility
+
+## [1.6.1] - 2026-04-11
+
+### Bug Fixes
+
+- fix(ci): git pull latest before docker build to include ferrflow version bump
+- fix(tcp): bind agent listener on 0.0.0.0 instead of [::] for IPv4 compatibility
+
 ## [1.6.0] - 2026-04-11
 
 ### Features
