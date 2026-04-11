@@ -5,6 +5,46 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.48.0] - 2026-04-11
+
+### Features
+
+- feat(logs): expandable entries with strict type guards for encrypted data
+- feat(logs): expandable log entries with metadata and before/after changes
+
+### Bug Fixes
+
+- fix(agents): always show update button in dev mode
+- fix(socket): use path option instead of namespace URL for socket.io connection
+- fix(kanban): use clearAssignee flag to unassign ticket
+- fix(logs): add chevron icon to indicate expandable log entries
+- fix: resolve merge conflict on logs component
+- fix(logs): strict check for changes object shape to avoid rendering encrypted strings
+- fix(logs): guard against encrypted metadata string instead of object
+- fix(logs): add null guards to prevent LogEntry crash on missing fields
+- fix(layout): use overflow-x-hidden instead of overflow-hidden on tabs to show logs content
+- fix(ci): skip tests on tag pipelines, only run build+deploy
+- fix(ci): skip pipeline on ferrflow release commits, keep tags
+
+## [1.47.0] - 2026-04-11
+
+### Features
+
+- feat(logs): expandable entries with strict type guards for encrypted data
+- feat(logs): expandable log entries with metadata and before/after changes
+
+### Bug Fixes
+
+- fix(kanban): use clearAssignee flag to unassign ticket
+- fix(logs): add chevron icon to indicate expandable log entries
+- fix: resolve merge conflict on logs component
+- fix(logs): strict check for changes object shape to avoid rendering encrypted strings
+- fix(logs): guard against encrypted metadata string instead of object
+- fix(logs): add null guards to prevent LogEntry crash on missing fields
+- fix(layout): use overflow-x-hidden instead of overflow-hidden on tabs to show logs content
+- fix(ci): skip tests on tag pipelines, only run build+deploy
+- fix(ci): skip pipeline on ferrflow release commits, keep tags
+
 ## [1.46.2] - 2026-04-11
 
 ### Bug Fixes

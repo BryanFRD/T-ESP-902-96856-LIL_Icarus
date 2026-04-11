@@ -35,12 +35,14 @@ export function AgentCard({ agent, auditId, onSelect }: Props) {
   const [isUpdating, setIsUpdating] = useState(false)
   const locale = LOCALES[i18n.language] ?? enUS
 
+  const isDev = __CONFIG__.CURRENT_MODE !== 'production'
   const needsUpdate =
     agent.isOnline &&
     !agent.isRevoked &&
-    agent.systemInfo?.agentVersion &&
-    agent.serverVersion &&
-    agent.systemInfo.agentVersion !== agent.serverVersion
+    (isDev ||
+      (agent.systemInfo?.agentVersion &&
+        agent.serverVersion &&
+        agent.systemInfo.agentVersion !== agent.serverVersion))
 
   const handleUpdate = async (e: React.MouseEvent) => {
     e.stopPropagation()
