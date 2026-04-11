@@ -8,7 +8,7 @@ export function DefaultLayout() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <main>
+        <main className='min-w-0 overflow-x-hidden'>
           <Outlet />
         </main>
       </SidebarInset>

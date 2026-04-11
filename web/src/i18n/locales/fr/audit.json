@@ -25,7 +25,14 @@
       "clients": "Clients",
       "invitations": "Invitations",
       "messages": "Messages",
-      "agents": "Agents"
+      "agents": "Agents",
+      "logs": "Logs"
+    },
+    "logs": {
+      "empty": "Aucun log d'activité pour cet audit.",
+      "error": "Impossible de charger les logs.",
+      "total": "{{count}} événement",
+      "total_other": "{{count}} événements"
     },
     "messages": {
       "placeholder": "Écrire un message...",

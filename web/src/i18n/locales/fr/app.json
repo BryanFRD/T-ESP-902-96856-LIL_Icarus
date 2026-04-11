@@ -1,5 +1,48 @@
 {
   "name": "Icarus",
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Vue d'ensemble de votre activite et metriques",
+    "last7Days": "7j",
+    "last30Days": "30j",
+    "teams": {
+      "title": "Equipes",
+      "owner": "proprietaire",
+      "member": "membre"
+    },
+    "audits": {
+      "title": "Audits",
+      "active": "actif(s)",
+      "archived": "archive(s)",
+      "asTeam": "en equipe"
+    },
+    "tickets": {
+      "title": "Tickets",
+      "assigned": "qui vous sont assignes",
+      "created": "crees",
+      "overdue": "en retard",
+      "noneOverdue": "Aucun ticket en retard",
+      "byPriority": "Par priorite"
+    },
+    "priority": {
+      "critical": "Critique",
+      "high": "Haute",
+      "medium": "Moyenne",
+      "low": "Basse"
+    },
+    "access": {
+      "title": "Acces audits"
+    },
+    "messages": {
+      "title": "Messages"
+    },
+    "comments": {
+      "title": "Commentaires"
+    },
+    "events": {
+      "title": "Activite"
+    }
+  },
   "layout": {
     "sidebar": {
       "items": {

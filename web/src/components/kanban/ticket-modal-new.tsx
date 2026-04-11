@@ -1,10 +1,25 @@
-import { Trash2, X } from 'lucide-react'
+import { Loader2, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import Button from '@/components/oldUi/button/Button'
-import Modal from '@/components/oldUi/modal/Modal'
-import ModalConfirm from '@/components/oldUi/modal/ModalConfirm'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUserContext } from '@/context/user-context.tsx'
 import { canDeleteTicket } from '@/domain/permissions/kanban-permissions.ts'
 import type { LabelResponse, TicketUser } from '@/domain/types/kanban.ts'
@@ -43,7 +58,6 @@ const TicketModal = ({
   const { mutateAsync: deleteTicket, isPending: isDeleting } =
     useDeleteTicket(auditId)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [activeTab, setActiveTab] = useState<'details' | 'activity'>('details')
 
   const handleDelete = async () => {
     try {
@@ -57,69 +71,44 @@ const TicketModal = ({
 
   const canDelete = role && user && ticket ? canDeleteTicket(role) : false
 
-  if (isLoading || !ticket) {
-    return (
-      <Modal isOpen={isOpen} onClose={onClose} title={t('kanban:loading')}>
-        <div className='flex items-center justify-center py-12'>
-          <div className='h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-orange-500' />
-        </div>
-      </Modal>
-    )
-  }
-
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size='xl' title={ticket.title}>
-        <div className='flex h-[85vh] flex-col'>
-          <div className='flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700'>
-            <div className='flex items-center gap-3'>
-              <button
-                type='button'
-                onClick={() => setActiveTab('details')}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === 'details'
-                    ? 'border-b-2 border-orange-500 text-gray-900 dark:text-gray-100'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                }`}
-              >
-                {t('kanban:ticket.details')}
-              </button>
-              <button
-                type='button'
-                onClick={() => setActiveTab('activity')}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === 'activity'
-                    ? 'border-b-2 border-orange-500 text-gray-900 dark:text-gray-100'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                }`}
-              >
-                {t('kanban:ticket.activity')}
-              </button>
+      <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
+        <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-3xl'>
+          {isLoading || !ticket ? (
+            <div className='flex items-center justify-center py-12'>
+              <Loader2 className='text-primary h-8 w-8 animate-spin' />
             </div>
-            <div className='flex items-center gap-2'>
-              {canDelete && (
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  onClick={() => setShowDeleteConfirm(true)}
-                >
-                  <Trash2 className='h-4 w-4 text-red-500' />
-                </Button>
-              )}
-              <button
-                type='button'
-                onClick={onClose}
-                className='rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300'
-              >
-                <X className='h-5 w-5' />
-              </button>
-            </div>
-          </div>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className='text-xl'>{ticket.title}</DialogTitle>
+              </DialogHeader>
 
-          <div className='flex flex-1 overflow-hidden'>
-            <div className='flex-1 overflow-y-auto px-6 py-6'>
-              {activeTab === 'details' ? (
-                <div className='space-y-6'>
+              <Tabs defaultValue='details' className='w-full'>
+                <div className='flex items-center justify-between'>
+                  <TabsList>
+                    <TabsTrigger value='details'>
+                      {t('kanban:ticket.details')}
+                    </TabsTrigger>
+                    <TabsTrigger value='activity'>
+                      {t('kanban:ticket.activity')}
+                    </TabsTrigger>
+                  </TabsList>
+                  {canDelete && (
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className='text-destructive hover:text-destructive'
+                    >
+                      <Trash2 className='mr-1 h-4 w-4' />
+                      {t('common:actions.delete')}
+                    </Button>
+                  )}
+                </div>
+
+                <TabsContent value='details' className='space-y-6'>
                   <TicketDetails
                     ticket={ticket}
                     auditId={auditId}
@@ -127,31 +116,44 @@ const TicketModal = ({
                     availableUsers={availableUsers}
                     availableLabels={availableLabels}
                   />
+                  <AttachmentSection auditId={auditId} ticketId={ticketId} />
+                  <CommentSection auditId={auditId} ticketId={ticketId} />
+                </TabsContent>
 
-                  <div className='space-y-6'>
-                    <AttachmentSection auditId={auditId} ticketId={ticketId} />
-                    <CommentSection auditId={auditId} ticketId={ticketId} />
-                  </div>
-                </div>
-              ) : (
-                <TicketActivity ticket={ticket} />
-              )}
-            </div>
-          </div>
-        </div>
-      </Modal>
+                <TabsContent value='activity'>
+                  <TicketActivity ticket={ticket} />
+                </TabsContent>
+              </Tabs>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
-      <ModalConfirm
-        isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={handleDelete}
-        title={t('kanban:ticket.deleteTitle')}
-        confirmText={t('common:delete')}
-        isLoading={isDeleting}
-        variant='danger'
-        description={t('kanban:ticket.deleteDescription')}
-        confirmMatch={t('kanban:ticket.deleteConfirmMatch')}
-      />
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('kanban:ticket.deleteTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('kanban:ticket.deleteDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              {t('common:actions.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+            >
+              {isDeleting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+              {t('common:actions.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

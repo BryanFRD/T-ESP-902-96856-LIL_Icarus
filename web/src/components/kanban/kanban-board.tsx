@@ -13,11 +13,12 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { getKanbanPermissions } from '@/domain/permissions/kanban-permissions.ts'
-import type { TicketSummary } from '@/domain/types/kanban.ts'
+import type { TicketSummary, TicketUser } from '@/domain/types/kanban.ts'
 import useToggle from '@/hooks/common/use-toggle.ts'
 import { useAuditRole } from '@/hooks/kanban/use-audit-role.ts'
 import { useKanbanBoard } from '@/hooks/kanban/use-kanban-board.ts'
 import { useMoveTicket } from '@/hooks/kanban/use-ticket-mutation.ts'
+import { useMyTeam } from '@/hooks/team/use-my-team.ts'
 
 import KanbanCard from './kanban-card.tsx'
 import KanbanColumn from './kanban-column.tsx'
@@ -137,13 +138,17 @@ const KanbanBoard = ({ auditId, teamId }: KanbanBoardProps) => {
     setSelectedColumnId(null)
   }
 
-  const availableUsers =
-    board?.columns
-      .flatMap(col => col.tickets)
-      .flatMap(ticket => (ticket.assignee ? [ticket.assignee] : []))
-      .filter(
-        (user, index, self) => self.findIndex(u => u.id === user.id) === index
-      ) || []
+  const { data: teams } = useMyTeam()
+  const availableUsers: TicketUser[] =
+    teams
+      ?.find(t => t.id === teamId)
+      ?.members?.map(m => ({
+        id: m.id,
+        username: m.username,
+        firstName: m.firstName,
+        lastName: m.lastName,
+        avatarUrl: m.avatarUrl ?? null
+      })) ?? []
 
   if (isLoading || isLoadingRole) {
     return (
@@ -185,7 +190,7 @@ const KanbanBoard = ({ auditId, teamId }: KanbanBoardProps) => {
   }
 
   return (
-    <div className='flex h-full w-full flex-col'>
+    <div className='flex h-full w-full min-w-0 flex-col'>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -227,7 +232,6 @@ const KanbanBoard = ({ auditId, teamId }: KanbanBoardProps) => {
           auditId={auditId}
           columnId={selectedColumnId}
           availableUsers={availableUsers}
-          availableLabels={board.labels}
         />
       )}
 

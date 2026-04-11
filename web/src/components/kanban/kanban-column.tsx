@@ -4,6 +4,8 @@ import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { twMerge } from 'tailwind-merge'
 
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import type { BoardColumn } from '@/domain/types/kanban.ts'
 
 import KanbanCard from './kanban-card.tsx'
@@ -29,33 +31,36 @@ const KanbanColumn = ({
   })
 
   return (
-    <div className='flex h-full min-w-80 flex-col rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'>
-      <div className='flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700'>
+    <div className='bg-muted/30 flex h-full min-w-80 flex-col rounded-xl'>
+      <div className='flex items-center justify-between px-3 py-3'>
         <div className='flex items-center gap-2'>
-          <h3 className='font-semibold text-gray-900 dark:text-gray-100'>
+          <h3 className='text-muted-foreground text-sm font-semibold tracking-wide uppercase'>
             {column.name}
           </h3>
-          <span className='flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300'>
+          <Badge
+            variant='outline'
+            className='text-muted-foreground text-[11px]'
+          >
             {column.tickets.length}
-          </span>
+          </Badge>
         </div>
         {canAddTicket && (
-          <button
-            type='button'
+          <Button
+            variant='ghost'
+            size='icon-sm'
             onClick={() => onAddTicket(column.id)}
-            className='rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300'
             title={t('kanban:addTicket')}
           >
-            <Plus className='h-5 w-5' />
-          </button>
+            <Plus className='h-4 w-4' />
+          </Button>
         )}
       </div>
 
       <div
         ref={setNodeRef}
         className={twMerge(
-          'flex-1 space-y-3 overflow-y-auto p-4',
-          isOver && 'bg-orange-50 dark:bg-orange-900/10'
+          'flex-1 space-y-2 overflow-y-auto px-2 pb-2',
+          isOver && 'bg-primary/5'
         )}
       >
         <SortableContext
@@ -73,10 +78,8 @@ const KanbanColumn = ({
         </SortableContext>
 
         {column.tickets.length === 0 && (
-          <div className='flex flex-col items-center justify-center py-8 text-center'>
-            <p className='text-sm text-gray-400 dark:text-gray-500'>
-              {t('kanban:emptyColumn')}
-            </p>
+          <div className='text-muted-foreground flex flex-col items-center justify-center py-8 text-center'>
+            <p className='text-sm'>{t('kanban:emptyColumn')}</p>
           </div>
         )}
       </div>

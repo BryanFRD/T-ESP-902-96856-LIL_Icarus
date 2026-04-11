@@ -5,6 +5,73 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.44.0] - 2026-04-11
+
+### Features
+
+- feat(kanban): redesign cards and columns with cleaner theme-aware styling
+- feat(kanban): redesign column components with new UI and pin ferrflow to v2.22.1
+- feat(kanban): redesign ticket detail modal with new UI, priority icons, and team member assignee
+- feat(kanban): redesign ticket create modal with priority icons and team member assignee
+
+### Bug Fixes
+
+- fix(kanban): rewrite comment section with shadcn UI, move delete button next to tabs
+- fix: resolve all TS build errors (i18n types, textarea props, metadata types, modal layout)
+- fix: ticket modal
+- fix(kanban): replace oldUi components with shadcn in comment section
+- fix(kanban): update comment section to use shadcn UI and theme colors
+- fix(kanban): add unassigned option to assignee select
+- fix(kanban): set default ticket priority to Medium
+
+## [1.43.0] - 2026-04-10
+
+### Features
+
+- feat(kanban): redesign cards and columns with cleaner theme-aware styling
+- feat(kanban): redesign column components with new UI and pin ferrflow to v2.22.1
+- feat(kanban): redesign ticket detail modal with new UI, priority icons, and team member assignee
+- feat(kanban): redesign ticket create modal with priority icons and team member assignee
+
+### Bug Fixes
+
+- fix(kanban): update comment section to use shadcn UI and theme colors
+- fix(kanban): add unassigned option to assignee select
+- fix(kanban): set default ticket priority to Medium
+
+## [1.42.0] - 2026-04-10
+
+### Features
+
+- feat(kanban): redesign column components with new UI and pin ferrflow to v2.22.1
+- feat(kanban): redesign ticket detail modal with new UI, priority icons, and team member assignee
+- feat(kanban): redesign ticket create modal with priority icons and team member assignee
+
+### Bug Fixes
+
+- fix(kanban): add unassigned option to assignee select
+- fix(kanban): set default ticket priority to Medium
+
+## [1.41.0] - 2026-04-10
+
+### Features
+
+- feat(logs): display event metadata (status, duration, agent info)
+- feat(dashboard): build dashboard with user metrics, tickets, and activity cards
+- feat(audit): add activity logs tab with filters, pagination, and color-coded actions
+
+### Bug Fixes
+
+- fix(logs): add AgentDownload to action filters
+- fix(logs): fix gitignore blocking logs component, parse timestamps as UTC
+- fix(ci): remove unnecessary git checkout from ferrflow job
+- fix(kanban): constrain board width with horizontal scroll when needed
+- fix(ci): use ferrflow version command, remove git/jq deps, fix layout overflow
+- fix(layout): constrain audit content and tabs within viewport
+- fix(layout): prevent main content from overflowing with sidebar
+- fix(ui): darken scrollbar with lower opacity
+- fix(ui): style scrollbar to match site theme colors
+
 ## [1.40.0] - 2026-04-10
 
 ### Features

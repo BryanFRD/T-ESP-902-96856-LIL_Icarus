@@ -171,17 +171,14 @@ stages:
 
 🎉_ferrflow_release:
   stage: release
-  image: ghcr.io/ferrflow-org/ferrflow:2.20.3
+  image: ghcr.io/ferrflow-org/ferrflow:2.22.1
   variables:
     HUSKY: '0'
     GIT_DEPTH: 0
-  before_script:
-    - apk add --no-cache jq git
-    - git checkout -B "$CI_COMMIT_REF_NAME"
   script:
     - ferrflow --version
     - ferrflow release
-    - VERSION=$(jq -r '.version' package.json)
+    - VERSION=$(ferrflow version web)
     - echo "VERSION=$VERSION" > release.env
   artifacts:
     paths:

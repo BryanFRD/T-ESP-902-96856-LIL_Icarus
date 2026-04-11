@@ -34,7 +34,7 @@ export default function AuditDetails() {
   }
 
   return (
-    <div className='mx-auto max-w-5xl space-y-6 px-4 py-8'>
+    <div className='mx-auto w-full max-w-5xl space-y-6 px-4 py-8'>
       <AuditDetailCard audit={audit} />
 
       <AuditTabs audit={audit} />

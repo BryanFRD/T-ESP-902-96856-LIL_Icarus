@@ -1,13 +1,32 @@
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { Calendar, Check, Edit2, Flag, Layers, User, X } from 'lucide-react'
+import {
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  ChevronsUp,
+  Edit2,
+  Equal,
+  Layers,
+  User,
+  X
+} from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import DatePicker from '@/components/oldUi/DatePicker'
-import Select, { type SelectOption } from '@/components/oldUi/Select'
-import Textarea from '@/components/oldUi/Textarea'
-import Button from '@/components/oldUi/button/Button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { useUserContext } from '@/context/user-context.tsx'
 import { canEditTicket } from '@/domain/permissions/kanban-permissions.ts'
 import type {
@@ -15,7 +34,6 @@ import type {
   TicketResponse,
   TicketUser
 } from '@/domain/types/kanban.ts'
-import { ticketPriorities } from '@/domain/validation/kanban-schema.ts'
 import { useAuditRole } from '@/hooks/kanban/use-audit-role.ts'
 import {
   useAddLabelToTicket,
@@ -25,6 +43,15 @@ import { useUpdateTicket } from '@/hooks/kanban/use-ticket-mutation.ts'
 
 import TicketLabelBadge from './ticket-label-badge.tsx'
 import TicketPriorityBadge from './ticket-priority-badge.tsx'
+
+const PRIORITY_CONFIG = {
+  CRITICAL: { icon: ChevronsUp, color: 'text-red-500' },
+  HIGH: { icon: ChevronUp, color: 'text-red-500' },
+  MEDIUM: { icon: Equal, color: 'text-orange-500' },
+  LOW: { icon: ChevronDown, color: 'text-blue-500' }
+} as const
+
+const PRIORITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] as const
 
 type TicketDetailsProps = {
   ticket: TicketResponse
@@ -60,16 +87,6 @@ const TicketDetails = ({
 
   const canEdit = role && user ? canEditTicket(role) : false
 
-  const priorityOptions: SelectOption[] = ticketPriorities.map(priority => ({
-    value: priority,
-    label: t(`kanban:priority.${priority.toLowerCase()}`)
-  }))
-
-  const userOptions: SelectOption[] = availableUsers.map(user => ({
-    value: user.id,
-    label: `${user.firstName} ${user.lastName}`
-  }))
-
   const handleUpdateField = async (field: string, value: unknown) => {
     try {
       await updateTicket({ [field]: value })
@@ -104,18 +121,14 @@ const TicketDetails = ({
 
   return (
     <div className='space-y-6'>
+      {/* Title */}
       <div>
         {isEditingTitle ? (
-          <div
-            className='flex items-center gap-2'
-            onClick={e => e.stopPropagation()}
-          >
-            <input
-              type='text'
+          <div className='flex items-center gap-2'>
+            <Input
               value={titleValue}
               onChange={e => setTitleValue(e.target.value)}
-              onClick={e => e.stopPropagation()}
-              className='flex-1 rounded border border-gray-300 px-3 py-2 text-xl font-semibold text-gray-900 outline-none focus:border-orange-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100'
+              className='text-xl font-semibold'
               autoFocus
               onKeyDown={e => {
                 if (e.key === 'Enter') handleSaveTitle()
@@ -125,12 +138,12 @@ const TicketDetails = ({
                 }
               }}
             />
-            <Button variant='ghost' size='sm' onClick={handleSaveTitle}>
+            <Button variant='ghost' size='icon-sm' onClick={handleSaveTitle}>
               <Check className='h-4 w-4' />
             </Button>
             <Button
               variant='ghost'
-              size='sm'
+              size='icon-sm'
               onClick={() => {
                 setTitleValue(ticket.title)
                 setIsEditingTitle(false)
@@ -141,108 +154,173 @@ const TicketDetails = ({
           </div>
         ) : (
           <div className='group flex items-start gap-2'>
-            <h1 className='flex-1 text-2xl font-semibold text-gray-900 dark:text-gray-100'>
-              {ticket.title}
-            </h1>
+            <h1 className='flex-1 text-xl font-semibold'>{ticket.title}</h1>
             {canEdit && (
               <button
                 onClick={() => setIsEditingTitle(true)}
                 className='opacity-0 transition-opacity group-hover:opacity-100'
               >
-                <Edit2 className='h-4 w-4 text-gray-400 hover:text-gray-600' />
+                <Edit2 className='text-muted-foreground hover:text-foreground h-4 w-4' />
               </button>
             )}
           </div>
         )}
       </div>
 
+      {/* Fields grid */}
       <div className='grid grid-cols-2 gap-4'>
-        <div className='space-y-1'>
-          <label className='flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400'>
+        {/* Assignee */}
+        <div className='space-y-2'>
+          <Label className='text-muted-foreground flex items-center gap-2'>
             <User className='h-4 w-4' />
             {t('kanban:ticket.assignee')}
-          </label>
+          </Label>
           {canEdit ? (
             <Select
-              options={[
-                { value: '', label: t('kanban:ticket.unassigned') },
-                ...userOptions
-              ]}
-              value={
-                ticket.assignee
-                  ? userOptions.find(o => o.value === ticket.assignee?.id)
-                  : { value: '', label: t('kanban:ticket.unassigned') }
+              value={ticket.assignee?.id ?? 'none'}
+              onValueChange={v =>
+                handleUpdateField('assigneeId', v === 'none' ? null : v)
               }
-              onChange={option => {
-                const value =
-                  option && typeof option === 'object' && 'value' in option
-                    ? option.value
-                    : null
-                handleUpdateField('assigneeId', value || null)
-              }}
-            />
+            >
+              <SelectTrigger>
+                <SelectValue>
+                  {ticket.assignee ? (
+                    <span className='flex items-center gap-2'>
+                      <Avatar className='h-5 w-5'>
+                        <AvatarFallback className='bg-primary/10 text-primary text-[9px]'>
+                          {ticket.assignee.firstName[0]}
+                          {ticket.assignee.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      {ticket.assignee.firstName} {ticket.assignee.lastName}
+                    </span>
+                  ) : (
+                    t('kanban:ticket.unassigned')
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='none'>
+                  <span className='text-muted-foreground'>
+                    {t('kanban:ticket.unassigned')}
+                  </span>
+                </SelectItem>
+                {availableUsers.map(u => (
+                  <SelectItem key={u.id} value={u.id}>
+                    <span className='flex items-center gap-2'>
+                      <Avatar className='h-5 w-5'>
+                        <AvatarFallback className='bg-primary/10 text-primary text-[9px]'>
+                          {u.firstName[0]}
+                          {u.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      {u.firstName} {u.lastName}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           ) : (
-            <div className='text-sm text-gray-900 dark:text-gray-100'>
+            <p className='text-sm'>
               {ticket.assignee
                 ? `${ticket.assignee.firstName} ${ticket.assignee.lastName}`
                 : t('kanban:ticket.unassigned')}
-            </div>
+            </p>
           )}
         </div>
 
-        <div className='space-y-1'>
-          <label className='flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400'>
-            <Flag className='h-4 w-4' />
+        {/* Priority */}
+        <div className='space-y-2'>
+          <Label className='text-muted-foreground flex items-center gap-2'>
+            <ChevronsUp className='h-4 w-4' />
             {t('kanban:ticket.priority')}
-          </label>
+          </Label>
           {canEdit ? (
             <Select
-              options={priorityOptions}
-              value={priorityOptions.find(o => o.value === ticket.priority)}
-              onChange={option => {
-                const value =
-                  option && typeof option === 'object' && 'value' in option
-                    ? option.value
-                    : null
-                handleUpdateField('priority', value)
-              }}
-            />
+              value={ticket.priority}
+              onValueChange={v => handleUpdateField('priority', v)}
+            >
+              <SelectTrigger>
+                <SelectValue>
+                  {(() => {
+                    const config =
+                      PRIORITY_CONFIG[
+                        ticket.priority as keyof typeof PRIORITY_CONFIG
+                      ]
+                    if (!config) return ticket.priority
+                    const Icon = config.icon
+                    return (
+                      <span
+                        className={`flex items-center gap-2 ${config.color}`}
+                      >
+                        <Icon className='h-4 w-4' strokeWidth={2.5} />
+                        {t(`kanban:priority.${ticket.priority.toLowerCase()}`)}
+                      </span>
+                    )
+                  })()}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {PRIORITIES.map(p => {
+                  const config = PRIORITY_CONFIG[p]
+                  const Icon = config.icon
+                  return (
+                    <SelectItem key={p} value={p}>
+                      <span
+                        className={`flex items-center gap-2 ${config.color}`}
+                      >
+                        <Icon className='h-4 w-4' strokeWidth={2.5} />
+                        {t(`kanban:priority.${p.toLowerCase()}`)}
+                      </span>
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
           ) : (
-            <div>
-              <TicketPriorityBadge priority={ticket.priority} />
-            </div>
+            <TicketPriorityBadge priority={ticket.priority} />
           )}
         </div>
 
-        <div className='space-y-1'>
-          <label className='flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400'>
+        {/* Due Date */}
+        <div className='space-y-2'>
+          <Label className='text-muted-foreground flex items-center gap-2'>
             <Calendar className='h-4 w-4' />
             {t('kanban:ticket.dueDate')}
-          </label>
+          </Label>
           {canEdit ? (
-            <DatePicker
-              value={ticket.dueDate ? new Date(ticket.dueDate) : null}
-              onChange={date =>
-                handleUpdateField('dueDate', date ? date.toISOString() : null)
+            <Input
+              type='date'
+              value={
+                ticket.dueDate
+                  ? new Date(ticket.dueDate).toISOString().split('T')[0]
+                  : ''
+              }
+              onChange={e =>
+                handleUpdateField(
+                  'dueDate',
+                  e.target.value ? new Date(e.target.value).toISOString() : null
+                )
               }
             />
           ) : (
-            <div className='text-sm text-gray-900 dark:text-gray-100'>
+            <p className='text-sm'>
               {ticket.dueDate
                 ? format(new Date(ticket.dueDate), 'dd MMMM yyyy', {
                     locale: fr
                   })
                 : t('kanban:ticket.noDueDate')}
-            </div>
+            </p>
           )}
         </div>
       </div>
 
+      {/* Labels */}
       <div className='space-y-2'>
-        <label className='flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400'>
+        <Label className='text-muted-foreground flex items-center gap-2'>
           <Layers className='h-4 w-4' />
           {t('kanban:labels')}
-        </label>
+        </Label>
         <div className='flex flex-wrap gap-2'>
           {ticket.labels.map(label => (
             <TicketLabelBadge
@@ -255,59 +333,58 @@ const TicketDetails = ({
             availableLabels.some(
               l => !ticket.labels.some(tl => tl.id === l.id)
             ) && (
-              <Select
-                options={availableLabels
-                  .filter(l => !ticket.labels.some(tl => tl.id === l.id))
-                  .map(l => ({ value: l.id, label: l.name }))}
-                onChange={option => {
-                  if (
-                    option &&
-                    typeof option === 'object' &&
-                    'value' in option
-                  ) {
-                    handleAddLabel(option.value as string)
-                  }
-                }}
-                placeholder={t('kanban:label.add')}
-              />
+              <Select onValueChange={v => handleAddLabel(v)}>
+                <SelectTrigger className='h-7 w-auto min-w-[120px]'>
+                  <SelectValue placeholder={t('kanban:label.add')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableLabels
+                    .filter(l => !ticket.labels.some(tl => tl.id === l.id))
+                    .map(l => (
+                      <SelectItem key={l.id} value={l.id}>
+                        {l.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             )}
         </div>
       </div>
 
+      {/* Description */}
       <div className='space-y-2'>
-        <label className='text-sm font-medium text-gray-600 dark:text-gray-400'>
+        <Label className='text-muted-foreground'>
           {t('kanban:ticket.description')}
-        </label>
+        </Label>
         {isEditingDescription ? (
-          <div className='space-y-2' onClick={e => e.stopPropagation()}>
+          <div className='space-y-2'>
             <Textarea
               value={descriptionValue}
               onChange={e => setDescriptionValue(e.target.value)}
-              onClick={e => e.stopPropagation()}
               rows={6}
               placeholder={t('kanban:ticket.descriptionPlaceholder')}
             />
             <div className='flex gap-2'>
               <Button size='sm' onClick={handleSaveDescription}>
-                {t('common:save')}
+                {t('common:actions.save')}
               </Button>
               <Button
-                variant='ghost'
+                variant='outline'
                 size='sm'
                 onClick={() => {
                   setDescriptionValue(ticket.description || '')
                   setIsEditingDescription(false)
                 }}
               >
-                {t('common:cancel')}
+                {t('common:actions.cancel')}
               </Button>
             </div>
           </div>
         ) : (
           <div className='group relative'>
-            <div className='min-h-25 rounded border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-300'>
+            <div className='bg-muted/50 text-foreground min-h-20 rounded-lg border px-4 py-3 text-sm'>
               {ticket.description || (
-                <span className='text-gray-400'>
+                <span className='text-muted-foreground'>
                   {t('kanban:ticket.noDescription')}
                 </span>
               )}
@@ -317,14 +394,15 @@ const TicketDetails = ({
                 onClick={() => setIsEditingDescription(true)}
                 className='absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100'
               >
-                <Edit2 className='h-4 w-4 text-gray-400 hover:text-gray-600' />
+                <Edit2 className='text-muted-foreground hover:text-foreground h-4 w-4' />
               </button>
             )}
           </div>
         )}
       </div>
 
-      <div className='border-t border-gray-200 pt-4 text-xs text-gray-500 dark:border-gray-700'>
+      {/* Footer */}
+      <div className='text-muted-foreground border-t pt-4 text-xs'>
         <div className='flex justify-between'>
           <span>
             {t('kanban:ticket.createdBy')} {ticket.createdBy.firstName}{' '}
