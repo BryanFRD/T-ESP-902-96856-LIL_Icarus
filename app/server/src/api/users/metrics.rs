@@ -203,11 +203,14 @@ fn collect_audit_metrics(
     })
 }
 
+#[allow(clippy::too_many_lines)]
 fn collect_ticket_metrics(
     conn: &mut PgConnection,
     user_id: &str,
     now: NaiveDateTime,
 ) -> Result<UserTicketMetrics, diesel::result::Error> {
+    use crate::schema::kanban_columns;
+
     // Get audit IDs the user has access to (via team membership)
     let user_team_ids: Vec<String> = teams_members::table
         .filter(teams_members::user_id.eq(user_id))
@@ -219,8 +222,31 @@ fn collect_ticket_metrics(
         .select(audits::id)
         .load(conn)?;
 
+    // Find "Done" column IDs (last column per audit by position) to exclude completed tickets
+    let all_columns: Vec<(String, String, i32)> = kanban_columns::table
+        .filter(kanban_columns::audit_id.eq_any(&user_audit_ids))
+        .select((kanban_columns::id, kanban_columns::audit_id, kanban_columns::position))
+        .load(conn)?;
+
+    let mut max_pos_per_audit: std::collections::HashMap<&str, i32> = std::collections::HashMap::new();
+    for (_, audit_id, pos) in &all_columns {
+        let entry = max_pos_per_audit.entry(audit_id.as_str()).or_insert(*pos);
+        if *pos > *entry {
+            *entry = *pos;
+        }
+    }
+
+    let done_column_ids: Vec<&str> = all_columns
+        .iter()
+        .filter(|(_, audit_id, pos)| {
+            max_pos_per_audit.get(audit_id.as_str()) == Some(pos)
+        })
+        .map(|(id, _, _)| id.as_str())
+        .collect();
+
     let assigned: i64 = tickets::table
         .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .count()
         .get_result(conn)?;
 
@@ -231,58 +257,66 @@ fn collect_ticket_metrics(
 
     let overdue: i64 = tickets::table
         .filter(tickets::audit_id.eq_any(&user_audit_ids))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .filter(tickets::due_date.is_not_null())
         .filter(tickets::due_date.lt(now))
         .count()
         .get_result(conn)?;
 
-    // Count by priority across all user's audits (total)
-    // Priority values are stored lowercase in DB
+    // Count by priority across all user's audits (excluding done)
     let critical: i64 = tickets::table
         .filter(tickets::audit_id.eq_any(&user_audit_ids))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .filter(tickets::priority.eq("critical"))
         .count()
         .get_result(conn)?;
 
     let high: i64 = tickets::table
         .filter(tickets::audit_id.eq_any(&user_audit_ids))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .filter(tickets::priority.eq("high"))
         .count()
         .get_result(conn)?;
 
     let medium: i64 = tickets::table
         .filter(tickets::audit_id.eq_any(&user_audit_ids))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .filter(tickets::priority.eq("medium"))
         .count()
         .get_result(conn)?;
 
     let low: i64 = tickets::table
         .filter(tickets::audit_id.eq_any(&user_audit_ids))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .filter(tickets::priority.eq("low"))
         .count()
         .get_result(conn)?;
 
-    // Count by priority assigned to user
+    // Count by priority assigned to user (excluding done)
     let critical_assigned: i64 = tickets::table
         .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .filter(tickets::priority.eq("critical"))
         .count()
         .get_result(conn)?;
 
     let high_assigned: i64 = tickets::table
         .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .filter(tickets::priority.eq("high"))
         .count()
         .get_result(conn)?;
 
     let medium_assigned: i64 = tickets::table
         .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .filter(tickets::priority.eq("medium"))
         .count()
         .get_result(conn)?;
 
     let low_assigned: i64 = tickets::table
         .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::column_id.ne_all(&done_column_ids))
         .filter(tickets::priority.eq("low"))
         .count()
         .get_result(conn)?;
