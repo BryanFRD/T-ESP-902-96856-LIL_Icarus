@@ -1,17 +1,17 @@
 import { useEffect, useRef } from 'react'
 import type { Socket } from 'socket.io-client'
 
-import { disconnectSocket, getSocket } from '@/lib/socket.ts'
+import { getSocket } from '@/lib/socket.ts'
 
 export function useAuditSocket(auditId: string): Socket {
-  const socketRef = useRef<Socket>(getSocket(auditId))
+  const socketRef = useRef<Socket | null>(null)
+
+  if (!socketRef.current || !socketRef.current.connected) {
+    socketRef.current = getSocket(auditId)
+  }
 
   useEffect(() => {
     socketRef.current = getSocket(auditId)
-
-    return () => {
-      disconnectSocket(auditId)
-    }
   }, [auditId])
 
   return socketRef.current
