@@ -27,7 +27,7 @@ export function AuditTabs({ audit }: AuditTabsProps) {
   ]
 
   return (
-    <Tabs defaultValue='kanban' className='w-full min-w-0 overflow-hidden'>
+    <Tabs defaultValue='kanban' className='w-full min-w-0 overflow-x-hidden'>
       <TabsList className='w-full'>
         {tabs.map(tab => (
           <TabsTrigger key={tab.value} value={tab.value}>

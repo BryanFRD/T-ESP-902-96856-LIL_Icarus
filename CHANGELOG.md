@@ -5,6 +5,16 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.46.2] - 2026-04-11
+
+### Bug Fixes
+
+- fix(logs): guard against encrypted metadata string instead of object
+- fix(logs): add null guards to prevent LogEntry crash on missing fields
+- fix(layout): use overflow-x-hidden instead of overflow-hidden on tabs to show logs content
+- fix(ci): skip tests on tag pipelines, only run build+deploy
+- fix(ci): skip pipeline on ferrflow release commits, keep tags
+
 ## [1.46.1] - 2026-04-11
 
 ### Bug Fixes
