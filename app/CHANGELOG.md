@@ -4,6 +4,12 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.7.1] - 2026-04-11
+
+### Bug Fixes
+
+- fix(ci): disable skipCi so tag pipelines trigger build/deploy
+
 ## [1.7.0] - 2026-04-11
 
 ### Features
