@@ -105,31 +105,45 @@ fn main() {
     let hostname = get_hostname();
     println!("Hostname: {hostname}");
 
-    let mut client = loop {
-        if let Ok(client) = Client::new(&server_addr) {
-            break client;
-        }
-        eprintln!("Failed to connect to server, retrying in 5 seconds..");
-        std::thread::sleep(Duration::from_secs(5));
-    };
-    println!("Connected to server successfully!");
+    loop {
+        // Re-read saved token on each reconnection attempt
+        let current_token = read_saved_agent()
+            .map_or_else(|| token.clone(), |s| s.agent_token);
 
-    // Authenticate with audit credentials + hostname
-    match client.authenticate(&audit_id, &token, &hostname) {
-        Ok((agent_token, agent_id)) => {
-            println!("Authentication successful for audit {audit_id} (agent: {agent_id})");
-            // If server assigned a new agent token, save it for future reconnections
-            if !agent_token.is_empty() {
-                println!("Saving assigned agent token");
-                save_agent_token(&agent_token);
+        let mut client = loop {
+            if let Ok(client) = Client::new(&server_addr) {
+                break client;
+            }
+            eprintln!("Failed to connect to server, retrying in 5 seconds..");
+            std::thread::sleep(Duration::from_secs(5));
+        };
+        println!("Connected to server successfully!");
+
+        // Authenticate with audit credentials + hostname
+        match client.authenticate(&audit_id, &current_token, &hostname) {
+            Ok((agent_token, agent_id)) => {
+                println!("Authentication successful for audit {audit_id} (agent: {agent_id})");
+                if !agent_token.is_empty() {
+                    println!("Saving assigned agent token");
+                    save_agent_token(&agent_token);
+                }
+            }
+            Err(e) => {
+                eprintln!("Authentication failed: {e}, retrying in 5 seconds..");
+                std::thread::sleep(Duration::from_secs(5));
+                continue;
             }
         }
-        Err(e) => {
-            eprintln!("Authentication failed: {e}");
-            return;
-        }
-    }
 
+        run_agent_session(client, &audit_id);
+
+        eprintln!("Connection lost, reconnecting in 5 seconds..");
+        std::thread::sleep(Duration::from_secs(5));
+    }
+}
+
+#[allow(clippy::too_many_lines)]
+fn run_agent_session(client: Client, _audit_id: &str) {
     let manager = Arc::new(MultiplexManager::new(client));
     let shutdown_flag = manager.shutdown_flag();
 

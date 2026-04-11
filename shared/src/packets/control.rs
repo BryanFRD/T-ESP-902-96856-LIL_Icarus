@@ -43,6 +43,14 @@ impl AgentControl {
     pub fn resume() -> Self {
         Self::new(AgentInstruction::Resume)
     }
+
+    #[must_use]
+    pub fn update(version: String, binary_size: u64) -> Self {
+        Self::new(AgentInstruction::Update {
+            version,
+            binary_size,
+        })
+    }
 }
 
 /// Instructions that can be sent to control an agent.
@@ -58,6 +66,11 @@ pub enum AgentInstruction {
     Pause,
     /// Resume agent operations.
     Resume,
+    /// Update the agent binary. Server will stream the binary via `StreamData` packets.
+    Update {
+        version: String,
+        binary_size: u64,
+    },
 }
 
 #[cfg(test)]
