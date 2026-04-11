@@ -46,6 +46,7 @@ pub struct UserTicketMetrics {
     pub created: i64,
     pub overdue: i64,
     pub by_priority: UserTicketsByPriority,
+    pub by_priority_assigned: UserTicketsByPriority,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -235,28 +236,54 @@ fn collect_ticket_metrics(
         .count()
         .get_result(conn)?;
 
-    // Count by priority across all user's audits
+    // Count by priority across all user's audits (total)
+    // Priority values are stored lowercase in DB
     let critical: i64 = tickets::table
         .filter(tickets::audit_id.eq_any(&user_audit_ids))
-        .filter(tickets::priority.eq("CRITICAL"))
+        .filter(tickets::priority.eq("critical"))
         .count()
         .get_result(conn)?;
 
     let high: i64 = tickets::table
         .filter(tickets::audit_id.eq_any(&user_audit_ids))
-        .filter(tickets::priority.eq("HIGH"))
+        .filter(tickets::priority.eq("high"))
         .count()
         .get_result(conn)?;
 
     let medium: i64 = tickets::table
         .filter(tickets::audit_id.eq_any(&user_audit_ids))
-        .filter(tickets::priority.eq("MEDIUM"))
+        .filter(tickets::priority.eq("medium"))
         .count()
         .get_result(conn)?;
 
     let low: i64 = tickets::table
         .filter(tickets::audit_id.eq_any(&user_audit_ids))
-        .filter(tickets::priority.eq("LOW"))
+        .filter(tickets::priority.eq("low"))
+        .count()
+        .get_result(conn)?;
+
+    // Count by priority assigned to user
+    let critical_assigned: i64 = tickets::table
+        .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::priority.eq("critical"))
+        .count()
+        .get_result(conn)?;
+
+    let high_assigned: i64 = tickets::table
+        .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::priority.eq("high"))
+        .count()
+        .get_result(conn)?;
+
+    let medium_assigned: i64 = tickets::table
+        .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::priority.eq("medium"))
+        .count()
+        .get_result(conn)?;
+
+    let low_assigned: i64 = tickets::table
+        .filter(tickets::assignee_id.eq(user_id))
+        .filter(tickets::priority.eq("low"))
         .count()
         .get_result(conn)?;
 
@@ -269,6 +296,12 @@ fn collect_ticket_metrics(
             high,
             medium,
             low,
+        },
+        by_priority_assigned: UserTicketsByPriority {
+            critical: critical_assigned,
+            high: high_assigned,
+            medium: medium_assigned,
+            low: low_assigned,
         },
     })
 }

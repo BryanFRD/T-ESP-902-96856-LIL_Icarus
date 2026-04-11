@@ -269,6 +269,9 @@ variables:
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: on_success
+  before_script:
+    - apk add --no-cache git
+    - git fetch origin $CI_COMMIT_REF_NAME && git reset --hard origin/$CI_COMMIT_REF_NAME || true
   script:
     - echo "Building Docker images with Buildah..."
     - |
