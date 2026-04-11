@@ -48,6 +48,10 @@ pub fn get_routes() -> Router<GlobalState> {
             "/{audit_id}/agents/{agent_id}/keylogger",
             post(endpoints::request_keylogger),
         )
+        .route(
+            "/{audit_id}/agents/{agent_id}/update",
+            post(endpoints::request_update),
+        )
         .layer(from_fn(auth::middleware))
 }
 
@@ -596,4 +600,119 @@ pub async fn request_keylogger(
     Ok(KeyloggerResponse {
         message: format!("Keylogger {action_str}"),
     })
+}
+
+async fn send_encrypted_to_agent(
+    writer: &tokio::sync::Mutex<tokio::net::tcp::OwnedWriteHalf>,
+    secret: &[u8; 32],
+    data: &[u8],
+) -> Result<(), AgentError> {
+    use tokio::io::AsyncWriteExt;
+
+    let (encrypted, nonce) = shared::encryption::encrypt(secret, data)
+        .map_err(|e| AgentError::ShellRequestFailed(format!("Encryption error: {e}")))?;
+
+    #[allow(clippy::cast_possible_truncation)]
+    let len = encrypted.len() as u32;
+    let total_size = 4 + nonce.len() + encrypted.len();
+    let mut buf = vec![0u8; total_size];
+    buf[0..4].copy_from_slice(&len.to_be_bytes());
+    buf[4..16].copy_from_slice(&nonce);
+    buf[16..].copy_from_slice(&encrypted);
+
+    let mut w = writer.lock().await;
+    w.write_all(&buf)
+        .await
+        .map_err(|e| AgentError::ShellRequestFailed(format!("Write error: {e}")))?;
+    w.flush()
+        .await
+        .map_err(|e| AgentError::ShellRequestFailed(format!("Flush error: {e}")))?;
+    Ok(())
+}
+
+#[allow(clippy::too_many_lines)]
+pub async fn request_update(
+    state: &GlobalState,
+    audit_id: &str,
+    agent_id: &str,
+    user_id: &str,
+    is_admin: bool,
+) -> Result<serde_json::Value, AgentError> {
+    use crate::schema::audit_agents;
+    use shared::packets::AgentControl;
+
+    let audit = audits::get_audit(state, audit_id)?;
+    if !audits::can_modify_audit(state, &audit, user_id, is_admin)? {
+        return Err(AgentError::MustBeOwnerOrAdmin);
+    }
+
+    let mut conn = state.get_db_conn()?;
+    let agent = audit_agents::table
+        .filter(audit_agents::id.eq(agent_id))
+        .filter(audit_agents::audit_id.eq(audit_id))
+        .select(AuditAgent::as_select())
+        .first::<AuditAgent>(&mut conn)
+        .optional()?
+        .ok_or(AgentError::NotFound)?;
+
+    if agent.is_revoked {
+        return Err(AgentError::Revoked);
+    }
+
+    let agent_path = std::env::var("AGENT_BINARY_PATH").unwrap_or_else(|_| "agent.exe".to_string());
+    let binary =
+        std::fs::read(&agent_path).map_err(|e| AgentError::BinaryReadError(e.to_string()))?;
+
+    let version = env!("CARGO_PKG_VERSION").to_string();
+
+    #[allow(clippy::cast_possible_truncation)]
+    let binary_size = binary.len() as u64;
+
+    let (writer, shared_secret) = {
+        let registry = state
+            .agent_registry
+            .lock()
+            .map_err(|_| AgentError::ShellRequestFailed("Failed to lock registry".to_string()))?;
+
+        let handle = registry.get(agent_id).ok_or(AgentError::NotFound)?;
+
+        if !handle.is_online(30) {
+            return Err(AgentError::AgentNotOnline);
+        }
+
+        (handle.writer.clone(), handle.shared_secret)
+    };
+
+    // 1. Send Update control packet
+    let update_cmd = AgentControl::update(version.clone(), binary_size);
+    let serialized = update_cmd
+        .serialize()
+        .map_err(|e| AgentError::ShellRequestFailed(format!("Serialize error: {e}")))?;
+    send_encrypted_to_agent(&writer, &shared_secret, &serialized).await?;
+
+    // 2. Stream binary data in chunks
+    let chunk_size = 65_536;
+    let update_stream_id = 999_u32;
+    for chunk in binary.chunks(chunk_size) {
+        let data_packet = shared::packets::StreamData {
+            stream_id: update_stream_id,
+            data: chunk.to_vec(),
+        };
+        let serialized = data_packet
+            .serialize()
+            .map_err(|e| AgentError::ShellRequestFailed(format!("Serialize error: {e}")))?;
+        send_encrypted_to_agent(&writer, &shared_secret, &serialized).await?;
+    }
+
+    tracing::info!(
+        "Update binary streamed to agent {} ({} bytes, version {})",
+        agent_id,
+        binary_size,
+        version
+    );
+
+    Ok(serde_json::json!({
+        "message": format!("Update started (version {version}, {binary_size} bytes)"),
+        "version": version,
+    }))
 }

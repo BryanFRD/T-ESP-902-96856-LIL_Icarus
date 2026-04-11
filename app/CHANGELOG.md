@@ -4,6 +4,16 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.9.0] - 2026-04-11
+
+### Features
+
+- feat(agents): self-update via TCP stream, reconnection loop, Update packet variant
+
+### Bug Fixes
+
+- fix: move use statement to top of block for clippy items_after_statements
+
 ## [1.8.0] - 2026-04-11
 
 ### Features

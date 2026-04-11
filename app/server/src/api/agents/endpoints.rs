@@ -281,3 +281,42 @@ pub async fn request_keylogger(
         Err(e) => internal_error("Failed to request keylogger", e),
     }
 }
+
+#[utoipa::path(
+    post,
+    path = "/v1/audits/{audit_id}/agents/{agent_id}/update",
+    tag = "Agents",
+    responses(
+        (status = 200, description = "Update binary streamed to agent"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Agent not found or binary not found"),
+        (status = 409, description = "Agent not online"),
+    ),
+    security(("cookieAuth" = [])),
+)]
+#[axum::debug_handler]
+pub async fn request_update(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    Path((audit_id, agent_id)): Path<(Ulid, Ulid)>,
+) -> impl IntoResponse {
+    match super::services::request_update(
+        &state,
+        &audit_id.to_string(),
+        &agent_id.to_string(),
+        &jwt_user.sub.to_string(),
+        jwt_user.is_admin(),
+    )
+    .await
+    {
+        Ok(response) => (StatusCode::OK, Json(response)).into_response(),
+        Err(AgentError::NotFound) => not_found_error("error.agent.notFound"),
+        Err(AgentError::AgentNotOnline) => {
+            (StatusCode::CONFLICT, Json("error.agent.notOnline")).into_response()
+        }
+        Err(AgentError::BinaryNotFound) => not_found_error("error.agent.binaryNotFound"),
+        Err(AgentError::MustBeOwnerOrAdmin) => forbidden_error("error.agent.mustBeOwnerOrAdmin"),
+        Err(e) => internal_error("Failed to request update", e),
+    }
+}

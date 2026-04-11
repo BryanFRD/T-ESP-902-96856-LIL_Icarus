@@ -128,6 +128,99 @@ impl MultiplexManager {
         }
     }
 
+    fn handle_update(
+        self: &Arc<Self>,
+        version: &str,
+        binary_size: u64,
+    ) -> Result<(), NetworkError> {
+        eprintln!("Collecting update binary ({binary_size} bytes)...");
+
+        let update_stream_id = 999_u32;
+        #[allow(clippy::cast_possible_truncation)]
+        let mut buffer = Vec::with_capacity(binary_size as usize);
+
+        while (buffer.len() as u64) < binary_size {
+            let mut reader_guard = self
+                .reader
+                .lock()
+                .map_err(|_| NetworkError::LockError)?;
+            let shared_secret = self.shared_secret;
+
+            let mut len_buf = [0u8; 4];
+            std::io::Read::read_exact(&mut *reader_guard, &mut len_buf)?;
+            let len = u32::from_be_bytes(len_buf) as usize;
+
+            let mut nonce_buf = [0u8; 12];
+            std::io::Read::read_exact(&mut *reader_guard, &mut nonce_buf)?;
+
+            let mut encrypted_buf = vec![0u8; len];
+            std::io::Read::read_exact(&mut *reader_guard, &mut encrypted_buf)?;
+
+            drop(reader_guard);
+
+            let decrypted =
+                shared::encryption::decrypt(&shared_secret, &nonce_buf, &encrypted_buf)?;
+            let packet = shared::packets::from_packet_bytes(&decrypted)?;
+
+            if let shared::packets::Packets::StreamData(data) = packet
+                && data.stream_id == update_stream_id
+            {
+                buffer.extend_from_slice(&data.data);
+                eprintln!(
+                    "Update progress: {}/{} bytes",
+                    buffer.len(),
+                    binary_size
+                );
+            }
+        }
+
+        eprintln!("Update binary received, applying...");
+
+        let exe_path = std::env::current_exe()?;
+        let exe_dir = exe_path
+            .parent()
+            .ok_or_else(|| std::io::Error::other("No parent dir"))?;
+
+        #[cfg(not(target_os = "windows"))]
+        {
+            use std::os::unix::process::CommandExt;
+
+            let new_path = exe_dir.join("agent.new");
+            std::fs::write(&new_path, &buffer)?;
+
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                std::fs::set_permissions(&new_path, std::fs::Permissions::from_mode(0o755))?;
+            }
+
+            std::fs::rename(&new_path, &exe_path)?;
+
+            eprintln!("Update applied (v{version}), restarting...");
+
+            let err = std::process::Command::new(&exe_path).exec();
+            eprintln!("exec failed: {err}");
+            std::process::exit(0);
+        }
+
+        #[cfg(target_os = "windows")]
+        {
+            let old_path = exe_dir.join("agent.old.exe");
+            let new_path = exe_dir.join("agent_update.exe");
+
+            std::fs::write(&new_path, &buffer)?;
+
+            let _ = std::fs::remove_file(&old_path);
+            std::fs::rename(&exe_path, &old_path)?;
+            std::fs::rename(&new_path, &exe_path)?;
+
+            eprintln!("Update applied (v{version}), restarting...");
+
+            std::process::Command::new(&exe_path).spawn()?;
+            std::process::exit(0);
+        }
+    }
+
     fn handle_shell_request(
         self: &Arc<Self>,
         shell_req: &ShellRequest,
@@ -402,6 +495,17 @@ impl MultiplexManager {
                         AgentInstruction::Resume => {
                             eprintln!("Resume requested by server");
                             // TODO: implement resume logic
+                        }
+                        AgentInstruction::Update {
+                            version,
+                            binary_size,
+                        } => {
+                            eprintln!(
+                                "Update requested: version {version}, size {binary_size} bytes"
+                            );
+                            if let Err(e) = self.handle_update(&version, binary_size) {
+                                eprintln!("Update failed: {e}");
+                            }
                         }
                     }
                 }
