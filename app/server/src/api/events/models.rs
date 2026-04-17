@@ -32,6 +32,7 @@ pub enum EventAction {
     AgentConnect,
     AgentDisconnect,
     AgentCommand,
+    AgentShellOutput,
     AgentShutdown,
     AgentDownload,
 }
@@ -59,6 +60,7 @@ where
             "agent_connect" => Ok(Self::AgentConnect),
             "agent_disconnect" => Ok(Self::AgentDisconnect),
             "agent_command" => Ok(Self::AgentCommand),
+            "agent_shell_output" => Ok(Self::AgentShellOutput),
             "agent_shutdown" => Ok(Self::AgentShutdown),
             "agent_download" => Ok(Self::AgentDownload),
             _ => Err("Unrecognized event action".into()),
@@ -89,6 +91,7 @@ where
             Self::AgentConnect => "agent_connect".to_sql(out),
             Self::AgentDisconnect => "agent_disconnect".to_sql(out),
             Self::AgentCommand => "agent_command".to_sql(out),
+            Self::AgentShellOutput => "agent_shell_output".to_sql(out),
             Self::AgentShutdown => "agent_shutdown".to_sql(out),
             Self::AgentDownload => "agent_download".to_sql(out),
         }
@@ -115,6 +118,7 @@ impl Display for EventAction {
             Self::AgentConnect => write!(f, "agent_connect"),
             Self::AgentDisconnect => write!(f, "agent_disconnect"),
             Self::AgentCommand => write!(f, "agent_command"),
+            Self::AgentShellOutput => write!(f, "agent_shell_output"),
             Self::AgentShutdown => write!(f, "agent_shutdown"),
             Self::AgentDownload => write!(f, "agent_download"),
         }

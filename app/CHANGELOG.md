@@ -4,6 +4,17 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.10.0] - 2026-04-17
+
+### Features
+
+- feat: revershell history + logging
+- feat: current working directory exchange
+
+### Bug Fixes
+
+- fix: resolve clippy too_many_lines and map_unwrap_or in agent
+
 ## [1.9.0] - 2026-04-11
 
 ### Features

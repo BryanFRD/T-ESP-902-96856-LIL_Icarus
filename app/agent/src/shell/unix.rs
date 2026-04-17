@@ -34,11 +34,17 @@ pub fn spawn_shell(shell_type: ShellType) -> Result<ShellSession, NetworkError> 
 
     eprintln!("Spawning Unix shell: {shell_path}");
 
+    // OSC 7 cwd reporting — bash runs this after each command, emitting
+    // `\e]7;file://$HOSTNAME$PWD\a` so the agent can track the shell's cwd.
+    // Harmless for /bin/sh (ignored, since PROMPT_COMMAND is a bashism).
+    let prompt_command = r#"printf '\033]7;file://%s%s\007' "${HOSTNAME:-}" "$PWD""#;
+
     // Use pre_exec to redirect stderr to stdout (dup2) so all output goes
     // through a single pipe. This prevents stderr from filling its buffer
     // and deadlocking the child process.
     let mut process = unsafe {
         Command::new(shell_path)
+            .env("PROMPT_COMMAND", prompt_command)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())

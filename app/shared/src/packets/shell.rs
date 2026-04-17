@@ -8,6 +8,15 @@ pub struct ShellRequest {
     pub shell_type: ShellType,
 }
 
+/// Shell current working directory update, emitted by the agent whenever
+/// the spawned shell reports a new `$PWD` via the OSC 7 escape sequence.
+#[derive(Debug, Clone, Encode, Decode, Packet)]
+#[packet(code = 0x0F)]
+pub struct ShellCwd {
+    pub stream_id: u32,
+    pub path: String,
+}
+
 impl ShellRequest {
     #[must_use]
     pub fn new(shell_type: ShellType) -> Self {

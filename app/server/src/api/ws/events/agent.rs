@@ -3,7 +3,8 @@ use socketioxide::SocketIo;
 use tracing::error;
 
 use super::types::{
-    AgentKeyloggerPayload, AgentOutputPayload, AgentStatusPayload, AgentStreamClosedPayload,
+    AgentCwdPayload, AgentKeyloggerPayload, AgentOutputPayload, AgentStatusPayload,
+    AgentStreamClosedPayload,
 };
 
 /// Emit agent output data to the audit room.
@@ -73,6 +74,24 @@ pub async fn emit_agent_stream_closed(
         .await
     {
         error!(audit_id = %audit_id, agent_id = %agent_id, error = %e, "Failed to emit agent:stream_closed");
+    }
+}
+
+/// Emit the current shell working directory to the audit room.
+pub async fn emit_agent_cwd(io: &SocketIo, audit_id: &str, agent_id: &str, path: &str) {
+    let room_id = format!("audit:{audit_id}");
+    let payload = AgentCwdPayload {
+        agent_id: agent_id.to_string(),
+        path: path.to_string(),
+    };
+    if let Err(e) = io
+        .of("/")
+        .expect("namespace / not found")
+        .to(room_id)
+        .emit("agent:cwd", &payload)
+        .await
+    {
+        error!(audit_id = %audit_id, agent_id = %agent_id, error = %e, "Failed to emit agent:cwd");
     }
 }
 

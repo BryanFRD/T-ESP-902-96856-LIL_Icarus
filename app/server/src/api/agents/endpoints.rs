@@ -1,6 +1,6 @@
 use axum::{
     Json,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     response::IntoResponse,
 };
 use http::StatusCode;
@@ -9,13 +9,15 @@ use validator::Validate;
 
 use crate::{
     api::auth::JwtClaims,
+    api::events::EventAction,
     helpers::{bad_request_error, forbidden_error, internal_error, not_found_error},
     state::GlobalState,
 };
 
 use super::{
     AgentError, AgentResponse, AgentTokenResponse, CreateAgentPayload, KeyloggerRequestPayload,
-    KeyloggerResponse, ShellRequestPayload, ShellStreamResponse,
+    KeyloggerResponse, ShellHistoryEntry, ShellHistoryQuery, ShellHistoryResponse,
+    ShellRequestPayload, ShellStreamResponse,
 };
 
 #[utoipa::path(
@@ -318,5 +320,121 @@ pub async fn request_update(
         Err(AgentError::BinaryNotFound) => not_found_error("error.agent.binaryNotFound"),
         Err(AgentError::MustBeOwnerOrAdmin) => forbidden_error("error.agent.mustBeOwnerOrAdmin"),
         Err(e) => internal_error("Failed to request update", e),
+    }
+}
+
+/// Map a decrypted event row into a `ShellHistoryEntry`.
+/// Returns `None` if decryption failed or required metadata fields are missing.
+fn event_to_history_entry(
+    state: &GlobalState,
+    event: crate::api::events::Event,
+) -> Option<ShellHistoryEntry> {
+    let action = event.action.clone();
+    let created_at = event.created_at.to_string();
+    let user_id = event.user_id.clone();
+
+    let decrypted = crate::api::events::services::decrypt_and_redact_event(state, event, true);
+    let metadata = decrypted.metadata?;
+
+    let stream_id = metadata.get("stream_id").and_then(serde_json::Value::as_u64);
+
+    match action {
+        EventAction::AgentCommand => {
+            let command = metadata.get("command")?.as_str()?.to_string();
+            Some(ShellHistoryEntry::Command {
+                created_at,
+                user_id,
+                command,
+                stream_id,
+            })
+        }
+        EventAction::AgentShellOutput => {
+            let data = metadata.get("data")?.as_str()?.to_string();
+            let truncated = metadata
+                .get("truncated")
+                .and_then(serde_json::Value::as_bool)
+                .unwrap_or(false);
+            let original_bytes = metadata
+                .get("original_bytes")
+                .and_then(serde_json::Value::as_u64);
+            Some(ShellHistoryEntry::Output {
+                created_at,
+                data,
+                truncated,
+                original_bytes,
+                stream_id,
+            })
+        }
+        _ => None,
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/v1/audits/{audit_id}/agents/{agent_id}/shell/history",
+    tag = "Agents",
+    params(
+        ("audit_id" = String, Path, description = "Audit ULID"),
+        ("agent_id" = String, Path, description = "Agent ULID"),
+        ("limit" = Option<i64>, Query, description = "Max entries (default 500, max 2000)"),
+    ),
+    responses(
+        (status = 200, description = "Shell history retrieved", body = ShellHistoryResponse),
+        (status = 403, description = "Forbidden - must be team member"),
+        (status = 404, description = "Audit not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+)]
+pub async fn get_shell_history(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    Path((audit_id, agent_id)): Path<(Ulid, Ulid)>,
+    Query(query): Query<ShellHistoryQuery>,
+) -> impl IntoResponse {
+    let audit_id_str = audit_id.to_string();
+    let agent_id_str = agent_id.to_string();
+
+    let audit = match crate::api::audits::get_audit(&state, &audit_id_str) {
+        Ok(a) => a,
+        Err(crate::api::audits::AuditError::NotFound) => {
+            return not_found_error("error.audit.notFound");
+        }
+        Err(e) => return internal_error("Failed to get audit", e),
+    };
+
+    let user_id_str = jwt_user.sub.to_string();
+    if !jwt_user.is_admin()
+        && crate::api::teams::get_team_member(&state, &audit.team_id, &user_id_str)
+            .ok()
+            .flatten()
+            .is_none()
+    {
+        return forbidden_error("error.audit.mustBeTeamMember");
+    }
+
+    let limit = query.limit.unwrap_or(500);
+    match crate::api::events::services::query_shell_history(
+        &state,
+        &audit_id_str,
+        &agent_id_str,
+        limit,
+    ) {
+        Ok(events) => {
+            let fetched = events.len();
+            let capped = i64::try_from(fetched).unwrap_or(i64::MAX) >= limit.clamp(1, 2000);
+            let entries: Vec<ShellHistoryEntry> = events
+                .into_iter()
+                .filter_map(|e| event_to_history_entry(&state, e))
+                .collect();
+            let response = ShellHistoryResponse {
+                total: entries.len(),
+                capped,
+                entries,
+            };
+            (StatusCode::OK, Json(response)).into_response()
+        }
+        Err(e) => internal_error("Failed to query shell history", e),
     }
 }
