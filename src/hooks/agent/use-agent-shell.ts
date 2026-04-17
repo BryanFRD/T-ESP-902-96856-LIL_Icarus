@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Socket } from 'socket.io-client'
 
 interface AgentOutputPayload {
@@ -12,6 +12,11 @@ interface AgentStreamClosedPayload {
   stream_id: number
 }
 
+interface AgentCwdPayload {
+  agent_id: string
+  path: string
+}
+
 export function useAgentShell(
   socket: Socket,
   auditId: string,
@@ -21,10 +26,18 @@ export function useAgentShell(
   const onOutputRef = useRef(onOutput)
   onOutputRef.current = onOutput
 
+  const [cwd, setCwd] = useState<string | null>(null)
+  const replayDoneRef = useRef(false)
+  const liveBufferRef = useRef<string[]>([])
+
   useEffect(() => {
     const handleOutput = (payload: AgentOutputPayload) => {
       if (payload.agent_id !== agentId) return
       const decoded = atob(payload.data)
+      if (!replayDoneRef.current) {
+        liveBufferRef.current.push(decoded)
+        return
+      }
       onOutputRef.current(decoded)
     }
 
@@ -33,12 +46,19 @@ export function useAgentShell(
       onOutputRef.current('\r\n')
     }
 
+    const handleCwd = (payload: AgentCwdPayload) => {
+      if (payload.agent_id !== agentId) return
+      setCwd(payload.path)
+    }
+
     socket.on('agent:output', handleOutput)
     socket.on('agent:stream_closed', handleStreamClosed)
+    socket.on('agent:cwd', handleCwd)
 
     return () => {
       socket.off('agent:output', handleOutput)
       socket.off('agent:stream_closed', handleStreamClosed)
+      socket.off('agent:cwd', handleCwd)
     }
   }, [socket, agentId])
 
@@ -53,5 +73,14 @@ export function useAgentShell(
     [socket, auditId, agentId]
   )
 
-  return { sendCommand }
+  const markReplayComplete = useCallback(() => {
+    if (replayDoneRef.current) return
+    replayDoneRef.current = true
+    for (const chunk of liveBufferRef.current) {
+      onOutputRef.current(chunk)
+    }
+    liveBufferRef.current = []
+  }, [])
+
+  return { sendCommand, cwd, markReplayComplete }
 }
