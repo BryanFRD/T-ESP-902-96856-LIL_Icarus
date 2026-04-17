@@ -14,6 +14,8 @@ mod unix;
 #[cfg(windows)]
 mod windows;
 
+pub mod osc7;
+
 /// Shell session managing a spawned process
 pub struct ShellSession {
     process: Option<Child>,

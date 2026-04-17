@@ -45,6 +45,10 @@ pub fn get_routes() -> Router<GlobalState> {
             post(endpoints::request_shell),
         )
         .route(
+            "/{audit_id}/agents/{agent_id}/shell/history",
+            get(endpoints::get_shell_history),
+        )
+        .route(
             "/{audit_id}/agents/{agent_id}/keylogger",
             post(endpoints::request_keylogger),
         )

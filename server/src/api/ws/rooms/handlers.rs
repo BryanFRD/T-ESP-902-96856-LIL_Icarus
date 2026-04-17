@@ -87,6 +87,35 @@ pub async fn on_room_join(
         error!("Failed to emit room:joined: {e}");
     }
 
+    // Replay the cached shell cwd for every agent in this audit room so late
+    // joiners get the current working directory without waiting for the next
+    // shell prompt to fire PROMPT_COMMAND.
+    if let Room::Audit(audit_id) = &room
+        && let Ok(registry) = state.agent_registry.lock()
+    {
+        let snapshots: Vec<(String, String)> = registry
+            .values()
+            .filter(|h| h.audit_id == *audit_id)
+            .filter_map(|h| {
+                h.shell_cwd
+                    .lock()
+                    .ok()
+                    .and_then(|g| g.clone())
+                    .map(|p| (h.agent_id.clone(), p))
+            })
+            .collect();
+        drop(registry);
+        for (agent_id, path) in snapshots {
+            let payload = crate::api::ws::events::types::AgentCwdPayload {
+                agent_id,
+                path,
+            };
+            if let Err(e) = socket.emit("agent:cwd", &payload) {
+                error!("Failed to replay agent:cwd on join: {e}");
+            }
+        }
+    }
+
     let join_event = NewEvent::new(
         Some(user_id),
         EventAction::Read,
@@ -469,7 +498,16 @@ pub async fn on_agent_command(
         "Command sent to agent"
     );
 
-    // Log agent command event
+    // Log agent command event (metadata encrypted — command text is sensitive)
+    let metadata_plain = serde_json::json!({
+        "agent_id": payload.agent_id,
+        "audit_id": payload.audit_id,
+        "stream_id": stream_id,
+        "command": payload.command,
+    });
+    let (encrypted_metadata, nonce) =
+        crate::api::events::services::encrypt_metadata(&state, metadata_plain);
+
     let command_event = NewEvent::new(
         Some(user_id),
         EventAction::AgentCommand,
@@ -481,11 +519,8 @@ pub async fn on_agent_command(
         "WS".to_string(),
         "/ws/agent:command".to_string(),
     )
-    .with_metadata(serde_json::json!({
-        "agent_id": payload.agent_id,
-        "audit_id": payload.audit_id,
-        "stream_id": stream_id,
-    }));
+    .with_metadata(encrypted_metadata)
+    .with_metadata_nonce(nonce);
 
     if let Err(e) = crate::api::events::services::log_event_sync(&state, &command_event) {
         error!("Failed to log agent command event: {e}");

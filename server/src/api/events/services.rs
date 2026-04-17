@@ -7,7 +7,7 @@ use crate::{
         PaginatedEventLogResponse,
     },
     state::GlobalState,
-    utils::event_encryption::decrypt_json,
+    utils::event_encryption::{decrypt_json, encrypt_json},
     utils::redaction::{redact_json_value, redact_string},
 };
 use axum::{Router, middleware::from_fn_with_state, routing::get};
@@ -26,6 +26,25 @@ pub fn get_routes(state: &GlobalState) -> Router {
             crate::middlewares::auth::middleware,
         ))
         .with_state(state.clone())
+}
+
+/// Encrypt a metadata JSON value with the server's event encryption key.
+/// Returns a tuple `(ciphertext_value, nonce)` ready to pass into
+/// `NewEvent::with_metadata` / `with_metadata_nonce`. On failure, logs the
+/// error and returns the plaintext value with `None` nonce so the event can
+/// still be persisted (degraded mode).
+#[must_use]
+pub fn encrypt_metadata(
+    state: &GlobalState,
+    value: serde_json::Value,
+) -> (serde_json::Value, Option<Vec<u8>>) {
+    match encrypt_json(&state.event_encryption_key, &value) {
+        Ok((ciphertext, nonce)) => (serde_json::json!(ciphertext), Some(nonce)),
+        Err(e) => {
+            error!("Failed to encrypt event metadata: {e}");
+            (value, None)
+        }
+    }
 }
 
 pub fn log_event_sync(state: &GlobalState, new_event: &NewEvent) -> Result<Event, EventError> {
@@ -82,6 +101,32 @@ pub fn query_events(state: &GlobalState, filters: EventFilters) -> Result<Vec<Ev
     }
 
     query
+        .select(Event::as_select())
+        .load::<Event>(&mut conn)
+        .map_err(EventError::from)
+}
+
+/// Query shell history events (`AgentCommand` + `AgentShellOutput`) for a
+/// specific agent under an audit, ordered chronologically ascending for replay.
+pub fn query_shell_history(
+    state: &GlobalState,
+    audit_id: &str,
+    agent_id: &str,
+    limit: i64,
+) -> Result<Vec<Event>, EventError> {
+    use crate::api::events::EventAction;
+    use crate::schema::events::dsl::{action, created_at, events, resource_id};
+
+    let rid = format!("agent_id:{agent_id},audit_id:{audit_id}");
+    let clamped = limit.clamp(1, 2000);
+
+    let mut conn = state.get_db_conn()?;
+
+    events
+        .filter(resource_id.eq(rid))
+        .filter(action.eq_any([EventAction::AgentCommand, EventAction::AgentShellOutput]))
+        .order(created_at.asc())
+        .limit(clamped)
         .select(Event::as_select())
         .load::<Event>(&mut conn)
         .map_err(EventError::from)

@@ -202,3 +202,43 @@ pub struct KeyloggerRequestPayload {
 pub struct KeyloggerResponse {
     pub message: String,
 }
+
+/// Single entry in the shell command history.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum ShellHistoryEntry {
+    Command {
+        #[serde(rename = "createdAt")]
+        created_at: String,
+        #[serde(rename = "userId")]
+        user_id: Option<String>,
+        command: String,
+        #[serde(rename = "streamId")]
+        stream_id: Option<u64>,
+    },
+    Output {
+        #[serde(rename = "createdAt")]
+        created_at: String,
+        data: String,
+        truncated: bool,
+        #[serde(rename = "originalBytes")]
+        original_bytes: Option<u64>,
+        #[serde(rename = "streamId")]
+        stream_id: Option<u64>,
+    },
+}
+
+/// Paginated response for shell command history.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShellHistoryResponse {
+    pub entries: Vec<ShellHistoryEntry>,
+    pub total: usize,
+    pub capped: bool,
+}
+
+/// Query parameters for shell history endpoint.
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+pub struct ShellHistoryQuery {
+    pub limit: Option<i64>,
+}

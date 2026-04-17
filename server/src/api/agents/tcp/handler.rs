@@ -24,6 +24,9 @@ use crate::state::{AgentHandle, GlobalState};
 ///
 /// # Errors
 /// Returns an error if the handshake or auth fails.
+const MAX_SHELL_OUTPUT_LOG_BYTES: usize = 4096;
+
+#[allow(clippy::too_many_lines)]
 pub async fn handle_agent_connection(
     mut stream: TcpStream,
     addr: SocketAddr,
@@ -74,6 +77,8 @@ pub async fn handle_agent_connection(
         Arc::new(std::sync::Mutex::new(None));
     let shell_stream_id: Arc<std::sync::Mutex<Option<u32>>> =
         Arc::new(std::sync::Mutex::new(None));
+    let shell_cwd: Arc<std::sync::Mutex<Option<String>>> =
+        Arc::new(std::sync::Mutex::new(None));
     let system_info: Arc<std::sync::Mutex<Option<SystemInfo>>> =
         Arc::new(std::sync::Mutex::new(None));
     {
@@ -85,6 +90,7 @@ pub async fn handle_agent_connection(
             last_heartbeat: last_heartbeat.clone(),
             latency_ms: latency_ms.clone(),
             shell_stream_id: shell_stream_id.clone(),
+            shell_cwd: shell_cwd.clone(),
             system_info: system_info.clone(),
             writer: writer.clone(),
             shared_secret,
@@ -109,8 +115,10 @@ pub async fn handle_agent_connection(
         &last_heartbeat,
         &latency_ms,
         &shell_stream_id,
+        &shell_cwd,
         &system_info,
         state.io_opt(),
+        &state,
         &agent.audit_id,
         &agent.id,
     )
@@ -365,8 +373,10 @@ async fn multiplex_loop(
     last_heartbeat: &Arc<std::sync::Mutex<Option<DateTime<Utc>>>>,
     latency_ms: &Arc<std::sync::Mutex<Option<u64>>>,
     shell_stream_id: &Arc<std::sync::Mutex<Option<u32>>>,
+    shell_cwd: &Arc<std::sync::Mutex<Option<String>>>,
     system_info: &Arc<std::sync::Mutex<Option<SystemInfo>>>,
     io: Option<&SocketIo>,
+    state: &GlobalState,
     audit_id: &str,
     agent_id: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -415,6 +425,50 @@ async fn multiplex_loop(
                                     )
                                     .await;
                                 }
+
+                                // Persist truncated + encrypted output chunk
+                                let original_len = stream_data.data.len();
+                                let truncated = original_len > MAX_SHELL_OUTPUT_LOG_BYTES;
+                                let slice = if truncated {
+                                    &stream_data.data[..MAX_SHELL_OUTPUT_LOG_BYTES]
+                                } else {
+                                    &stream_data.data[..]
+                                };
+                                let data_str = String::from_utf8_lossy(slice).into_owned();
+
+                                let metadata_plain = serde_json::json!({
+                                    "agent_id": agent_id,
+                                    "audit_id": audit_id,
+                                    "stream_id": stream_data.stream_id,
+                                    "data": data_str,
+                                    "truncated": truncated,
+                                    "original_bytes": original_len,
+                                });
+                                let (encrypted, nonce) =
+                                    crate::api::events::services::encrypt_metadata(
+                                        state,
+                                        metadata_plain,
+                                    );
+
+                                let output_event = NewEvent::new(
+                                    None,
+                                    EventAction::AgentShellOutput,
+                                    ResourceType::Agent,
+                                    Some(format!(
+                                        "agent_id:{agent_id},audit_id:{audit_id}"
+                                    )),
+                                    "TCP".to_string(),
+                                    "/tcp/agent:shell_output".to_string(),
+                                )
+                                .with_metadata(encrypted)
+                                .with_metadata_nonce(nonce);
+
+                                if let Err(e) = crate::api::events::services::log_event_sync(
+                                    state,
+                                    &output_event,
+                                ) {
+                                    error!("Failed to log shell output event: {e}");
+                                }
                             }
                             Ok(Packets::StreamClose(close)) => {
                                 // Clear shell stream if it's the one being closed
@@ -446,6 +500,20 @@ async fn multiplex_loop(
                                 tracing::debug!("Agent opened shell stream: {}", open.stream_id);
                                 if let Ok(mut sid) = shell_stream_id.lock() {
                                     *sid = Some(open.stream_id);
+                                }
+                            }
+                            Ok(Packets::ShellCwd(cwd_pkt)) => {
+                                if let Ok(mut cwd) = shell_cwd.lock() {
+                                    *cwd = Some(cwd_pkt.path.clone());
+                                }
+                                if let Some(io) = io {
+                                    crate::api::ws::events::agent::emit_agent_cwd(
+                                        io,
+                                        audit_id,
+                                        agent_id,
+                                        &cwd_pkt.path,
+                                    )
+                                    .await;
                                 }
                             }
                             Ok(packet) => {
