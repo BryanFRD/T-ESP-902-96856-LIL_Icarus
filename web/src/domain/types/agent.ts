@@ -35,3 +35,26 @@ export type Agent = {
   serverVersion: string
   createdAt: string
 }
+
+export type ShellHistoryEntry =
+  | {
+      kind: 'command'
+      createdAt: string
+      userId: string | null
+      command: string
+      streamId?: number
+    }
+  | {
+      kind: 'output'
+      createdAt: string
+      data: string
+      truncated: boolean
+      originalBytes?: number
+      streamId?: number
+    }
+
+export interface ShellHistoryResponse {
+  entries: ShellHistoryEntry[]
+  total: number
+  capped: boolean
+}

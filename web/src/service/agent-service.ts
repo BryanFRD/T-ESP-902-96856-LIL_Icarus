@@ -1,5 +1,5 @@
 import { getAxiosClient } from '@/configuration/api/axios-client.ts'
-import type { Agent } from '@/domain/types/agent.ts'
+import type { Agent, ShellHistoryResponse } from '@/domain/types/agent.ts'
 
 export const getAgents = async (auditId: string) => {
   const res = await getAxiosClient().get<Agent[]>(`/audits/${auditId}/agents`)
@@ -26,4 +26,16 @@ export const toggleKeylogger = async (
     `/audits/${auditId}/agents/${agentId}/keylogger`,
     { action }
   )
+}
+
+export const getAgentShellHistory = async (
+  auditId: string,
+  agentId: string,
+  limit = 500
+) => {
+  const res = await getAxiosClient().get<ShellHistoryResponse>(
+    `/audits/${auditId}/agents/${agentId}/shell/history`,
+    { params: { limit } }
+  )
+  return res.data
 }
