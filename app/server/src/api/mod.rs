@@ -4,6 +4,7 @@ pub mod auth;
 pub mod csrf;
 pub mod dashboard;
 pub mod events;
+pub mod exploits;
 pub mod metrics;
 pub mod status;
 pub mod swagger;

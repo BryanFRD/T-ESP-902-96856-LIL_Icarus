@@ -4,6 +4,36 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.14.0] - 2026-04-17
+
+### Features
+
+- feat: audit events export
+- feat: audit events export
+
+## [1.13.0] - 2026-04-17
+
+### Features
+
+- feat(audits): add CSV export endpoint for audit event logs
+
+## [1.12.0] - 2026-04-17
+
+### Features
+
+- feat(audits): add CSV export endpoint for audit event logs
+
+## [1.11.0] - 2026-04-17
+
+### Features
+
+- feat: redesign audit report with professional layout and logo
+- feat: add exploit collection, listing, and PDF report generation for audits
+
+### Bug Fixes
+
+- fix(exploits): collapse nested if in load_logo
+
 ## [1.10.0] - 2026-04-17
 
 ### Features

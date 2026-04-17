@@ -12,3 +12,5 @@ reports/
 
 .cargo/
 agent.bin
+cookies.txt
+*.pdf

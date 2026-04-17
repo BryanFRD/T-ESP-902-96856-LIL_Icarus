@@ -1,7 +1,7 @@
 use super::{
     AgentError, AgentResponse, AgentTokenResponse, AuditAgent, CreateAgentPayload,
-    DeploymentToken, KeyloggerRequestPayload, KeyloggerResponse, ShellRequestPayload,
-    ShellStreamResponse,
+    DeploymentToken, KeyloggerRequestPayload, KeyloggerResponse, ScanRequestPayload, ScanResponse,
+    ShellRequestPayload, ShellStreamResponse,
 };
 
 const CONFIG_MARKER: &[u8] = b"\n###ICARUS_CONFIG###\n";
@@ -21,7 +21,7 @@ use diesel::{
 };
 use sha2::{Digest, Sha256};
 use shared::multiplexing::MIN_DATA_STREAM_ID;
-use shared::packets::{KeyloggerRequest, Packet, ShellRequest};
+use shared::packets::{ExploitScanRequest, KeyloggerRequest, Packet, ShellRequest};
 
 use super::endpoints;
 
@@ -55,6 +55,10 @@ pub fn get_routes() -> Router<GlobalState> {
         .route(
             "/{audit_id}/agents/{agent_id}/update",
             post(endpoints::request_update),
+        )
+        .route(
+            "/{audit_id}/agents/{agent_id}/scan",
+            post(endpoints::request_scan),
         )
         .layer(from_fn(auth::middleware))
 }
@@ -719,4 +723,72 @@ pub async fn request_update(
         "message": format!("Update started (version {version}, {binary_size} bytes)"),
         "version": version,
     }))
+}
+
+/// Request the agent to perform a vulnerability scan
+///
+/// # Errors
+/// Returns `AgentError` if agent not found, not online, or send fails
+pub async fn request_scan(
+    state: &GlobalState,
+    audit_id: &str,
+    agent_id: &str,
+    user_id: &str,
+    is_admin: bool,
+    payload: ScanRequestPayload,
+) -> Result<ScanResponse, AgentError> {
+    use crate::schema::audit_agents;
+
+    let audit = audits::get_audit(state, audit_id)?;
+    if !audits::can_modify_audit(state, &audit, user_id, is_admin)? {
+        return Err(AgentError::MustBeOwnerOrAdmin);
+    }
+
+    let mut conn = state.get_db_conn()?;
+    let agent = audit_agents::table
+        .filter(audit_agents::id.eq(agent_id))
+        .filter(audit_agents::audit_id.eq(audit_id))
+        .select(AuditAgent::as_select())
+        .first::<AuditAgent>(&mut conn)
+        .optional()?
+        .ok_or(AgentError::NotFound)?;
+
+    if agent.is_revoked {
+        return Err(AgentError::Revoked);
+    }
+
+    let (writer, shared_secret) = {
+        let registry = state
+            .agent_registry
+            .lock()
+            .map_err(|_| AgentError::ScanRequestFailed("Failed to lock registry".to_string()))?;
+
+        let handle = registry.get(agent_id).ok_or(AgentError::NotFound)?;
+
+        if !handle.is_online(30) {
+            return Err(AgentError::AgentNotOnline);
+        }
+
+        (handle.writer.clone(), handle.shared_secret)
+    };
+
+    let scan_req = ExploitScanRequest {
+        scan_ports: payload.scan_ports,
+        scan_software: payload.scan_software,
+        scan_config: payload.scan_config,
+    };
+
+    let serialized = scan_req.serialize().map_err(|e| {
+        AgentError::ScanRequestFailed(format!("Failed to serialize scan request: {e}"))
+    })?;
+
+    send_encrypted_to_agent(&writer, &shared_secret, &serialized)
+        .await
+        .map_err(|e| {
+            AgentError::ScanRequestFailed(format!("Failed to send scan request: {e}"))
+        })?;
+
+    Ok(ScanResponse {
+        message: "Scan request sent to agent".to_string(),
+    })
 }

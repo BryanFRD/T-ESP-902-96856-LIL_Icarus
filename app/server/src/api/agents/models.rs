@@ -203,6 +203,29 @@ pub struct KeyloggerResponse {
     pub message: String,
 }
 
+/// Payload for scan request
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ScanRequestPayload {
+    #[serde(default = "default_true")]
+    pub scan_ports: bool,
+    #[serde(default = "default_true")]
+    pub scan_software: bool,
+    #[serde(default = "default_true")]
+    pub scan_config: bool,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+/// Response for scan requests
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ScanResponse {
+    pub message: String,
+}
+
 /// Single entry in the shell command history.
 #[derive(Debug, Clone, Serialize, ToSchema)]
 #[serde(tag = "kind", rename_all = "snake_case")]
