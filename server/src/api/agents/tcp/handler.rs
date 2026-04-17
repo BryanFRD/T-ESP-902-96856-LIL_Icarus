@@ -516,6 +516,37 @@ async fn multiplex_loop(
                                     .await;
                                 }
                             }
+                            Ok(Packets::ExploitData(exploit_data)) => {
+                                info!(
+                                    "Received {} exploits from agent {}",
+                                    exploit_data.exploits.len(),
+                                    agent_id,
+                                );
+                                for entry in &exploit_data.exploits {
+                                    let severity_str = match entry.severity {
+                                        shared::packets::ExploitSeverity::Critical => "critical",
+                                        shared::packets::ExploitSeverity::High => "high",
+                                        shared::packets::ExploitSeverity::Medium => "medium",
+                                        shared::packets::ExploitSeverity::Low => "low",
+                                        shared::packets::ExploitSeverity::Info => "info",
+                                    };
+                                    let cvss = entry.cvss_score.map(|s| f64::from(s) / 10.0);
+                                    if let Err(e) = crate::api::exploits::services::create_exploit_from_agent(
+                                        state,
+                                        audit_id,
+                                        agent_id,
+                                        entry.title.clone(),
+                                        Some(entry.description.clone()),
+                                        severity_str,
+                                        cvss,
+                                        entry.cve_id.clone(),
+                                        entry.affected_component.clone(),
+                                        entry.remediation.clone(),
+                                    ) {
+                                        error!("Failed to insert exploit from agent: {e}");
+                                    }
+                                }
+                            }
                             Ok(packet) => {
                                 tracing::debug!("Received packet: {packet:?}");
                             }

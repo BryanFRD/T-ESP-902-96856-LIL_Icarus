@@ -1,3 +1,5 @@
+use std::fmt::Write as _;
+
 use axum::{
     Json,
     extract::{Path, Query, State},
@@ -269,5 +271,116 @@ pub async fn list_audit_logs(
     match crate::api::events::query_audit_logs(&state, &audit_id_str, &filters) {
         Ok(response) => (StatusCode::OK, Json(response)).into_response(),
         Err(e) => internal_error("Failed to query audit logs", e),
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/v1/audits/{audit_id}/logs/export",
+    tag = "Audits",
+    params(
+        ("audit_id" = String, Path, description = "Audit ID"),
+    ),
+    responses(
+        (status = 200, description = "Audit events exported as CSV", content_type = "text/csv"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Audit not found"),
+    ),
+    security(
+        ("cookieAuth" = [])
+    ),
+)]
+pub async fn export_audit_logs(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    Path(audit_id): Path<Ulid>,
+) -> impl IntoResponse {
+    let audit_id_str = audit_id.to_string();
+
+    let audit = match super::get_audit(&state, &audit_id_str) {
+        Ok(a) => a,
+        Err(AuditError::NotFound) => return not_found_error("error.audit.notFound"),
+        Err(e) => return internal_error("Failed to get audit", e),
+    };
+
+    let user_id_str = jwt_user.sub.to_string();
+    if !jwt_user.is_admin()
+        && crate::api::teams::get_team_member(&state, &audit.team_id, &user_id_str)
+            .ok()
+            .flatten()
+            .is_none()
+    {
+        return (StatusCode::FORBIDDEN, Json("error.audit.mustBeTeamMember")).into_response();
+    }
+
+    let filters = AuditLogFilters {
+        include_user: Some(true),
+        action: None,
+        limit: Some(200),
+        offset: Some(0),
+    };
+
+    let mut all_rows = Vec::new();
+    let mut offset: i64 = 0;
+    loop {
+        let page_filters = AuditLogFilters {
+            offset: Some(offset),
+            ..filters.clone()
+        };
+        match crate::api::events::query_audit_logs(&state, &audit_id_str, &page_filters) {
+            Ok(page) => {
+                let fetched = i64::try_from(page.data.len()).unwrap_or(i64::MAX);
+                all_rows.extend(page.data);
+                let total_len = i64::try_from(all_rows.len()).unwrap_or(i64::MAX);
+                if fetched < page.limit || total_len >= page.total {
+                    break;
+                }
+                offset += fetched;
+            }
+            Err(e) => return internal_error("Failed to query audit logs", e),
+        }
+    }
+
+    let mut csv = String::from("created_at,action,user,method,path,resource_type,resource_id\n");
+    for row in all_rows {
+        let user_display = row
+            .user
+            .as_ref()
+            .map(|u| format!("{} <{}>", u.username, u.email))
+            .or(row.user_id.clone())
+            .unwrap_or_default();
+        let _ = writeln!(
+            csv,
+            "{},{},{},{},{},{},{}",
+            csv_escape(&row.created_at),
+            csv_escape(&format!("{:?}", row.action)),
+            csv_escape(&user_display),
+            csv_escape(&row.request_method),
+            csv_escape(&row.request_path),
+            csv_escape(&format!("{:?}", row.resource_type)),
+            csv_escape(row.resource_id.as_deref().unwrap_or("")),
+        );
+    }
+
+    let filename = format!(
+        "audit-events-{}.csv",
+        audit.name.replace(' ', "-").to_lowercase()
+    );
+    let headers = [
+        (http::header::CONTENT_TYPE, "text/csv".to_string()),
+        (
+            http::header::CONTENT_DISPOSITION,
+            format!("attachment; filename=\"{filename}\""),
+        ),
+    ];
+    (StatusCode::OK, headers, csv).into_response()
+}
+
+fn csv_escape(value: &str) -> String {
+    if value.contains(',') || value.contains('"') || value.contains('\n') {
+        format!("\"{}\"", value.replace('"', "\"\""))
+    } else {
+        value.to_string()
     }
 }

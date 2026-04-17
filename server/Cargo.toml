@@ -1,6 +1,6 @@
 [package]
 name = "server"
-version = "1.10.0"
+version = "1.14.0"
 edition = "2024"
 rust-version = "1.91.0"
 
@@ -57,6 +57,7 @@ metrics-exporter-prometheus = "0.18"
 socketioxide = { version = "0.18.0", features = ["state", "extensions"] }
 x25519-dalek = "2.0.1"
 aes-gcm = "0.10.3"
+genpdf = { version = "0.2", features = ["images"] }
 
 [dev-dependencies]
 mockall = "0.14"

@@ -77,10 +77,17 @@ pub fn get_routes(state: &GlobalState) -> Router {
     // Log routes (auth only, no step-up)
     let log_routes = Router::new()
         .route("/{audit_id}/logs", get(endpoints::list_audit_logs))
+        .route(
+            "/{audit_id}/logs/export",
+            get(endpoints::export_audit_logs),
+        )
         .layer(from_fn(auth::middleware));
 
     // Agent management routes (auth only, no step-up)
     let agent_routes = crate::api::agents::get_routes();
+
+    // Exploit management routes (auth only, no step-up)
+    let exploit_routes = crate::api::exploits::get_routes();
 
     // Merge all routers
     protected_routes
@@ -91,6 +98,7 @@ pub fn get_routes(state: &GlobalState) -> Router {
         .merge(message_routes)
         .merge(log_routes)
         .merge(agent_routes)
+        .merge(exploit_routes)
         .with_state(state.clone())
 }
 

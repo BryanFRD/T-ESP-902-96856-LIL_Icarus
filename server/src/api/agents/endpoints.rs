@@ -16,8 +16,8 @@ use crate::{
 
 use super::{
     AgentError, AgentResponse, AgentTokenResponse, CreateAgentPayload, KeyloggerRequestPayload,
-    KeyloggerResponse, ShellHistoryEntry, ShellHistoryQuery, ShellHistoryResponse,
-    ShellRequestPayload, ShellStreamResponse,
+    KeyloggerResponse, ScanRequestPayload, ScanResponse, ShellHistoryEntry, ShellHistoryQuery,
+    ShellHistoryResponse, ShellRequestPayload, ShellStreamResponse,
 };
 
 #[utoipa::path(
@@ -436,5 +436,43 @@ pub async fn get_shell_history(
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => internal_error("Failed to query shell history", e),
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/v1/audits/{audit_id}/agents/{agent_id}/scan",
+    tag = "Agents",
+    request_body = ScanRequestPayload,
+    responses(
+        (status = 200, description = "Scan request sent", body = ScanResponse),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Agent not found"),
+    ),
+    security(("cookieAuth" = [])),
+)]
+pub async fn request_scan(
+    State(state): State<GlobalState>,
+    jwt_user: JwtClaims,
+    Path((audit_id, agent_id)): Path<(Ulid, Ulid)>,
+    Json(payload): Json<ScanRequestPayload>,
+) -> impl IntoResponse {
+    match super::services::request_scan(
+        &state,
+        &audit_id.to_string(),
+        &agent_id.to_string(),
+        &jwt_user.sub.to_string(),
+        jwt_user.is_admin(),
+        payload,
+    )
+    .await
+    {
+        Ok(resp) => (StatusCode::OK, Json(resp)).into_response(),
+        Err(AgentError::NotFound) => not_found_error("error.agent.notFound"),
+        Err(AgentError::MustBeOwnerOrAdmin) => forbidden_error("error.agent.mustBeOwnerOrAdmin"),
+        Err(AgentError::AgentNotOnline) => bad_request_error("error.agent.notOnline"),
+        Err(AgentError::Revoked) => bad_request_error("error.agent.revoked"),
+        Err(e) => internal_error("Failed to request scan", e),
     }
 }

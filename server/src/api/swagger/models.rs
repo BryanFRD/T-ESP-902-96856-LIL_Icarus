@@ -3,6 +3,7 @@ use crate::api::dashboard::{DashboardMetrics};
 use crate::api::agents;
 use crate::api::agents::{
     AgentResponse, AgentTokenResponse, CreateAgentPayload, SystemInfoResponse,
+    ScanRequestPayload, ScanResponse,
 };
 use crate::api::audits;
 use crate::api::audits::invitations::{
@@ -43,6 +44,10 @@ use crate::api::events::{
     AuditLogFilters, Event, EventAction, EventChanges, EventFilters, EventLogResponse,
     EventLogUser, EventResponse, PaginatedEventLogResponse, ResourceType,
 };
+use crate::api::exploits;
+use crate::api::exploits::{
+    CreateExploitPayload, Exploit, ExploitListQuery, ExploitResponse, UpdateExploitPayload,
+};
 
 use crate::api::status;
 use crate::api::status::{Status, StatusEnum};
@@ -65,9 +70,17 @@ use utoipa::OpenApi;
         audits::endpoints::archive_audit,
         audits::endpoints::remove_client,
         audits::endpoints::list_audit_logs,
+        audits::endpoints::export_audit_logs,
         agents::endpoints::create_agent,
         agents::endpoints::list_agents,
         agents::endpoints::revoke_agent,
+        agents::endpoints::request_scan,
+        // Exploits
+        exploits::endpoints::list_exploits,
+        exploits::endpoints::create_exploit,
+        exploits::endpoints::update_exploit,
+        exploits::endpoints::delete_exploit,
+        exploits::endpoints::generate_report_pdf,
         audits::step_up::endpoints::verify_access,
         audits::step_up::endpoints::check_access,
         audits::invitations::endpoints::create_invitation,
@@ -155,7 +168,8 @@ use utoipa::OpenApi;
     ),
     components(
         schemas(
-            CreateAgentPayload, AgentResponse, AgentTokenResponse, SystemInfoResponse,
+            CreateAgentPayload, AgentResponse, AgentTokenResponse, SystemInfoResponse, ScanRequestPayload, ScanResponse,
+            Exploit, CreateExploitPayload, UpdateExploitPayload, ExploitResponse, ExploitListQuery,
             CreateAuditPayload, UpdateAuditPayload, AuditResponse, ClientUser, VerifyAccessPayload, CheckAccessResponse,
             CreateAuditInvitationPayload, AcceptAuditInvitationPayload, AcceptInvitationResponse, AuditInvitationReturn, CheckInvitationResponse,
             ConfirmEmailPayload, LoginPayload, RegisterPayload, ResetPasswordRequestPayload, ResetPasswordPayload,
@@ -201,6 +215,7 @@ use utoipa::OpenApi;
         (name = "Ticket Attachments", description = "Ticket attachment management endpoints"),
         (name = "Audit Messages", description = "Audit message management endpoints"),
         (name = "Audit Message Attachments", description = "Audit message attachment management endpoints"),
+        (name = "Exploits", description = "Exploit management and PDF report endpoints"),
         (name = "Dashboard", description = "Dashboard metrics endpoints"),
     ),
     security(

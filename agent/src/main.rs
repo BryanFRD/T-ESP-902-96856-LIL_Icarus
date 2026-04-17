@@ -1,3 +1,4 @@
+mod exploit_scanner;
 mod keylogger;
 mod network;
 mod shell;

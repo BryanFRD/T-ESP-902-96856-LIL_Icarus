@@ -1,6 +1,18 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    audit_agents (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        name -> Varchar,
+        token_hash -> Varchar,
+        is_revoked -> Bool,
+        last_connected_at -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     audit_deployment_tokens (id) {
         id -> Varchar,
         audit_id -> Varchar,
@@ -12,14 +24,60 @@ diesel::table! {
 }
 
 diesel::table! {
-    audit_agents (id) {
+    audit_exploits (id) {
         id -> Varchar,
         audit_id -> Varchar,
-        name -> Varchar,
-        token_hash -> Varchar,
-        is_revoked -> Bool,
-        last_connected_at -> Nullable<Timestamp>,
+        agent_id -> Nullable<Varchar>,
+        title -> Varchar,
+        description -> Nullable<Text>,
+        severity -> Varchar,
+        cvss_score -> Nullable<Float8>,
+        cve_id -> Nullable<Varchar>,
+        affected_component -> Varchar,
+        remediation -> Nullable<Text>,
+        is_auto_discovered -> Bool,
         created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    audit_invitations (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        token -> Varchar,
+        max_uses -> Int4,
+        used_count -> Int4,
+        expires_at -> Nullable<Timestamp>,
+        created_by -> Varchar,
+        is_canceled -> Bool,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    audit_message_attachments (id) {
+        id -> Varchar,
+        message_id -> Varchar,
+        uploaded_by -> Varchar,
+        file_name -> Varchar,
+        file_path -> Varchar,
+        file_size -> Int8,
+        mime_type -> Varchar,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    audit_messages (id) {
+        id -> Varchar,
+        audit_id -> Varchar,
+        author_id -> Varchar,
+        content -> Text,
+        content_nonce -> Bytea,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
@@ -56,31 +114,6 @@ diesel::table! {
         is_used -> Bool,
         used_at -> Nullable<Timestamp>,
         created_by -> Varchar,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-diesel::table! {
-    audit_message_attachments (id) {
-        id -> Varchar,
-        message_id -> Varchar,
-        uploaded_by -> Varchar,
-        file_name -> Varchar,
-        file_path -> Varchar,
-        file_size -> Int8,
-        mime_type -> Varchar,
-        created_at -> Timestamp,
-    }
-}
-
-diesel::table! {
-    audit_messages (id) {
-        id -> Varchar,
-        audit_id -> Varchar,
-        author_id -> Varchar,
-        content -> Text,
-        content_nonce -> Bytea,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -254,6 +287,10 @@ diesel::table! {
 diesel::joinable!(audit_agents -> audits (audit_id));
 diesel::joinable!(audit_deployment_tokens -> audits (audit_id));
 diesel::joinable!(audit_deployment_tokens -> users (created_by));
+diesel::joinable!(audit_exploits -> audit_agents (agent_id));
+diesel::joinable!(audit_exploits -> audits (audit_id));
+diesel::joinable!(audit_invitations -> audits (audit_id));
+diesel::joinable!(audit_invitations -> users (created_by));
 diesel::joinable!(audit_message_attachments -> audit_messages (message_id));
 diesel::joinable!(audit_message_attachments -> users (uploaded_by));
 diesel::joinable!(audit_messages -> audits (audit_id));
@@ -285,6 +322,8 @@ diesel::joinable!(tickets_labels -> tickets (ticket_id));
 diesel::allow_tables_to_appear_in_same_query!(
     audit_agents,
     audit_deployment_tokens,
+    audit_exploits,
+    audit_invitations,
     audit_message_attachments,
     audit_messages,
     audits,
