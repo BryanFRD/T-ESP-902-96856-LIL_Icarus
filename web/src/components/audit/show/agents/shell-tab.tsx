@@ -9,8 +9,8 @@ import type { Socket } from 'socket.io-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { Agent } from '@/domain/types/agent.ts'
-import { useAgentShell } from '@/hooks/agent/use-agent-shell.ts'
 import { useAgentShellHistory } from '@/hooks/agent/use-agent-shell-history.ts'
+import { useAgentShell } from '@/hooks/agent/use-agent-shell.ts'
 
 interface Props {
   socket: Socket

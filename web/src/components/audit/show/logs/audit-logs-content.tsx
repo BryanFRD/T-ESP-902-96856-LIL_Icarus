@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  DownloadIcon,
   Filter,
   Loader2,
   LogIn,
@@ -32,6 +33,7 @@ import {
 } from '@/components/ui/select'
 import type { AuditLogEntry } from '@/domain/types/audit.ts'
 import { useAuditLogs } from '@/hooks/audit/use-audit-logs.ts'
+import { getAuditLogsExportUrl } from '@/service/exploit-service.ts'
 
 interface AuditLogsContentProps {
   auditId: string
@@ -435,9 +437,17 @@ export function AuditLogsContent({ auditId }: AuditLogsContentProps) {
             </SelectContent>
           </Select>
         </div>
-        <span className='text-muted-foreground text-xs'>
-          {t('show.logs.total', { count: data?.total ?? 0 })}
-        </span>
+        <div className='flex items-center gap-3'>
+          <span className='text-muted-foreground text-xs'>
+            {t('show.logs.total', { count: data?.total ?? 0 })}
+          </span>
+          <Button variant='secondary' size='sm' asChild>
+            <a href={getAuditLogsExportUrl(auditId)} download>
+              <DownloadIcon className='size-4' />
+              {t('show.logs.export')}
+            </a>
+          </Button>
+        </div>
       </div>
 
       {!data?.data.length ? (
