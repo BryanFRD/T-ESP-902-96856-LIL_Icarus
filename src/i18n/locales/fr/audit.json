@@ -26,13 +26,71 @@
       "invitations": "Invitations",
       "messages": "Messages",
       "agents": "Agents",
+      "exploits": "Exploits",
       "logs": "Logs"
     },
     "logs": {
       "empty": "Aucun log d'activité pour cet audit.",
       "error": "Impossible de charger les logs.",
+      "export": "Exporter (CSV)",
       "total": "{{count}} événement",
       "total_other": "{{count}} événements"
+    },
+    "exploits": {
+      "empty": "Aucun exploit enregistré pour cet audit.",
+      "create": "Nouvel exploit",
+      "downloadPdf": "Rapport PDF",
+      "remediation": "Remédiation",
+      "autoDiscovered": "Auto-découvert",
+      "severity": {
+        "critical": "Critique",
+        "high": "Élevée",
+        "medium": "Moyenne",
+        "low": "Faible",
+        "info": "Info"
+      },
+      "dialog": {
+        "createTitle": "Ajouter un exploit",
+        "editTitle": "Modifier l'exploit",
+        "cancel": "Annuler",
+        "create": "Créer",
+        "save": "Enregistrer"
+      },
+      "deleteDialog": {
+        "title": "Supprimer l'exploit",
+        "description": "Êtes-vous sûr de vouloir supprimer \"{{title}}\" ? Cette action est irréversible.",
+        "cancel": "Annuler",
+        "confirm": "Supprimer"
+      },
+      "form": {
+        "title": {
+          "label": "Titre",
+          "placeholder": "ex. Injection SQL dans le formulaire de login",
+          "required": "Le titre est requis",
+          "max": "Le titre ne peut pas dépasser 255 caractères"
+        },
+        "description": { "label": "Description" },
+        "severity": {
+          "label": "Sévérité",
+          "invalid": "Sévérité invalide"
+        },
+        "cvssScore": { "label": "Score CVSS" },
+        "cveId": { "label": "Identifiant CVE" },
+        "affectedComponent": {
+          "label": "Composant affecté",
+          "placeholder": "ex. Formulaire de login",
+          "required": "Le composant affecté est requis"
+        },
+        "remediation": { "label": "Remédiation" }
+      },
+      "toast": {
+        "created": "Exploit créé",
+        "updated": "Exploit mis à jour",
+        "deleted": "Exploit supprimé",
+        "createError": "Impossible de créer l'exploit",
+        "updateError": "Impossible de mettre à jour l'exploit",
+        "deleteError": "Impossible de supprimer l'exploit"
+      }
     },
     "messages": {
       "placeholder": "Écrire un message...",

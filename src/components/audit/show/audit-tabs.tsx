@@ -6,6 +6,7 @@ import type { UserAudit } from '@/domain/types/audit.ts'
 
 import { AuditAgentsContent } from './agents/audit-agents-content'
 import { AuditClientsContent } from './clients/audit-clients-content'
+import { AuditExploitsContent } from './exploits/audit-exploits-content'
 import { AuditInvitationsContent } from './invitations/audit-invitations-content'
 import { AuditLogsContent } from './logs/audit-logs-content'
 import { AuditMessagesContent } from './messages/audit-messages-content'
@@ -23,6 +24,7 @@ export function AuditTabs({ audit }: AuditTabsProps) {
     { value: 'invitations', label: t('show.tabs.invitations') },
     { value: 'messages', label: t('show.tabs.messages') },
     { value: 'agents', label: t('show.tabs.agents') },
+    { value: 'exploits', label: t('show.tabs.exploits') },
     { value: 'logs', label: t('show.tabs.logs') }
   ]
 
@@ -54,6 +56,10 @@ export function AuditTabs({ audit }: AuditTabsProps) {
 
       <TabsContent value='agents'>
         <AuditAgentsContent auditId={audit.id} />
+      </TabsContent>
+
+      <TabsContent value='exploits'>
+        <AuditExploitsContent auditId={audit.id} />
       </TabsContent>
 
       <TabsContent value='logs'>

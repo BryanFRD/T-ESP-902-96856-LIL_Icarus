@@ -5,6 +5,14 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.50.0] - 2026-04-17
+
+### Features
+
+- feat(audits): add exploits tab with CRUD, PDF report and events CSV export
+- feat: revershell history
+- feat: added current working directory to terminal
+
 ## [1.49.0] - 2026-04-11
 
 ### Features

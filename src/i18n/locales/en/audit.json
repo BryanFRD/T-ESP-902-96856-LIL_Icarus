@@ -23,13 +23,71 @@
       "invitations": "Invitations",
       "messages": "Messages",
       "agents": "Agents",
+      "exploits": "Exploits",
       "logs": "Logs"
     },
     "logs": {
       "empty": "No activity logs for this audit yet.",
       "error": "Failed to load logs.",
+      "export": "Export (CSV)",
       "total": "{{count}} event",
       "total_other": "{{count}} events"
+    },
+    "exploits": {
+      "empty": "No exploits recorded for this audit yet.",
+      "create": "New Exploit",
+      "downloadPdf": "PDF Report",
+      "remediation": "Remediation",
+      "autoDiscovered": "Auto-discovered",
+      "severity": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "info": "Info"
+      },
+      "dialog": {
+        "createTitle": "Add an exploit",
+        "editTitle": "Edit exploit",
+        "cancel": "Cancel",
+        "create": "Create",
+        "save": "Save"
+      },
+      "deleteDialog": {
+        "title": "Delete exploit",
+        "description": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "form": {
+        "title": {
+          "label": "Title",
+          "placeholder": "e.g. SQL Injection in login form",
+          "required": "Title is required",
+          "max": "Title cannot exceed 255 characters"
+        },
+        "description": { "label": "Description" },
+        "severity": {
+          "label": "Severity",
+          "invalid": "Invalid severity"
+        },
+        "cvssScore": { "label": "CVSS Score" },
+        "cveId": { "label": "CVE ID" },
+        "affectedComponent": {
+          "label": "Affected Component",
+          "placeholder": "e.g. Login form",
+          "required": "Affected component is required"
+        },
+        "remediation": { "label": "Remediation" }
+      },
+      "toast": {
+        "created": "Exploit created",
+        "updated": "Exploit updated",
+        "deleted": "Exploit deleted",
+        "createError": "Failed to create exploit",
+        "updateError": "Failed to update exploit",
+        "deleteError": "Failed to delete exploit"
+      }
     },
     "messages": {
       "placeholder": "Write a message...",
