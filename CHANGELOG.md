@@ -4,6 +4,12 @@ All notable changes to `app` will be documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.14.1] - 2026-04-20
+
+### Bug Fixes
+
+- fix: update rust crate resend-rs to 0.25.0
+
 ## [1.14.0] - 2026-04-17
 
 ### Features
