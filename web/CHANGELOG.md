@@ -5,6 +5,20 @@
 
 * add logout functionality to sidebar and update translations ([7c798f8](https://git.icarus-cyber.fr/icarus/web/commit/7c798f8b49f47d169d7f1ba3d76ef1bfaa361477))
 
+## [1.50.2] - 2026-04-18
+
+### Bug Fixes
+
+- fix: update dependency react-circle-flags to ^0.0.29
+- fix: update dependency react-circle-flags to ^0.0.29
+- fix: update dependency react-circle-flags to ^0.0.29
+
+## [1.50.1] - 2026-04-18
+
+### Bug Fixes
+
+- fix: update dependency react-circle-flags to ^0.0.29
+
 ## [1.50.0] - 2026-04-17
 
 ### Features
